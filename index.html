@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCM Dashboard — Scarlett</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#f0eef8;--card:#fff;--border:#e2daf2;
+  --text:#1a0a2e;--text2:#6b5b8a;
+  --green:#1D9E75;--blue:#5b3fa8;--orange:#e6944a;--red:#e05b5b;--pink:#e879a0;
+  --sidebar:#1e0d3b;--sidebar-text:#b8a8d8;--accent:#e879a0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;}
+
+/* SIDEBAR */
+.sidebar{width:210px;background:var(--sidebar);padding:18px 12px;flex-shrink:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px;}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#e879a0,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;box-shadow:0 4px 12px rgba(232,121,160,0.4);}
+.logo-name{font-size:13px;font-weight:700;color:#fff;}
+.logo-sub{font-size:10px;color:var(--sidebar-text);margin-top:1px;}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.nav-section{font-size:9px;color:var(--sidebar-text);text-transform:uppercase;letter-spacing:0.1em;margin:14px 4px 6px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--sidebar-text);font-size:12.5px;font-weight:500;transition:all 0.15s;margin-bottom:2px;}
+.nav-item.active{background:rgba(232,121,160,0.18);color:var(--accent);font-weight:600;}
+.nav-item:hover:not(.active){background:rgba(255,255,255,0.06);color:#fff;}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+.sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);font-size:10px;color:var(--sidebar-text);text-align:center;line-height:1.7;}
+
+/* MAIN */
+.main{margin-left:210px;flex:1;padding:24px;min-width:0;}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.page-title{font-size:20px;font-weight:800;color:var(--text);}
+.page-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.live-badge{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--text2);font-weight:500;white-space:nowrap;}
+.live-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;}
+
+/* FILTER BAR — Tableau style */
+.filter-bar{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.filter-bar-label{font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;margin-right:4px;}
+.filter-item{display:flex;align-items:center;gap:6px;}
+.filter-item label{font-size:11px;color:var(--text2);white-space:nowrap;font-weight:500;}
+.filter-select{font-size:11.5px;padding:5px 28px 5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b5b8a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;min-width:130px;transition:border-color 0.12s;}
+.filter-select:focus{border-color:var(--blue);}
+.filter-divider{width:1px;height:20px;background:var(--border);margin:0 2px;}
+.btn-reset{font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-weight:500;transition:all 0.12s;}
+.btn-reset:hover{border-color:var(--blue);color:var(--blue);}
+
+/* PAGE */
+.page{display:none;}
+.page.active{display:block;}
+
+/* LOADING */
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--text2);}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-card.c0::before{background:var(--green);}
+.kpi-card.c1::before{background:var(--blue);}
+.kpi-card.c2::before{background:var(--orange);}
+.kpi-card.c3::before{background:var(--red);}
+.kpi-card.c4::before{background:var(--pink);}
+.kpi-card.c5::before{background:#7c3aed;}
+.kpi-label{font-size:10.5px;color:var(--text2);font-weight:500;margin-bottom:5px;}
+.kpi-value{font-size:20px;font-weight:800;color:var(--text);line-height:1;}
+.kpi-value.sm{font-size:15px;}
+.kpi-week{font-size:10px;color:var(--text2);margin-top:4px;}
+
+/* CHART */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
+.chart-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:12px;}
+.chart-wrap{position:relative;height:250px;}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:900px){.chart-row{grid-template-columns:1fr;}}
+
+/* METRIC TABS */
+.metric-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.metric-tab{padding:4px 11px;border-radius:5px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.12s;}
+.metric-tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.metric-tab:hover:not(.active){border-color:var(--blue);color:var(--blue);}
+
+/* TABLE */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;overflow-x:auto;}
+.table-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.table-title{font-size:12.5px;font-weight:700;color:var(--text);}
+.table-meta{font-size:11px;color:var(--text2);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;padding:7px 10px;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;font-size:11px;white-space:nowrap;}
+td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f8f6ff;}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+td.tot{text-align:right;font-weight:700;color:var(--blue);}
+.wk{display:inline-block;background:#f0eef8;color:var(--blue);font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid #ddd6f8;}
+.error-state{background:#fff5f5;border:1px solid #fecdd3;border-radius:10px;padding:14px 18px;color:var(--red);font-size:12.5px;margin-bottom:14px;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">SC</div>
+    <div style="flex:1">
+      <div class="logo-name">Scarlett SCM</div>
+      <div class="logo-sub">Supply Chain Dashboard</div>
+    </div>
+    <div class="live-dot"></div>
+  </div>
+  <div class="nav-section">Menu</div>
+  <div class="nav-item active" onclick="showPage('kpi',this)"><span class="nav-icon">📊</span>KPI Weekly</div>
+  <div class="nav-item" onclick="showPage('marketplace',this)"><span class="nav-icon">🛒</span>Marketplace</div>
+  <div class="nav-item" onclick="showPage('product',this)"><span class="nav-icon">📦</span>Product Trend</div>
+  <div class="nav-item" onclick="showPage('category',this)"><span class="nav-icon">🏷️</span>Category</div>
+  <div class="sidebar-footer">
+    Last sync:<br><span id="lastSync">—</span><br>
+    <span style="color:#555;font-size:9px">Google Sheets Live CSV</span>
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- KPI -->
+  <div class="page active" id="page-kpi">
+    <div class="page-header">
+      <div><div class="page-title">📊 KPI Weekly</div><div class="page-sub">Ringkasan performa mingguan seluruh channel</div></div>
+      <div class="live-badge"><div class="dot"></div><span id="kpiStatus">Memuat...</span></div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-bar-label">🔽 Filter:</span>
+      <div class="filter-item"><label>Week</label><select class="filter-select" id="kpiWeek" onchange="renderKPI()"><option value="all">Semua Week</option></select></div>
+      <div class="filter-divider"></div>
+      <button class="btn-reset" onclick="resetKPI()">↺ Reset</button>
+    </div>
+    <div id="kpiContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data KPI...</div></div></div>
+  </div>
+
+  <!-- MARKETPLACE -->
+  <div class="page" id="page-marketplace">
+    <div class="page-header">
+      <div><div class="page-title">🛒 Marketplace Weekly</div><div class="page-sub">Performa per marketplace per minggu</div></div>
+      <div class="live-badge"><div class="dot"></div><span id="mpStatus">Memuat...</span></div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-bar-label">🔽 Filter:</span>
+      <div class="filter-item"><label>Week</label><select class="filter-select" id="mpWeek" onchange="renderMarketplace()"><option value="all">Semua Week</option></select></div>
+      <div class="filter-item"><label>Marketplace</label><select class="filter-select" id="mpMP" onchange="renderMarketplace()"><option value="all">Semua</option></select></div>
+      <div class="filter-divider"></div>
+      <button class="btn-reset" onclick="resetMP()">↺ Reset</button>
+    </div>
+    <div id="mpContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Marketplace...</div></div></div>
+  </div>
+
+  <!-- PRODUCT -->
+  <div class="page" id="page-product">
+    <div class="page-header">
+      <div><div class="page-title">📦 Product Trend</div><div class="page-sub">Tren produk per SKU per minggu</div></div>
+      <div class="live-badge"><div class="dot"></div><span id="prodStatus">Memuat...</span></div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-bar-label">🔽 Filter:</span>
+      <div class="filter-item"><label>Week</label><select class="filter-select" id="prodWeek" onchange="renderProduct()"><option value="all">Semua Week</option></select></div>
+      <div class="filter-item"><label>Marketplace</label><select class="filter-select" id="prodMP" onchange="renderProduct()"><option value="all">Semua</option></select></div>
+      <div class="filter-item"><label>Category</label><select class="filter-select" id="prodCat" onchange="renderProduct()"><option value="all">Semua</option></select></div>
+      <div class="filter-divider"></div>
+      <button class="btn-reset" onclick="resetProd()">↺ Reset</button>
+    </div>
+    <div id="prodContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Product...</div></div></div>
+  </div>
+
+  <!-- CATEGORY -->
+  <div class="page" id="page-category">
+    <div class="page-header">
+      <div><div class="page-title">🏷️ Category Weekly</div><div class="page-sub">Breakdown performa per kategori</div></div>
+      <div class="live-badge"><div class="dot"></div><span id="catStatus">Memuat...</span></div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-bar-label">🔽 Filter:</span>
+      <div class="filter-item"><label>Week</label><select class="filter-select" id="catWeek" onchange="renderCategory()"><option value="all">Semua Week</option></select></div>
+      <div class="filter-item"><label>Category</label><select class="filter-select" id="catCat" onchange="renderCategory()"><option value="all">Semua</option></select></div>
+      <div class="filter-divider"></div>
+      <button class="btn-reset" onclick="resetCat()">↺ Reset</button>
+    </div>
+    <div id="catContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Category...</div></div></div>
+  </div>
+
+</main>
+
+<script>
+const CSV_KPI  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1726885858&single=true&output=csv';
+const CSV_MP   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1508996446&single=true&output=csv';
+const CSV_PROD = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=747219576&single=true&output=csv';
+const CSV_CAT  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=971208042&single=true&output=csv';
+
+let D = {kpi:[],mp:[],prod:[],cat:[]};
+let charts = {};
+let mpMetric=null, prodMetric=null, catMetric=null;
+const COLORS = ['#5b3fa8','#e879a0','#1D9E75','#e6944a','#e05b5b','#7c3aed','#0891b2','#ca8a04','#be185d','#15803d'];
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+const toN = v => { if(!v&&v!==0) return 0; const n=parseFloat(String(v).replace(/[^0-9.-]/g,'')); return isNaN(n)?0:n; };
+const fmt = (v,col='') => {
+  if(/%/.test(col||'')) return toN(v).toFixed(2)+'%';
+  if(v>=1e9) return 'Rp '+(v/1e9).toFixed(1)+'M';
+  if(v>=1e6) return 'Rp '+(v/1e6).toFixed(1)+'jt';
+  return Math.round(v).toLocaleString('id-ID');
+};
+
+function findCol(data, kws) {
+  if(!data||!data.length) return null;
+  const cols = Object.keys(data[0]);
+  for(const kw of kws){
+    const f=cols.find(c=>c.toLowerCase().replace(/[\s_-]/g,'').includes(kw.toLowerCase().replace(/[\s_-]/g,'')));
+    if(f) return f;
+  }
+  return null;
+}
+
+function metricCols(data) {
+  if(!data||!data.length) return [];
+  const SKIP=/^(week|minggu|wk|marketplace|platform|channel|category|kategori|sku|product|produk|name|nama|brand|type|tipe|no|id|kode|date|tanggal)$/i;
+  return Object.keys(data[0]).filter(k=>{
+    const cl=k.toLowerCase().replace(/[\s_-]/g,'');
+    if(SKIP.test(cl)) return false;
+    return data.some(r=>toN(r[k])!==0);
+  });
+}
+
+function fetchCSV(url){
+  return new Promise((res,rej)=>{
+    Papa.parse(url,{download:true,header:true,skipEmptyLines:true,complete:r=>res(r.data),error:e=>rej(e)});
+  });
+}
+
+function fillSel(id,vals,label){
+  const el=document.getElementById(id); if(!el) return;
+  const prev=el.value;
+  el.innerHTML=`<option value="all">${label}</option>`;
+  vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);});
+  if(vals.map(String).includes(String(prev))) el.value=prev;
+}
+const gv = id => { const e=document.getElementById(id); return e?e.value:'all'; };
+function killChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+// ─── KPI ─────────────────────────────────────────────────────────────────────
+function renderKPI(){
+  const rows=D.kpi; if(!rows.length) return;
+  const wkCol=findCol(rows,['week','minggu','wk'])||Object.keys(rows[0])[0];
+  const metrics=metricCols(rows);
+  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  fillSel('kpiWeek',allWeeks,'Semua Week');
+
+  const fWk=gv('kpiWeek');
+  const filtered=fWk==='all'?rows:rows.filter(r=>String(r[wkCol])===String(fWk));
+  const shownWeeks=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
+  const latestWk=allWeeks[allWeeks.length-1];
+  const latestRows=rows.filter(r=>String(r[wkCol])===String(latestWk));
+
+  const CL=['c0','c1','c2','c3','c4','c5'];
+  let html='<div class="kpi-grid">';
+  metrics.forEach((m,i)=>{
+    const t=latestRows.reduce((s,r)=>s+toN(r[m]),0);
+    html+=`<div class="kpi-card ${CL[i%6]}"><div class="kpi-label">${m}</div><div class="kpi-value ${t>=1e8?'sm':''}">${fmt(t,m)}</div><div class="kpi-week">Wk ${latestWk} (latest)</div></div>`;
+  });
+  html+='</div>';
+
+  html+=`<div class="chart-card"><div class="chart-title">📈 Trend Mingguan</div><div class="metric-tabs" id="kpiTabs">`;
+  metrics.forEach((m,i)=>html+=`<div class="metric-tab ${i===0?'active':''}" onclick="kpiSwitch('${m}',this)">${m}</div>`);
+  html+=`</div><div class="chart-wrap"><canvas id="kpiChart"></canvas></div></div>`;
+
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Data per Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Week</th>`;
+  metrics.forEach(m=>html+=`<th style="text-align:right">${m}</th>`);
+  html+='</tr></thead><tbody>';
+  shownWeeks.forEach(wk=>{
+    const wr=filtered.filter(r=>String(r[wkCol])===String(wk));
+    html+=`<tr><td><span class="wk">Wk ${wk}</span></td>`;
+    metrics.forEach(m=>{const t=wr.reduce((s,r)=>s+toN(r[m]),0);html+=`<td class="num">${fmt(t,m)}</td>`;});
+    html+='</tr>';
+  });
+  html+='</tbody></table></div></div>';
+
+  document.getElementById('kpiContent').innerHTML=html;
+  document.getElementById('kpiStatus').textContent=`${filtered.length} baris · Wk ${latestWk} latest`;
+  drawKpiChart(metrics[0],filtered,wkCol,shownWeeks);
+}
+
+function drawKpiChart(metric,rows,wkCol,weeks){
+  killChart('kpiChart');
+  const ctx=document.getElementById('kpiChart'); if(!ctx) return;
+  charts['kpiChart']=new Chart(ctx,{
+    type:'bar',
+    data:{labels:weeks.map(w=>'Wk '+w),datasets:[{label:metric,data:weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[metric]),0)),backgroundColor:COLORS[0]+'bb',borderColor:COLORS[0],borderWidth:1.5,borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>fmt(v,metric)}}}}
+  });
+}
+function kpiSwitch(m,el){
+  document.querySelectorAll('#kpiTabs .metric-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+  const rows=D.kpi,wkCol=findCol(rows,['week','minggu','wk'])||Object.keys(rows[0])[0];
+  const fWk=gv('kpiWeek');
+  const filtered=fWk==='all'?rows:rows.filter(r=>String(r[wkCol])===String(fWk));
+  const weeks=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
+  drawKpiChart(m,filtered,wkCol,weeks);
+}
+function resetKPI(){document.getElementById('kpiWeek').value='all';renderKPI();}
+
+// ─── MARKETPLACE ─────────────────────────────────────────────────────────────
+function renderMarketplace(){
+  const rows=D.mp; if(!rows.length){document.getElementById('mpContent').innerHTML='<div class="error-state">Data Marketplace belum tersedia.</div>';return;}
+  const wkCol=findCol(rows,['week','minggu','wk']);
+  const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
+  const metrics=metricCols(rows);
+  if(!mpMetric||!metrics.includes(mpMetric)) mpMetric=metrics[0];
+
+  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const allMPs=mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
+  fillSel('mpWeek',allWeeks,'Semua Week');
+  if(allMPs.length) fillSel('mpMP',allMPs,'Semua');
+
+  const fWk=gv('mpWeek'),fMP=gv('mpMP');
+  let filtered=rows;
+  if(fWk!=='all') filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
+  if(fMP!=='all'&&mpCol) filtered=filtered.filter(r=>r[mpCol]===fMP);
+
+  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
+  const sm=mpCol?[...new Set(filtered.map(r=>r[mpCol]).filter(Boolean))].sort():[];
+
+  let html=`<div class="metric-tabs" id="mpTabs">`;
+  metrics.forEach(m=>html+=`<div class="metric-tab ${m===mpMetric?'active':''}" onclick="mpSwitch('${m}',this)">${m}</div>`);
+  html+='</div>';
+
+  html+='<div class="chart-row">';
+  html+=`<div class="chart-card"><div class="chart-title">🛒 Total per Marketplace</div><div class="chart-wrap"><canvas id="mpBar"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">📅 Trend Mingguan</div><div class="chart-wrap"><canvas id="mpLine"></canvas></div></div>`;
+  html+='</div>';
+
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Marketplace × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Marketplace</th>`;
+  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
+  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
+  sm.forEach(mp=>{
+    const tot=filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0);
+    html+=`<tr><td style="font-weight:600">${mp}</td>`;
+    sw.forEach(w=>{const v=filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0);html+=`<td class="num">${v>0?fmt(v,mpMetric):'—'}</td>`;});
+    html+=`<td class="tot">${fmt(tot,mpMetric)}</td></tr>`;
+  });
+  html+='</tbody></table></div></div>';
+
+  document.getElementById('mpContent').innerHTML=html;
+  document.getElementById('mpStatus').textContent=`${sm.length} marketplace · ${sw.length} weeks`;
+
+  killChart('mpBar');
+  charts['mpBar']=new Chart(document.getElementById('mpBar'),{
+    type:'bar',
+    data:{labels:sm,datasets:[{data:sm.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0)),backgroundColor:COLORS.slice(0,sm.length).map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,mpMetric)}}}}
+  });
+  killChart('mpLine');
+  charts['mpLine']=new Chart(document.getElementById('mpLine'),{
+    type:'line',
+    data:{labels:sw.map(w=>'Wk '+w),datasets:sm.map((mp,i)=>({label:mp,data:sw.map(w=>filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
+  });
+}
+function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderMarketplace();}
+function resetMP(){document.getElementById('mpWeek').value='all';document.getElementById('mpMP').value='all';renderMarketplace();}
+
+// ─── PRODUCT ─────────────────────────────────────────────────────────────────
+function renderProduct(){
+  const rows=D.prod; if(!rows.length){document.getElementById('prodContent').innerHTML='<div class="error-state">Data Product belum tersedia.</div>';return;}
+  const wkCol=findCol(rows,['week','minggu','wk']);
+  const skuCol=findCol(rows,['sku','product','produk','name','nama','item','barang','kode']);
+  const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
+  const catCol=findCol(rows,['category','kategori','cat']);
+  const metrics=metricCols(rows);
+  if(!prodMetric||!metrics.includes(prodMetric)) prodMetric=metrics[0];
+
+  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const allMPs=mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
+  const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
+  fillSel('prodWeek',allWeeks,'Semua Week');
+  if(allMPs.length) fillSel('prodMP',allMPs,'Semua');
+  if(allCats.length) fillSel('prodCat',allCats,'Semua');
+
+  const fWk=gv('prodWeek'),fMP=gv('prodMP'),fCat=gv('prodCat');
+  let filtered=rows;
+  if(fWk!=='all') filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
+  if(fMP!=='all'&&mpCol) filtered=filtered.filter(r=>r[mpCol]===fMP);
+  if(fCat!=='all'&&catCol) filtered=filtered.filter(r=>r[catCol]===fCat);
+
+  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
+  const skuMap={};
+  filtered.forEach(r=>{
+    const k=r[skuCol]||'(unknown)';
+    if(!skuMap[k]) skuMap[k]={sku:k,weeks:{},total:0};
+    const v=toN(r[prodMetric]); const wk=String(r[wkCol]);
+    skuMap[k].weeks[wk]=(skuMap[k].weeks[wk]||0)+v; skuMap[k].total+=v;
+  });
+  const skus=Object.values(skuMap).sort((a,b)=>b.total-a.total);
+
+  let html=`<div class="metric-tabs" id="prodTabs">`;
+  metrics.forEach(m=>html+=`<div class="metric-tab ${m===prodMetric?'active':''}" onclick="prodSwitch('${m}',this)">${m}</div>`);
+  html+='</div>';
+
+  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 10 SKU — ${prodMetric}</div><div class="chart-wrap"><canvas id="prodBar"></canvas></div></div>`;
+
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
+  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
+  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
+  skus.forEach(s=>{
+    html+=`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;
+    sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmt(v,prodMetric):'—'}</td>`;});
+    html+=`<td class="tot">${fmt(s.total,prodMetric)}</td></tr>`;
+  });
+  html+='</tbody></table></div></div>';
+
+  document.getElementById('prodContent').innerHTML=html;
+  document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
+
+  killChart('prodBar');
+  const top10=skus.slice(0,10);
+  charts['prodBar']=new Chart(document.getElementById('prodBar'),{
+    type:'bar',
+    data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:COLORS.map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,prodMetric)}}}}
+  });
+}
+function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
+function resetProd(){document.getElementById('prodWeek').value='all';document.getElementById('prodMP').value='all';document.getElementById('prodCat').value='all';renderProduct();}
+
+// ─── CATEGORY ────────────────────────────────────────────────────────────────
+function renderCategory(){
+  const rows=D.cat; if(!rows.length){document.getElementById('catContent').innerHTML='<div class="error-state">Data Category belum tersedia.</div>';return;}
+  const wkCol=findCol(rows,['week','minggu','wk']);
+  const catCol=findCol(rows,['category','kategori','cat']);
+  const metrics=metricCols(rows);
+  if(!catMetric||!metrics.includes(catMetric)) catMetric=metrics[0];
+
+  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
+  fillSel('catWeek',allWeeks,'Semua Week');
+  if(allCats.length) fillSel('catCat',allCats,'Semua');
+
+  const fWk=gv('catWeek'),fCat=gv('catCat');
+  let filtered=rows;
+  if(fWk!=='all') filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
+  if(fCat!=='all'&&catCol) filtered=filtered.filter(r=>r[catCol]===fCat);
+
+  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
+  const sc=catCol?[...new Set(filtered.map(r=>r[catCol]).filter(Boolean))].sort():[];
+
+  let html=`<div class="metric-tabs" id="catTabs">`;
+  metrics.forEach(m=>html+=`<div class="metric-tab ${m===catMetric?'active':''}" onclick="catSwitch('${m}',this)">${m}</div>`);
+  html+='</div>';
+
+  html+='<div class="chart-row">';
+  html+=`<div class="chart-card"><div class="chart-title">🏷️ Komposisi per Category</div><div class="chart-wrap"><canvas id="catPie"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">📅 Trend per Category</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div>`;
+  html+='</div>';
+
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Category × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Category</th>`;
+  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
+  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
+  sc.forEach(cat=>{
+    const tot=filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0);
+    html+=`<tr><td style="font-weight:600">${cat}</td>`;
+    sw.forEach(w=>{const v=filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<td class="num">${v>0?fmt(v,catMetric):'—'}</td>`;});
+    html+=`<td class="tot">${fmt(tot,catMetric)}</td></tr>`;
+  });
+  html+='</tbody></table></div></div>';
+
+  document.getElementById('catContent').innerHTML=html;
+  document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
+
+  killChart('catPie');
+  charts['catPie']=new Chart(document.getElementById('catPie'),{
+    type:'doughnut',
+    data:{labels:sc,datasets:[{data:sc.map(cat=>filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0)),backgroundColor:COLORS.map(c=>c+'dd'),borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
+  });
+  killChart('catLine');
+  charts['catLine']=new Chart(document.getElementById('catLine'),{
+    type:'line',
+    data:{labels:sw.map(w=>'Wk '+w),datasets:sc.map((cat,i)=>({label:cat,data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
+  });
+}
+function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCategory();}
+function resetCat(){document.getElementById('catWeek').value='all';document.getElementById('catCat').value='all';renderCategory();}
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+function showPage(p,el){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  el.classList.add('active');
+  if(p==='kpi') renderKPI();
+  else if(p==='marketplace') renderMarketplace();
+  else if(p==='product') renderProduct();
+  else if(p==='category') renderCategory();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+async function init(){
+  try{
+    const [kpi,mp,prod,cat]=await Promise.all([fetchCSV(CSV_KPI),fetchCSV(CSV_MP),fetchCSV(CSV_PROD),fetchCSV(CSV_CAT)]);
+    D.kpi=kpi; D.mp=mp; D.prod=prod; D.cat=cat;
+    document.getElementById('lastSync').textContent=new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    renderKPI();
+  }catch(e){
+    console.error(e);
+    ['kpiContent','mpContent','prodContent','catContent'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
+    });
+  }
+}
+init();
+</script>
+</body>
+</html>
