@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
 :root{
   --bg:#f0eef8;--card:#fff;--border:#e2daf2;
   --text:#1a0a2e;--text2:#6b5b8a;
@@ -62,22 +62,81 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* KPI CARDS */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px;position:relative;overflow:hidden;}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-.kpi-card.c0::before{background:var(--green);}
-.kpi-card.c1::before{background:var(--blue);}
-.kpi-card.c2::before{background:var(--orange);}
-.kpi-card.c3::before{background:var(--red);}
-.kpi-card.c4::before{background:var(--pink);}
-.kpi-card.c5::before{background:#7c3aed;}
-.kpi-label{font-size:10.5px;color:var(--text2);font-weight:500;margin-bottom:5px;}
-.kpi-value{font-size:20px;font-weight:800;color:var(--text);line-height:1;}
-.kpi-value.sm{font-size:15px;}
-.kpi-week-tag{display:inline-block;margin-top:5px;font-size:10px;background:#f0eef8;color:var(--blue);padding:2px 7px;border-radius:8px;font-weight:600;}
+/* CROSS-TABULATION MATRIX STYLES (MENGGANTIKAN KPI CARDS LAMA) */
+.matrix-container {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(26,10,46,0.03);
+}
+.matrix-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.matrix-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 900px;
+}
+.matrix-table th, .matrix-table td {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 13px;
+  border: 1px solid #1a0a2e;
+}
+.matrix-table th {
+  background-color: #fce7f3;
+  color: #1a0a2e;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.matrix-table td.matrix-hdr-side {
+  background-color: #f1f5f9;
+  color: #1a0a2e;
+  font-weight: 700;
+  text-align: center;
+  width: 130px;
+}
+.matrix-table tr.row-order td:not(.matrix-hdr-side) {
+  background-color: #d946ef;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+}
+.matrix-table tr.row-qty td:not(.matrix-hdr-side) {
+  background-color: #cbd5e1;
+  color: #1a0a2e;
+  font-weight: 700;
+  font-size: 15px;
+}
+.matrix-table tr.row-pct td:not(.matrix-hdr-side) {
+  background-color: #ffffff;
+  color: #1a0a2e;
+  font-weight: 700;
+  font-size: 14px;
+}
+.matrix-table th.empty-corner {
+  background-color: #ffffff;
+  border: 1px solid #1a0a2e;
+}
+.matrix-table td.cell-empty {
+  background-color: #f8fafc !important;
+  color: #94a3b8 !important;
+  font-weight: 400 !important;
+}
 
-/* CHART */
+/* CHART & TABLES */
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
 .chart-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
 .chart-sub{font-size:10.5px;color:var(--text2);margin-bottom:12px;}
@@ -137,7 +196,6 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
 
 <main class="main">
 
-  <!-- KPI -->
   <div class="page active" id="page-kpi">
     <div class="page-header">
       <div><div class="page-title">📊 KPI Weekly</div><div class="page-sub">Ringkasan performa mingguan seluruh channel</div></div>
@@ -155,7 +213,6 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
     <div id="kpiContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data KPI...</div></div></div>
   </div>
 
-  <!-- MARKETPLACE -->
   <div class="page" id="page-marketplace">
     <div class="page-header">
       <div><div class="page-title">🛒 Marketplace Weekly</div><div class="page-sub">Performa per marketplace per minggu</div></div>
@@ -171,7 +228,6 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
     <div id="mpContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Marketplace...</div></div></div>
   </div>
 
-  <!-- PRODUCT -->
   <div class="page" id="page-product">
     <div class="page-header">
       <div><div class="page-title">📦 Product Trend</div><div class="page-sub">Tren produk per SKU per minggu</div></div>
@@ -188,7 +244,6 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
     <div id="prodContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Product...</div></div></div>
   </div>
 
-  <!-- CATEGORY -->
   <div class="page" id="page-category">
     <div class="page-header">
       <div><div class="page-title">🏷️ Category Weekly</div><div class="page-sub">Breakdown performa per kategori</div></div>
@@ -270,34 +325,118 @@ function renderKPI(){
   const wkCol=findCol(rows,['week','minggu','wk'])||Object.keys(rows[0])[0];
   const metrics=metricCols(rows);
 
-  // Auto-detect Qty col dan Order col
-  const qtyCol  = findCol(rows,['totalqty','qty','jumlah']) || metrics.find(m=>/qty/i.test(m)) || metrics[1];
-  const orderCol = findCol(rows,['totalorder','order','pesanan','unique']) || metrics.find(m=>/order/i.test(m)) || metrics[0];
-
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
   fillSel('kpiWeek',allWeeks,'Semua Week');
 
   const fWk=gv('kpiWeek');
-  // Cards: tampilkan data week terpilih. Jika "all" → tampilkan latest week
   const latestWk=allWeeks[allWeeks.length-1];
-  const cardWk = fWk==='all' ? latestWk : fWk;
-  const cardRows=rows.filter(r=>String(r[wkCol])===String(cardWk));
-  const cardLabel=fWk==='all'?`Wk ${latestWk} (latest)`:`Wk ${cardWk}`;
+  const activeWk = fWk==='all' ? latestWk : fWk;
+  
+  // Ambil data spesifik week yang dipilih/aktif
+  const activeRows = rows.filter(r=>String(r[wkCol])===String(activeWk));
 
-  // KPI CARDS — ikuti filter
-  const CL=['c0','c1','c2','c3','c4','c5'];
-  let html='<div class="kpi-grid">';
-  metrics.forEach((m,i)=>{
-    const t=cardRows.reduce((s,r)=>s+toN(r[m]),0);
-    html+=`<div class="kpi-card ${CL[i%6]}">
-      <div class="kpi-label">${m}</div>
-      <div class="kpi-value ${t>=1e8?'sm':''}">${fmt(t,m)}</div>
-      <div class="kpi-week-tag">${cardLabel}</div>
-    </div>`;
-  });
-  html+='</div>';
+  // Fungsi pembantu mengekstrak nilai kolom secara fleksibel
+  const getMetricVal = (kws) => {
+    const colName = findCol(rows, kws);
+    if (!colName) return 0;
+    return activeRows.reduce((sum, r) => sum + toN(r[colName]), 0);
+  };
 
-  // TREND CHART — Bar: Total Qty | Line: Total Order (semua week selalu tampil)
+  // Kalkulasi data matriks secara dinamis berdasarkan filter week
+  const totalOrder       = getMetricVal(['totalorder','order','pesanan']);
+  const totalQty         = getMetricVal(['totalqty','qty','jumlah']);
+  
+  const delOrder         = getMetricVal(['orderdelivered','deliveredorder']);
+  const delQty           = getMetricVal(['qtydelivered','deliveredqty']);
+  
+  const dispOrder        = getMetricVal(['orderdispatched','dispatchedorder']);
+  const dispQty          = getMetricVal(['qtydispatched','dispatchedqty']);
+  
+  const cancOrder        = getMetricVal(['ordercancelled','cancelledorder']);
+  const cancQty          = getMetricVal(['qtycancelled','cancelledqty']);
+  
+  const retOrder         = getMetricVal(['orderreturn','returnorder']);
+  const retQty           = getMetricVal(['qtyreturn','returnqty']);
+  
+  const whOrder          = getMetricVal(['orderwarehouse','warehouseissueorder','whissue']);
+  const whQty            = getMetricVal(['qtywarehouse','warehouseissueqty','whissue']);
+  
+  const sysOrder         = getMetricVal(['ordersystem','systemissueorder']);
+  const sysQty           = getMetricVal(['qtysystem','systemissueqty']);
+  
+  const expOrder         = getMetricVal(['orderekpedisi','ekpedisiissueorder','expedition']);
+  const expQty           = getMetricVal(['qtyekpedisi','ekpedisiissueqty','expedition']);
+
+  // Hitung persentase dinamis terhadap Total Qty / Total Order
+  const pDelivered  = totalQty > 0 ? ((delQty / totalQty) * 100).toFixed(2) + '%' : '0.00%';
+  const pDispatched = totalQty > 0 ? ((dispQty / totalQty) * 100).toFixed(2) + '%' : '0.00%';
+  const pCancelled  = totalQty > 0 ? ((cancQty / totalQty) * 100).toFixed(2) + '%' : '0.00%';
+  const pReturn     = totalQty > 0 ? ((retQty / totalQty) * 100).toFixed(2) + '%' : '0.00%';
+  const pWh         = totalQty > 0 ? ((whQty / totalQty) * 100).toFixed(2) + '%' : '0.00%';
+  const pSys        = totalQty > 0 ? ((sysQty / totalQty) * 100).toFixed(2) + '%' : '0.00%';
+  const pExp        = totalQty > 0 ? ((expQty / totalQty) * 100).toFixed(2) + '%' : '0.00%';
+
+  // 1. BAGIAN SUMMARY CROSS-TABULATION MATRIX (MENGGANTI KPI CARD LAMA)
+  let html = `<div class="matrix-container">
+    <div class="matrix-title">SUMMARY CROSS-TABULATION (Week ${activeWk}${fWk==='all'?' - Latest':' '})</div>
+    <div class="matrix-wrapper">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th class="empty-corner"></th>
+            <th>[TOTAL]</th>
+            <th>[Delivered]</th>
+            <th>[Dispatched]</th>
+            <th>[Cancelled]</th>
+            <th>[Return]</th>
+            <th>[WH Issue]</th>
+            <th>[System Issue]</th>
+            <th>[Expedisi Issue]</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-order">
+            <td class="matrix-hdr-side">ORDER</td>
+            <td>${fmt(totalOrder)}</td>
+            <td>${fmt(delOrder)}</td>
+            <td>${fmt(dispOrder)}</td>
+            <td>${fmt(cancOrder)}</td>
+            <td>${fmt(retOrder)}</td>
+            <td>${fmt(whOrder)}</td>
+            <td>${fmt(sysOrder)}</td>
+            <td>${fmt(expOrder)}</td>
+          </tr>
+          <tr class="row-qty">
+            <td class="matrix-hdr-side">QUANTITY</td>
+            <td>${fmt(totalQty)}</td>
+            <td>${fmt(delQty)}</td>
+            <td>${fmt(dispQty)}</td>
+            <td>${fmt(cancQty)}</td>
+            <td>${fmt(retQty)}</td>
+            <td>${fmt(whQty)}</td>
+            <td>${fmt(sysQty)}</td>
+            <td>${fmt(expQty)}</td>
+          </tr>
+          <tr class="row-pct">
+            <td class="matrix-hdr-side">% to TOTAL</td>
+            <td class="cell-empty">—</td>
+            <td>${pDelivered}</td>
+            <td>${pDispatched}</td>
+            <td>${pCancelled}</td>
+            <td>${pReturn}</td>
+            <td>${pWh}</td>
+            <td>${pSys}</td>
+            <td>${pExp}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  // 2. STRUKTUR ASLI (Trend Chart & Breakdown Table Bawaan Berjalan Normal Tanpa Perubahan)
+  const qtyCol  = findCol(rows,['totalqty','qty','jumlah']) || metrics[1];
+  const orderCol = findCol(rows,['totalorder','order','pesanan']) || metrics[0];
+
   html+=`<div class="chart-card">
     <div class="chart-title">📈 Trend Mingguan</div>
     <div class="chart-sub">Bar = ${qtyCol || 'Qty'} &nbsp;|&nbsp; Line = ${orderCol || 'Order'}</div>
@@ -309,7 +448,6 @@ function renderKPI(){
     <div class="chart-wrap"><canvas id="kpiChart"></canvas></div>
   </div>`;
 
-  // TABLE — SELALU semua week, week terpilih di-highlight
   html+=`<div class="table-card">
     <div class="table-header">
       <div class="table-title">📋 Semua Data per Week</div>
@@ -320,7 +458,6 @@ function renderKPI(){
   metrics.forEach(m=>html+=`<th style="text-align:right">${m}</th>`);
   html+='</tr></thead><tbody>';
 
-  // Selalu tampilkan SEMUA weeks, highlight yang dipilih
   allWeeks.forEach(wk=>{
     const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
     const isSelected=fWk!=='all'&&String(wk)===String(fWk);
@@ -337,7 +474,6 @@ function renderKPI(){
   document.getElementById('kpiContent').innerHTML=html;
   document.getElementById('kpiStatus').textContent=`${allWeeks.length} weeks · Wk ${latestWk} latest`;
 
-  // Draw combined chart
   drawKpiTrend(rows, wkCol, allWeeks, qtyCol, orderCol, fWk);
 }
 
@@ -349,7 +485,6 @@ function drawKpiTrend(rows, wkCol, weeks, qtyCol, orderCol, selectedWk){
   const qtyVals  = weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[qtyCol]),0));
   const orderVals= weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[orderCol]),0));
 
-  // Highlight selected week bar
   const barColors = weeks.map(wk=>
     selectedWk!=='all'&&String(wk)===String(selectedWk) ? '#5b3fa8' : '#5b3fa8aa'
   );
