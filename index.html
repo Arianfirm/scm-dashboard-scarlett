@@ -3,34 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>SCM Dashboard — Scarlett</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
-<!-- PLUGIN PERCENT PIE -->
+<!-- TAMBAHAN UNTUK % PIE CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg:#f0eef8;
+  --card:#fff;
+  --border:#e2daf2;
+  --text:#1a0a2e;
+  --text2:#6b5b8a;
+  --green:#1D9E75;
+  --blue:#5b3fa8;
+  --orange:#e6944a;
+  --red:#e05b5b;
+  --pink:#e879a0;
+}
+
 body{
-  font-family:Arial,sans-serif;
-  background:#f4f2fb;
-  padding:30px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);
+  padding:24px;
 }
 
 .chart-card{
   background:#fff;
+  border:1px solid var(--border);
   border-radius:18px;
   padding:20px;
-  border:1px solid #ddd;
 }
 
 .chart-title{
-  font-size:22px;
-  font-weight:700;
-  margin-bottom:20px;
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:16px;
 }
 
 .chart-wrap{
@@ -56,9 +70,9 @@ body{
 
 <script>
 
-// ==========================
-// SAMPLE DATA
-// ==========================
+// =============================
+// DUMMY DATA
+// =============================
 
 const sc = [
   'BODY CARE',
@@ -84,9 +98,9 @@ const COLORS = [
   '#e05b5b'
 ];
 
-// ==========================
+// =============================
 // FORMAT NUMBER
-// ==========================
+// =============================
 
 function fmt(v){
 
@@ -97,9 +111,9 @@ function fmt(v){
   return Math.round(v).toLocaleString('id-ID');
 }
 
-// ==========================
+// =============================
 // PIE CHART
-// ==========================
+// =============================
 
 new Chart(document.getElementById('catPie'), {
 
@@ -117,10 +131,9 @@ new Chart(document.getElementById('catPie'), {
 
       borderColor: '#ffffff',
 
-      borderWidth: 4,
+      borderWidth: 3,
 
       hoverOffset: 12
-
     }]
   },
 
@@ -140,9 +153,9 @@ new Chart(document.getElementById('catPie'), {
 
     plugins: {
 
-      // ==========================
+      // =============================
       // LEGEND
-      // ==========================
+      // =============================
 
       legend: {
 
@@ -150,20 +163,20 @@ new Chart(document.getElementById('catPie'), {
 
         labels: {
 
-          boxWidth: 16,
+          boxWidth: 14,
 
-          padding:20,
+          padding:18,
 
           font: {
-            size: 13,
+            size: 12,
             weight:'600'
           }
         }
       },
 
-      // ==========================
+      // =============================
       // TOOLTIP
-      // ==========================
+      // =============================
 
       tooltip: {
 
@@ -171,41 +184,35 @@ new Chart(document.getElementById('catPie'), {
 
         padding:12,
 
-        titleFont:{
-          size:13
-        },
-
-        bodyFont:{
-          size:12
-        },
-
         callbacks: {
 
           label: function(context) {
 
-            const total = context.dataset.data
-              .reduce((a, b) => a + b, 0);
+            const total =
+              context.dataset.data.reduce((a,b)=>a+b,0);
 
             const value = context.raw;
 
             const percentage =
               ((value / total) * 100).toFixed(1);
 
-            return ` ${context.label}: ${fmt(value)} (${percentage}%)`;
+            return `${context.label}: ${fmt(value)} (${percentage}%)`;
           }
         }
       },
 
-      // ==========================
-      // PERCENT LABEL
-      // ==========================
+      // =============================
+      // PERCENT TEXT
+      // =============================
 
       datalabels: {
 
         color: '#ffffff',
 
         font: {
+
           weight: 'bold',
+
           size: 14
         },
 
@@ -213,15 +220,13 @@ new Chart(document.getElementById('catPie'), {
 
           const total =
             ctx.chart.data.datasets[0].data
-            .reduce((a, b) => a + b, 0);
+            .reduce((a,b)=>a+b,0);
 
           const percentage =
             (value / total * 100).toFixed(1);
 
-          // hide kalau kecil
-          if (percentage < 3) {
-            return '';
-          }
+          // sembunyikan kalau terlalu kecil
+          if (percentage < 3) return '';
 
           return percentage + '%';
         }
@@ -232,7 +237,7 @@ new Chart(document.getElementById('catPie'), {
 
       animateRotate: true,
 
-      duration: 1400
+      duration: 1200
     }
   }
 });
