@@ -33,7 +33,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);font-size:10px;color:var(--sidebar-text);text-align:center;line-height:1.7;}
 
 /* MAIN */
-.main{margin-left:210px;flex:1;padding:24px;min-width:0;position:relative;}
+.main{margin-left:210px;flex:1;padding:24px;min-width:0;}
 
 /* PAGE HEADER */
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
@@ -57,8 +57,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .page{display:none;}
 .page.active{display:block;}
 
-/* GLOBAL LOADING OVERLAY */
-.loading-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(240,238,248,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99;gap:12px;color:var(--text2);min-height:400px;}
+/* LOADING */
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--text2);}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -137,11 +137,7 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
 
 <main class="main">
 
-  <div class="loading-overlay" id="globalLoading">
-    <div class="spinner"></div>
-    <div>Mengambil & Menyusun Data Dashboard...</div>
-  </div>
-
+  <!-- KPI -->
   <div class="page active" id="page-kpi">
     <div class="page-header">
       <div><div class="page-title">📊 KPI Weekly</div><div class="page-sub">Ringkasan performa mingguan seluruh channel</div></div>
@@ -156,9 +152,10 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
       <div class="filter-divider"></div>
       <button class="btn-reset" onclick="document.getElementById('kpiWeek').value='all';renderKPI()">↺ Reset</button>
     </div>
-    <div id="kpiContent"></div>
+    <div id="kpiContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data KPI...</div></div></div>
   </div>
 
+  <!-- MARKETPLACE -->
   <div class="page" id="page-marketplace">
     <div class="page-header">
       <div><div class="page-title">🛒 Marketplace Weekly</div><div class="page-sub">Performa per marketplace per minggu</div></div>
@@ -171,9 +168,10 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
       <div class="filter-divider"></div>
       <button class="btn-reset" onclick="document.getElementById('mpWeek').value='all';document.getElementById('mpMP').value='all';renderMarketplace()">↺ Reset</button>
     </div>
-    <div id="mpContent"></div>
+    <div id="mpContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Marketplace...</div></div></div>
   </div>
 
+  <!-- PRODUCT -->
   <div class="page" id="page-product">
     <div class="page-header">
       <div><div class="page-title">📦 Product Trend</div><div class="page-sub">Tren produk per SKU per minggu</div></div>
@@ -187,9 +185,10 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
       <div class="filter-divider"></div>
       <button class="btn-reset" onclick="document.getElementById('prodWeek').value='all';document.getElementById('prodMP').value='all';document.getElementById('prodCat').value='all';renderProduct()">↺ Reset</button>
     </div>
-    <div id="prodContent"></div>
+    <div id="prodContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Product...</div></div></div>
   </div>
 
+  <!-- CATEGORY -->
   <div class="page" id="page-category">
     <div class="page-header">
       <div><div class="page-title">🏷️ Category Weekly</div><div class="page-sub">Breakdown performa per kategori</div></div>
@@ -202,7 +201,7 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
       <div class="filter-divider"></div>
       <button class="btn-reset" onclick="document.getElementById('catWeek').value='all';document.getElementById('catCat').value='all';renderCategory()">↺ Reset</button>
     </div>
-    <div id="catContent"></div>
+    <div id="catContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Category...</div></div></div>
   </div>
 
 </main>
@@ -265,124 +264,80 @@ function killChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 
 // ─── KPI PAGE ────────────────────────────────────────────────────────────────
 function renderKPI(){
-  const rows = D.kpi;
+  const rows=D.kpi;
   if(!rows.length){document.getElementById('kpiContent').innerHTML='<div class="error-state">Data KPI belum tersedia.</div>';return;}
 
-  const wkCol = findCol(rows,['week','minggu','wk']) || Object.keys(rows[0])[0];
-  const metrics = metricCols(rows);
+  const wkCol=findCol(rows,['week','minggu','wk'])||Object.keys(rows[0])[0];
+  const metrics=metricCols(rows);
 
+  // Auto-detect Qty col dan Order col
   const qtyCol  = findCol(rows,['totalqty','qty','jumlah']) || metrics.find(m=>/qty/i.test(m)) || metrics[1];
   const orderCol = findCol(rows,['totalorder','order','pesanan','unique']) || metrics.find(m=>/order/i.test(m)) || metrics[0];
 
-  const allWeeks = [...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
   fillSel('kpiWeek',allWeeks,'Semua Week');
 
-  const fWk = gv('kpiWeek');
-  const latestWk = allWeeks[allWeeks.length-1];
-  const cardWk = fWk === 'all' ? latestWk : fWk;
-  const cardRows = rows.filter(r=>String(r[wkCol])===String(cardWk));
-  const cardLabel = fWk === 'all' ? `Wk ${latestWk} (latest)` : `Wk ${cardWk}`;
+  const fWk=gv('kpiWeek');
+  // Cards: tampilkan data week terpilih. Jika "all" → tampilkan latest week
+  const latestWk=allWeeks[allWeeks.length-1];
+  const cardWk = fWk==='all' ? latestWk : fWk;
+  const cardRows=rows.filter(r=>String(r[wkCol])===String(cardWk));
+  const cardLabel=fWk==='all'?`Wk ${latestWk} (latest)`:`Wk ${cardWk}`;
 
-  const CL = ['c0','c1','c2','c3','c4','c5'];
-  let html = '<div class="kpi-grid">';
+  // KPI CARDS — ikuti filter
+  const CL=['c0','c1','c2','c3','c4','c5'];
+  let html='<div class="kpi-grid">';
   metrics.forEach((m,i)=>{
-    const t = cardRows.reduce((s,r)=>s+toN(r[m]),0);
-    html += `<div class="kpi-card ${CL[i%6]}">
+    const t=cardRows.reduce((s,r)=>s+toN(r[m]),0);
+    html+=`<div class="kpi-card ${CL[i%6]}">
       <div class="kpi-label">${m}</div>
       <div class="kpi-value ${t>=1e8?'sm':''}">${fmt(t,m)}</div>
       <div class="kpi-week-tag">${cardLabel}</div>
     </div>`;
   });
-  html += '</div>';
+  html+='</div>';
 
-  const crossMap = [
-    { label: 'DELIVERED',     qKey: metrics.find(m=>/deliv/i.test(m)), oKey: metrics.find(m=>/order.*deliv|deliv.*order/i.test(m)) },
-    { label: 'DISPATCHED',    qKey: metrics.find(m=>/dispatch/i.test(m)), oKey: metrics.find(m=>/order.*dispatch|dispatch.*order/i.test(m)) },
-    { label: 'CANCELLED',     qKey: metrics.find(m=>/cancel/i.test(m)), oKey: metrics.find(m=>/order.*cancel|cancel.*order/i.test(m)) },
-    { label: 'RETURN',        qKey: metrics.find(m=>/return/i.test(m)), oKey: metrics.find(m=>/order.*return|return.*order/i.test(m)) },
-    { label: 'WH ISSUE',      qKey: metrics.find(m=>/wh.*issue|warehouse/i.test(m)), oKey: metrics.find(m=>/order.*wh|wh.*order/i.test(m)) },
-    { label: 'SYSTEM ISSUE',  qKey: metrics.find(m=>/system/i.test(m)), oKey: metrics.find(m=>/order.*system|system.*order/i.test(m)) },
-    { label: 'EXPEDISI ISSUE',qKey: metrics.find(m=>/ekpedisi|ekspedisi|expedisi/i.test(m)), oKey: metrics.find(m=>/order.*ekpedisi|ekpedisi.*order/i.test(m)) }
-  ];
-
-  const totalOrderVal = cardRows.reduce((s,r)=>s+toN(r[orderCol]),0);
-  const totalQtyVal = cardRows.reduce((s,r)=>s+toN(r[qtyCol]),0);
-
-  html += `<div class="table-card" style="margin-bottom:16px;">
-    <div class="table-header">
-      <div class="table-title">📊 SUMMARY CROSS-TABULATION (${cardLabel.toUpperCase()})</div>
-    </div>
-    <div style="overflow-x:auto">
-    <table style="text-align:center;">
-      <thead>
-        <tr style="background:#f8f6ff;">
-          <th></th>
-          <th style="text-align:right; font-weight:700;">[TOTAL]</th>
-          ${crossMap.map(c=>`<th style="text-align:right; font-weight:700;">[${c.label}]</th>`).join('')}
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="font-weight:700; text-align:left; background:#e0b0ff; color:#1a0a2e;">ORDER</td>
-          <td class="num" style="background:#e0b0ff; color:#1a0a2e;">${fmt(totalOrderVal)}</td>
-          ${crossMap.map(c=>{
-            const val = c.oKey ? cardRows.reduce((s,r)=>s+toN(r[c.oKey]),0) : 0;
-            return `<td class="num" style="background:#fdf2ff;">${val > 0 ? fmt(val) : '0'}</td>`;
-          }).join('')}
-        </tr>
-        <tr>
-          <td style="font-weight:700; text-align:left; background:#dae1e7;">QUANTITY</td>
-          <td class="num" style="background:#dae1e7;">${fmt(totalQtyVal)}</td>
-          ${crossMap.map(c=>{
-            const val = c.qKey ? cardRows.reduce((s,r)=>s+toN(r[c.qKey]),0) : 0;
-            return `<td class="num">${val > 0 ? fmt(val) : '0'}</td>`;
-          }).join('')}
-        </tr>
-        <tr>
-          <td style="font-weight:700; text-align:left;">% to TOTAL</td>
-          <td style="text-align:right; color:#6b5b8a;">—</td>
-          ${crossMap.map(c=>{
-            const val = c.qKey ? cardRows.reduce((s,r)=>s+toN(r[c.qKey]),0) : 0;
-            const pct = totalQtyVal > 0 ? ((val / totalQtyVal) * 100).toFixed(2) + '%' : '0.00%';
-            return `<td class="num" style="color:var(--blue);">${pct}</td>`;
-          }).join('')}
-        </tr>
-      </tbody>
-    </table>
-    </div>
-  </div>`;
-
-  html += `<div class="chart-card">
+  // TREND CHART — Bar: Total Qty | Line: Total Order (semua week selalu tampil)
+  html+=`<div class="chart-card">
     <div class="chart-title">📈 Trend Mingguan</div>
     <div class="chart-sub">Bar = ${qtyCol || 'Qty'} &nbsp;|&nbsp; Line = ${orderCol || 'Order'}</div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>${qtyCol||'Qty'} (Bar)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>${orderCol||'Order'} (Line)</div>
+      ${fWk!=='all'?`<div class="legend-item" style="color:var(--blue)">▶ Week ${fWk} disorot</div>`:''}
+    </div>
     <div class="chart-wrap"><canvas id="kpiChart"></canvas></div>
   </div>`;
 
-  html += `<div class="table-card">
+  // TABLE — SELALU semua week, week terpilih di-highlight
+  html+=`<div class="table-card">
     <div class="table-header">
       <div class="table-title">📋 Semua Data per Week</div>
+      <div class="table-meta">${allWeeks.length} weeks · ${fWk!=='all'?`Wk ${fWk} disorot`:'Semua week ditampilkan'}</div>
     </div>
     <div style="overflow-x:auto">
     <table><thead><tr><th>Week</th>`;
   metrics.forEach(m=>html+=`<th style="text-align:right">${m}</th>`);
-  html += '</tr></thead><tbody>';
+  html+='</tr></thead><tbody>';
 
+  // Selalu tampilkan SEMUA weeks, highlight yang dipilih
   allWeeks.forEach(wk=>{
-    const wRows = rows.filter(r=>String(r[wkCol])===String(wk));
-    const isSelected = fWk!=='all'&&String(wk)===String(fWk);
-    html += `<tr class="${isSelected?'highlighted':''}">
+    const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
+    const isSelected=fWk!=='all'&&String(wk)===String(fWk);
+    html+=`<tr class="${isSelected?'highlighted':''}">
       <td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
     metrics.forEach(m=>{
-      const t = wRows.reduce((s,r)=>s+toN(r[m]),0);
-      html += `<td class="num">${fmt(t,m)}</td>`;
+      const t=wRows.reduce((s,r)=>s+toN(r[m]),0);
+      html+=`<td class="num">${fmt(t,m)}</td>`;
     });
-    html += '</tr>';
+    html+='</tr>';
   });
-  html += '</tbody></table></div></div>';
+  html+='</tbody></table></div></div>';
 
-  document.getElementById('kpiContent').innerHTML = html;
-  document.getElementById('kpiStatus').textContent = `${allWeeks.length} weeks · Wk ${latestWk} latest`;
+  document.getElementById('kpiContent').innerHTML=html;
+  document.getElementById('kpiStatus').textContent=`${allWeeks.length} weeks · Wk ${latestWk} latest`;
 
+  // Draw combined chart
   drawKpiTrend(rows, wkCol, allWeeks, qtyCol, orderCol, fWk);
 }
 
@@ -393,23 +348,77 @@ function drawKpiTrend(rows, wkCol, weeks, qtyCol, orderCol, selectedWk){
 
   const qtyVals  = weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[qtyCol]),0));
   const orderVals= weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[orderCol]),0));
-  const barColors = weeks.map(wk=>selectedWk!=='all'&&String(wk)===String(selectedWk) ? '#5b3fa8' : '#5b3fa8aa');
+
+  // Highlight selected week bar
+  const barColors = weeks.map(wk=>
+    selectedWk!=='all'&&String(wk)===String(selectedWk) ? '#5b3fa8' : '#5b3fa8aa'
+  );
 
   charts['kpiChart']=new Chart(ctx,{
     data:{
       labels:weeks.map(w=>'Wk '+w),
       datasets:[
-        { type:'bar', label:qtyCol||'Total Qty', data:qtyVals, backgroundColor:barColors, borderColor:'#5b3fa8', borderWidth:1.5, borderRadius:4, yAxisID:'yQty', order:2 },
-        { type:'line', label:orderCol||'Total Order', data:orderVals, borderColor:'#e879a0', borderWidth:2.5, pointRadius:5, tension:0.35, yAxisID:'yOrder', order:1 }
+        {
+          type:'bar',
+          label:qtyCol||'Total Qty',
+          data:qtyVals,
+          backgroundColor:barColors,
+          borderColor:'#5b3fa8',
+          borderWidth:1.5,
+          borderRadius:4,
+          yAxisID:'yQty',
+          order:2
+        },
+        {
+          type:'line',
+          label:orderCol||'Total Order',
+          data:orderVals,
+          borderColor:'#e879a0',
+          backgroundColor:'#e879a020',
+          borderWidth:2.5,
+          pointRadius:5,
+          pointBackgroundColor:weeks.map(wk=>selectedWk!=='all'&&String(wk)===String(selectedWk)?'#e879a0':'#e879a0'),
+          pointBorderColor:'#fff',
+          pointBorderWidth:2,
+          tension:0.35,
+          fill:false,
+          yAxisID:'yOrder',
+          order:1
+        }
       ]
     },
     options:{
-      responsive:true,maintainAspectRatio:false,
+      responsive:true,
+      maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label:ctx=>{
+              const v=ctx.parsed.y;
+              return ` ${ctx.dataset.label}: ${Math.round(v).toLocaleString('id-ID')}`;
+            }
+          }
+        }
+      },
       scales:{
-        yQty:{ type:'linear', position:'left', beginAtZero:true, ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')}, grid:{color:'#e2daf2'}},
-        yOrder:{ type:'linear', position:'right', beginAtZero:true, ticks:{callback:v=>v.toLocaleString('id-ID')}, grid:{drawOnChartArea:false}}
+        yQty:{
+          type:'linear',
+          position:'left',
+          beginAtZero:true,
+          title:{display:true,text:qtyCol||'Qty',color:'#5b3fa8',font:{size:10,weight:'600'}},
+          ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},
+          grid:{color:'#e2daf2'}
+        },
+        yOrder:{
+          type:'linear',
+          position:'right',
+          beginAtZero:true,
+          title:{display:true,text:orderCol||'Order',color:'#e879a0',font:{size:10,weight:'600'}},
+          ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},
+          grid:{drawOnChartArea:false}
+        }
       }
     }
   });
@@ -444,7 +453,7 @@ function renderMarketplace(){
   html+=`<div class="chart-card"><div class="chart-title">🛒 Total per Marketplace</div><div class="chart-wrap"><canvas id="mpBar"></canvas></div></div>`;
   html+=`<div class="chart-card"><div class="chart-title">📅 Trend Mingguan</div><div class="chart-wrap"><canvas id="mpLine"></canvas></div></div>`;
   html+='</div>';
-  html+=`<div class="table-card"><div style="overflow-x:auto"><table><thead><tr><th>Marketplace</th>`;
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Marketplace × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Marketplace</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
   sm.forEach(mp=>{
@@ -467,8 +476,8 @@ function renderMarketplace(){
   killChart('mpLine');
   charts['mpLine']=new Chart(document.getElementById('mpLine'),{
     type:'line',
-    data:{labels:sw.map(w=>'Wk '+w),datasets:sm.map((mp,i)=>({label:mp,data:sw.map(w=>filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0)),borderColor:COLORS[i%COLORS.length],tension:0.3,fill:false,pointRadius:4}))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}}
+    data:{labels:sw.map(w=>'Wk '+w),datasets:sm.map((mp,i)=>({label:mp,data:sw.map(w=>filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
   });
 }
 function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderMarketplace();}
@@ -511,7 +520,7 @@ function renderProduct(){
   metrics.forEach(m=>html+=`<div class="metric-tab ${m===prodMetric?'active':''}" onclick="prodSwitch('${m}',this)">${m}</div>`);
   html+='</div>';
   html+=`<div class="chart-card"><div class="chart-title">🏆 Top 10 SKU — ${prodMetric}</div><div class="chart-wrap"><canvas id="prodBar"></canvas></div></div>`;
-  html+=`<div class="table-card"><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
   skus.forEach(s=>{
@@ -553,4 +562,73 @@ function renderCategory(){
   if(fWk!=='all')filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
   if(fCat!=='all'&&catCol)filtered=filtered.filter(r=>r[catCol]===fCat);
 
-  const sw=
+  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
+  const sc=catCol?[...new Set(filtered.map(r=>r[catCol]).filter(Boolean))].sort():[];
+
+  let html=`<div class="metric-tabs" id="catTabs">`;
+  metrics.forEach(m=>html+=`<div class="metric-tab ${m===catMetric?'active':''}" onclick="catSwitch('${m}',this)">${m}</div>`);
+  html+='</div>';
+  html+='<div class="chart-row">';
+  html+=`<div class="chart-card"><div class="chart-title">🏷️ Komposisi per Category</div><div class="chart-wrap"><canvas id="catPie"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">📅 Trend per Category</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div>`;
+  html+='</div>';
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Category × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Category</th>`;
+  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
+  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
+  sc.forEach(cat=>{
+    const tot=filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0);
+    html+=`<tr><td style="font-weight:600">${cat}</td>`;
+    sw.forEach(w=>{const v=filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<td class="num">${v>0?fmt(v,catMetric):'—'}</td>`;});
+    html+=`<td class="tot">${fmt(tot,catMetric)}</td></tr>`;
+  });
+  html+='</tbody></table></div></div>';
+
+  document.getElementById('catContent').innerHTML=html;
+  document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
+
+  killChart('catPie');
+  charts['catPie']=new Chart(document.getElementById('catPie'),{
+    type:'doughnut',
+    data:{labels:sc,datasets:[{data:sc.map(cat=>filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0)),backgroundColor:COLORS.map(c=>c+'dd'),borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
+  });
+  killChart('catLine');
+  charts['catLine']=new Chart(document.getElementById('catLine'),{
+    type:'line',
+    data:{labels:sw.map(w=>'Wk '+w),datasets:sc.map((cat,i)=>({label:cat,data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
+  });
+}
+function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCategory();}
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+function showPage(p,el){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  el.classList.add('active');
+  if(p==='kpi')renderKPI();
+  else if(p==='marketplace')renderMarketplace();
+  else if(p==='product')renderProduct();
+  else if(p==='category')renderCategory();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+async function init(){
+  try{
+    const [kpi,mp,prod,cat]=await Promise.all([fetchCSV(CSV_KPI),fetchCSV(CSV_MP),fetchCSV(CSV_PROD),fetchCSV(CSV_CAT)]);
+    D.kpi=kpi;D.mp=mp;D.prod=prod;D.cat=cat;
+    document.getElementById('lastSync').textContent=new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    renderKPI();
+  }catch(e){
+    console.error(e);
+    ['kpiContent','mpContent','prodContent','catContent'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
+    });
+  }
+}
+init();
+</script>
+</body>
+</html>
