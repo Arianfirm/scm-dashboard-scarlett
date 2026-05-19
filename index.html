@@ -587,11 +587,130 @@ function renderCategory(){
   document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
 
   killChart('catPie');
-  charts['catPie']=new Chart(document.getElementById('catPie'),{
-    type:'doughnut',
-    data:{labels:sc,datasets:[{data:sc.map(cat=>filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0)),backgroundColor:COLORS.map(c=>c+'dd'),borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
-  });
+
+const pieData = sc.map(cat =>
+  filtered
+    .filter(r => r[catCol] === cat)
+    .reduce((s, r) => s + toN(r[catMetric]), 0)
+);
+
+charts['catPie'] = new Chart(document.getElementById('catPie'), {
+  type: 'doughnut',
+
+  data: {
+    labels: sc,
+    datasets: [{
+      data: pieData,
+      backgroundColor: COLORS.map(c => c + 'dd'),
+      borderColor: '#fff',
+      borderWidth: 2,
+      hoverOffset: 8
+    }]
+  },
+
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    plugins: {
+
+      legend: {
+        position: 'right',
+        labels: {
+          boxWidth: 12,
+          font: {
+            size: 11
+          }
+        }
+      },
+
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+
+            const value = context.raw;
+
+            const total = context.dataset.data.reduce(
+              (a, b) => a + b,
+              0
+            );
+
+            const percent = (
+              (value / total) * 100
+            ).toFixed(1);
+
+            return `${context.label}: ${fmt(value, catMetric)} (${percent}%)`;
+          }
+        }
+      }
+
+    }
+  },
+
+  plugins: [{
+
+    id: 'piePercent',
+
+    afterDraw(chart) {
+
+      const {
+        ctx
+      } = chart;
+
+      const dataset = chart.data.datasets[0];
+
+      const total = dataset.data.reduce(
+        (a, b) => a + b,
+        0
+      );
+
+      chart.getDatasetMeta(0).data.forEach((arc, index) => {
+
+        const value = dataset.data[index];
+
+        const percent = (
+          (value / total) * 100
+        ).toFixed(1) + '%';
+
+        // skip kalau terlalu kecil
+        if ((value / total) < 0.04) return;
+
+        const angle =
+          (arc.startAngle + arc.endAngle) / 2;
+
+        const radius =
+          arc.outerRadius * 0.72;
+
+        const x =
+          arc.x + Math.cos(angle) * radius;
+
+        const y =
+          arc.y + Math.sin(angle) * radius;
+
+        ctx.save();
+
+        ctx.fillStyle = '#ffffff';
+
+        ctx.font =
+          'bold 12px Plus Jakarta Sans';
+
+        ctx.textAlign = 'center';
+
+        ctx.textBaseline = 'middle';
+
+        ctx.shadowColor = 'rgba(0,0,0,0.25)';
+        ctx.shadowBlur = 4;
+
+        ctx.fillText(percent, x, y);
+
+        ctx.restore();
+
+      });
+
+    }
+
+  }]
+});
   killChart('catLine');
   charts['catLine']=new Chart(document.getElementById('catLine'),{
     type:'line',
