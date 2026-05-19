@@ -4,11 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SCM Dashboard — Scarlett</title>
-<!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<!-- PLUGIN UTAMA: Untuk menampilkan persentase langsung di chart -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-<!-- PapaParse -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -141,7 +138,6 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
 
 <main class="main">
 
-  <!-- KPI -->
   <div class="page active" id="page-kpi">
     <div class="page-header">
       <div><div class="page-title">📊 KPI Weekly</div><div class="page-sub">Ringkasan performa mingguan seluruh channel</div></div>
@@ -159,7 +155,6 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
     <div id="kpiContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data KPI...</div></div></div>
   </div>
 
-  <!-- MARKETPLACE -->
   <div class="page" id="page-marketplace">
     <div class="page-header">
       <div><div class="page-title">🛒 Marketplace Weekly</div><div class="page-sub">Performa per marketplace per minggu</div></div>
@@ -175,7 +170,6 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
     <div id="mpContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Marketplace...</div></div></div>
   </div>
 
-  <!-- PRODUCT -->
   <div class="page" id="page-product">
     <div class="page-header">
       <div><div class="page-title">📦 Product Trend</div><div class="page-sub">Tren produk per SKU per minggu</div></div>
@@ -192,7 +186,6 @@ td.tot{text-align:right;font-weight:700;color:var(--blue);}
     <div id="prodContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Product...</div></div></div>
   </div>
 
-  <!-- CATEGORY -->
   <div class="page" id="page-category">
     <div class="page-header">
       <div><div class="page-title">🏷️ Category Weekly</div><div class="page-sub">Breakdown performa per kategori</div></div>
@@ -221,7 +214,10 @@ let charts={};
 let mpMetric=null,prodMetric=null,catMetric=null;
 const COLORS=['#5b3fa8','#e879a0','#1D9E75','#e6944a','#e05b5b','#7c3aed','#0891b2','#ca8a04','#be185d','#15803d'];
 
-// ─── INIT & NAVIGATION ───────────────────────────────────────────────────────
+// REGISTRASI PLUGIN SECARA GLOBAL AGAR AKTIF DI CHART.JS v4
+Chart.register(ChartDataLabels);
+
+// ─── NAVIGATION SYSTEM ───────────────────────────────────────────────────────
 function showPage(pageId, navEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -418,7 +414,7 @@ function drawKpiTrend(rows, wkCol, weeks, qtyCol, orderCol, selectedWk){
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{display:false},
-        datalabels:{display:false}, // Matikan datalabels khusus di line/bar biar tidak menumpuk
+        datalabels:{display:false}, // Dimatikan khusus di sini agar tidak bocor
         tooltip:{
           callbacks:{
             label:ctx=>{
@@ -485,209 +481,4 @@ function renderMarketplace(){
   sm.forEach(mp=>{
     const tot=filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0);
     html+=`<tr><td style="font-weight:600">${mp}</td>`;
-    sw.forEach(w=>{const v=filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0);html+=`<td class="num">${v>0?fmt(v,mpMetric):'—'}</td>`;});
-    html+=`<td class="tot">${fmt(tot,mpMetric)}</td></tr>`;
-  });
-  html+='</tbody></table></div></div>';
-
-  document.getElementById('mpContent').innerHTML=html;
-  document.getElementById('mpStatus').textContent=`${sm.length} marketplace · ${sw.length} weeks`;
-
-  killChart('mpBar');
-  charts['mpBar']=new Chart(document.getElementById('mpBar'),{
-    type:'bar',
-    data:{labels:sm,datasets:[{data:sm.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0)),backgroundColor:COLORS.slice(0,sm.length).map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,mpMetric)}}}}
-  });
-  killChart('mpLine');
-  charts['mpLine']=new Chart(document.getElementById('mpLine'),{
-    type:'line',
-    data:{labels:sw.map(w=>'Wk '+w),datasets:sm.map((mp,i)=>({label:mp,data:sw.map(w=>filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},datalabels:{display:false}},scales:{y:{beginAtZero:true}}}
-  });
-}
-function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderMarketplace();}
-
-// ─── PRODUCT ─────────────────────────────────────────────────────────────────
-function renderProduct(){
-  const rows=D.prod;
-  if(!rows.length){document.getElementById('prodContent').innerHTML='<div class="error-state">Data Product belum tersedia.</div>';return;}
-  const wkCol=findCol(rows,['week','minggu','wk']);
-  const skuCol=findCol(rows,['sku','product','produk','name','nama','item','barang','kode']);
-  const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
-  const catCol=findCol(rows,['category','kategori','cat']);
-  const metrics=metricCols(rows);
-  if(!prodMetric||!metrics.includes(prodMetric))prodMetric=metrics[0];
-
-  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  const allMPs=mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
-  const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
-  fillSel('prodWeek',allWeeks,'Semua Week');
-  if(allMPs.length)fillSel('prodMP',allMPs,'Semua');
-  if(allCats.length)fillSel('prodCat',allCats,'Semua');
-
-  const fWk=gv('prodWeek'),fMP=gv('prodMP'),fCat=gv('prodCat');
-  let filtered=rows;
-  if(fWk!=='all')filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
-  if(fMP!=='all'&&mpCol)filtered=filtered.filter(r=>r[mpCol]===fMP);
-  if(fCat!=='all'&&catCol)filtered=filtered.filter(r=>r[catCol]===fCat);
-
-  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
-  const skuMap={};
-  filtered.forEach(r=>{
-    const k=r[skuCol]||'(unknown)';
-    if(!skuMap[k])skuMap[k]={sku:k,weeks:{},total:0};
-    const v=toN(r[prodMetric]),wk=String(r[wkCol]);
-    skuMap[k].weeks[wk]=(skuMap[k].weeks[wk]||0)+v;skuMap[k].total+=v;
-  });
-  const skus=Object.values(skuMap).sort((a,b)=>b.total-a.total);
-
-  let html=`<div class="metric-tabs" id="prodTabs">`;
-  metrics.forEach(m=>html+=`<div class="metric-tab ${m===prodMetric?'active':''}" onclick="prodSwitch('${m}',this)">${m}</div>`);
-  html+='</div>';
-  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 10 SKU — ${prodMetric}</div><div class="chart-wrap"><canvas id="prodBar"></canvas></div></div>`;
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
-  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
-  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  skus.forEach(s=>{
-    html+=`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;
-    sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmt(v,prodMetric):'—'}</td>`;});
-    html+=`<td class="tot">${fmt(s.total,prodMetric)}</td></tr>`;
-  });
-  html+='</tbody></table></div></div>';
-
-  document.getElementById('prodContent').innerHTML=html;
-  document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
-
-  killChart('prodBar');
-  const top10=skus.slice(0,10);
-  charts['prodBar']=new Chart(document.getElementById('prodBar'),{
-    type:'bar',
-    data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:COLORS.map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,prodMetric)}}}}
-  });
-}
-function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
-
-// ─── CATEGORY (TERMASUK PIE/DONUT CHART + PERSENTASE AKTIF) ─────────────────
-function renderCategory(){
-  const rows=D.cat;
-  if(!rows.length){document.getElementById('catContent').innerHTML='<div class="error-state">Data Category belum tersedia.</div>';return;}
-  const wkCol=findCol(rows,['week','minggu','wk']);
-  const catCol=findCol(rows,['category','kategori','cat']);
-  const metrics=metricCols(rows);
-  if(!catMetric||!metrics.includes(catMetric))catMetric=metrics[0];
-
-  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
-  fillSel('catWeek',allWeeks,'Semua Week');
-  if(allCats.length)fillSel('catCat',allCats,'Semua');
-
-  const fWk=gv('catWeek'),fCat=gv('catCat');
-  let filtered=rows;
-  if(fWk!=='all')filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
-  if(fCat!=='all'&&catCol)filtered=filtered.filter(r=>r[catCol]===fCat);
-
-  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
-  const sc=catCol?[...new Set(filtered.map(r=>r[catCol]).filter(Boolean))].sort():[];
-
-  let html=`<div class="metric-tabs" id="catTabs">`;
-  metrics.forEach(m=>html+=`<div class="metric-tab ${m===catMetric?'active':''}" onclick="catSwitch('${m}',this)">${m}</div>`);
-  html+='</div>';
-  
-  // Skenario Chart Berdampingan
-  html+='<div class="chart-row">';
-  html+=`<div class="chart-card"><div class="chart-title">🏷️ Share Kategori (Donut Chart)</div><div class="chart-wrap"><canvas id="catPie"></canvas></div></div>`;
-  html+=`<div class="chart-card"><div class="chart-title">📅 Trend Kategori Mingguan</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div>`;
-  html+='</div>';
-
-  // Tabel Detail Kategori
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Category × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Kategori</th>`;
-  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
-  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  sc.forEach(cat=>{
-    const tot=filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0);
-    html+=`<tr><td style="font-weight:600">${cat}</td>`;
-    sw.forEach(w=>{const v=filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<td class="num">${v>0?fmt(v,catMetric):'—'}</td>`;});
-    html+=`<td class="tot">${fmt(tot,catMetric)}</td></tr>`;
-  });
-  html+='</tbody></table></div></div>';
-
-  document.getElementById('catContent').innerHTML=html;
-  document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
-
-  // Hitung Data untuk Donut/Pie
-  const catTotals = sc.map(cat => filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0));
-
-  // DRAW PIE/DONUT CHART (DENGAN PERSENTASE OTOMATIS)
-  killChart('catPie');
-  charts['catPie']=new Chart(document.getElementById('catPie'),{
-    type:'doughnut', // Menggunakan tipe Donut agar tampilan tengahnya bersih dan modern
-    plugins: [ChartDataLabels], // DAFTARKAN PLUGIN DATALABELS DI SINI
-    data:{
-      labels:sc,
-      datasets:[{
-        data:catTotals,
-        backgroundColor:COLORS.slice(0,sc.length),
-        borderWidth:2,
-        borderColor:'#fff'
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{
-          position:'bottom',
-          labels:{boxWidth:10,font:{size:10}}
-        },
-        // SCRIPT KONFIGURASI PERSENTASE LANGSUNG KELIATAN TANPA DIKLIK
-        datalabels: {
-          color: '#fff', // Warna teks persentase
-          font: {
-            weight: 'bold',
-            size: 11
-          },
-          formatter: (value, ctx) => {
-            let sum = 0;
-            let dataArr = ctx.chart.data.datasets[0].data;
-            dataArr.map(data => { sum += data; });
-            let percentage = (value*100 / sum).toFixed(1);
-            return percentage > 3 ? percentage + '%' : ''; // Hanya tampilkan jika porsi > 3% agar tidak menumpuk sesak
-          }
-        }
-      }
-    }
-  });
-
-  // DRAW LINE CHART TREND KATEGORI
-  killChart('catLine');
-  charts['catLine']=new Chart(document.getElementById('catLine'),{
-    type:'line',
-    data:{
-      labels:sw.map(w=>'Wk '+w),
-      datasets:sc.map((cat,i)=>({
-        label:cat,
-        data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),
-        borderColor:COLORS[i%COLORS.length],
-        backgroundColor:COLORS[i%COLORS.length]+'20',
-        tension:0.3,
-        fill:false,
-        pointRadius:4
-      }))
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},
-        datalabels:{display:false} // Matikan datalabels di line chart agar bersih
-      },
-      scales:{y:{beginAtZero:true}}
-    }
-  });
-}
-function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCategory();}
-</script>
-</body>
-</html>
+    sw.forEach(w=>{const v=filtered.filter(r=>r
