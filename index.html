@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SCM Dashboard — Scarlett</title>
+<!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<!-- PLUGIN UTAMA: Untuk menampilkan persentase langsung di chart -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+<!-- PapaParse -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -217,6 +221,38 @@ let charts={};
 let mpMetric=null,prodMetric=null,catMetric=null;
 const COLORS=['#5b3fa8','#e879a0','#1D9E75','#e6944a','#e05b5b','#7c3aed','#0891b2','#ca8a04','#be185d','#15803d'];
 
+// ─── INIT & NAVIGATION ───────────────────────────────────────────────────────
+function showPage(pageId, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  
+  const targetPage = document.getElementById(`page-${pageId}`);
+  if(targetPage) targetPage.classList.add('active');
+  if(navEl) navEl.classList.add('active');
+  
+  if(pageId === 'kpi') renderKPI();
+  if(pageId === 'marketplace') renderMarketplace();
+  if(pageId === 'product') renderProduct();
+  if(pageId === 'category') renderCategory();
+}
+
+async function init() {
+  try {
+    const [kpi, mp, prod, cat] = await Promise.all([
+      fetchCSV(CSV_KPI), fetchCSV(CSV_MP), fetchCSV(CSV_PROD), fetchCSV(CSV_CAT)
+    ]);
+    D.kpi = kpi; D.mp = mp; D.prod = prod; D.cat = cat;
+    document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('id-ID');
+    renderKPI();
+  } catch(e) {
+    console.error(e);
+    document.querySelectorAll('.loading-state').forEach(el => {
+      el.innerHTML = '<div class="error-state">Gagal memuat data dari Google Sheets. Pastikan link CSV benar.</div>';
+    });
+  }
+}
+window.addEventListener('DOMContentLoaded', init);
+
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 const toN=v=>{if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));return isNaN(n)?0:n;};
 const fmt=(v,col='')=>{
@@ -270,7 +306,6 @@ function renderKPI(){
   const wkCol=findCol(rows,['week','minggu','wk'])||Object.keys(rows[0])[0];
   const metrics=metricCols(rows);
 
-  // Auto-detect Qty col dan Order col
   const qtyCol  = findCol(rows,['totalqty','qty','jumlah']) || metrics.find(m=>/qty/i.test(m)) || metrics[1];
   const orderCol = findCol(rows,['totalorder','order','pesanan','unique']) || metrics.find(m=>/order/i.test(m)) || metrics[0];
 
@@ -278,13 +313,11 @@ function renderKPI(){
   fillSel('kpiWeek',allWeeks,'Semua Week');
 
   const fWk=gv('kpiWeek');
-  // Cards: tampilkan data week terpilih. Jika "all" → tampilkan latest week
   const latestWk=allWeeks[allWeeks.length-1];
   const cardWk = fWk==='all' ? latestWk : fWk;
   const cardRows=rows.filter(r=>String(r[wkCol])===String(cardWk));
   const cardLabel=fWk==='all'?`Wk ${latestWk} (latest)`:`Wk ${cardWk}`;
 
-  // KPI CARDS — ikuti filter
   const CL=['c0','c1','c2','c3','c4','c5'];
   let html='<div class="kpi-grid">';
   metrics.forEach((m,i)=>{
@@ -297,7 +330,6 @@ function renderKPI(){
   });
   html+='</div>';
 
-  // TREND CHART — Bar: Total Qty | Line: Total Order (semua week selalu tampil)
   html+=`<div class="chart-card">
     <div class="chart-title">📈 Trend Mingguan</div>
     <div class="chart-sub">Bar = ${qtyCol || 'Qty'} &nbsp;|&nbsp; Line = ${orderCol || 'Order'}</div>
@@ -309,7 +341,6 @@ function renderKPI(){
     <div class="chart-wrap"><canvas id="kpiChart"></canvas></div>
   </div>`;
 
-  // TABLE — SELALU semua week, week terpilih di-highlight
   html+=`<div class="table-card">
     <div class="table-header">
       <div class="table-title">📋 Semua Data per Week</div>
@@ -320,7 +351,6 @@ function renderKPI(){
   metrics.forEach(m=>html+=`<th style="text-align:right">${m}</th>`);
   html+='</tr></thead><tbody>';
 
-  // Selalu tampilkan SEMUA weeks, highlight yang dipilih
   allWeeks.forEach(wk=>{
     const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
     const isSelected=fWk!=='all'&&String(wk)===String(fWk);
@@ -337,7 +367,6 @@ function renderKPI(){
   document.getElementById('kpiContent').innerHTML=html;
   document.getElementById('kpiStatus').textContent=`${allWeeks.length} weeks · Wk ${latestWk} latest`;
 
-  // Draw combined chart
   drawKpiTrend(rows, wkCol, allWeeks, qtyCol, orderCol, fWk);
 }
 
@@ -348,11 +377,7 @@ function drawKpiTrend(rows, wkCol, weeks, qtyCol, orderCol, selectedWk){
 
   const qtyVals  = weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[qtyCol]),0));
   const orderVals= weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[orderCol]),0));
-
-  // Highlight selected week bar
-  const barColors = weeks.map(wk=>
-    selectedWk!=='all'&&String(wk)===String(selectedWk) ? '#5b3fa8' : '#5b3fa8aa'
-  );
+  const barColors = weeks.map(wk=>selectedWk!=='all'&&String(wk)===String(selectedWk) ? '#5b3fa8' : '#5b3fa8aa');
 
   charts['kpiChart']=new Chart(ctx,{
     data:{
@@ -377,7 +402,7 @@ function drawKpiTrend(rows, wkCol, weeks, qtyCol, orderCol, selectedWk){
           backgroundColor:'#e879a020',
           borderWidth:2.5,
           pointRadius:5,
-          pointBackgroundColor:weeks.map(wk=>selectedWk!=='all'&&String(wk)===String(selectedWk)?'#e879a0':'#e879a0'),
+          pointBackgroundColor:'#e879a0',
           pointBorderColor:'#fff',
           pointBorderWidth:2,
           tension:0.35,
@@ -393,6 +418,7 @@ function drawKpiTrend(rows, wkCol, weeks, qtyCol, orderCol, selectedWk){
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{display:false},
+        datalabels:{display:false}, // Matikan datalabels khusus di line/bar biar tidak menumpuk
         tooltip:{
           callbacks:{
             label:ctx=>{
@@ -471,13 +497,13 @@ function renderMarketplace(){
   charts['mpBar']=new Chart(document.getElementById('mpBar'),{
     type:'bar',
     data:{labels:sm,datasets:[{data:sm.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0)),backgroundColor:COLORS.slice(0,sm.length).map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,mpMetric)}}}}
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,mpMetric)}}}}
   });
   killChart('mpLine');
   charts['mpLine']=new Chart(document.getElementById('mpLine'),{
     type:'line',
     data:{labels:sw.map(w=>'Wk '+w),datasets:sm.map((mp,i)=>({label:mp,data:sw.map(w=>filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},datalabels:{display:false}},scales:{y:{beginAtZero:true}}}
   });
 }
 function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderMarketplace();}
@@ -538,12 +564,12 @@ function renderProduct(){
   charts['prodBar']=new Chart(document.getElementById('prodBar'),{
     type:'bar',
     data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:COLORS.map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,prodMetric)}}}}
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,prodMetric)}}}}
   });
 }
 function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
 
-// ─── CATEGORY ────────────────────────────────────────────────────────────────
+// ─── CATEGORY (TERMASUK PIE/DONUT CHART + PERSENTASE AKTIF) ─────────────────
 function renderCategory(){
   const rows=D.cat;
   if(!rows.length){document.getElementById('catContent').innerHTML='<div class="error-state">Data Category belum tersedia.</div>';return;}
@@ -568,11 +594,15 @@ function renderCategory(){
   let html=`<div class="metric-tabs" id="catTabs">`;
   metrics.forEach(m=>html+=`<div class="metric-tab ${m===catMetric?'active':''}" onclick="catSwitch('${m}',this)">${m}</div>`);
   html+='</div>';
+  
+  // Skenario Chart Berdampingan
   html+='<div class="chart-row">';
-  html+=`<div class="chart-card"><div class="chart-title">🏷️ Komposisi per Category</div><div class="chart-wrap"><canvas id="catPie"></canvas></div></div>`;
-  html+=`<div class="chart-card"><div class="chart-title">📅 Trend per Category</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">🏷️ Share Kategori (Donut Chart)</div><div class="chart-wrap"><canvas id="catPie"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">📅 Trend Kategori Mingguan</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div>`;
   html+='</div>';
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Category × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Category</th>`;
+
+  // Tabel Detail Kategori
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Category × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Kategori</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
   sc.forEach(cat=>{
@@ -586,49 +616,78 @@ function renderCategory(){
   document.getElementById('catContent').innerHTML=html;
   document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
 
+  // Hitung Data untuk Donut/Pie
+  const catTotals = sc.map(cat => filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0));
+
+  // DRAW PIE/DONUT CHART (DENGAN PERSENTASE OTOMATIS)
   killChart('catPie');
   charts['catPie']=new Chart(document.getElementById('catPie'),{
-    type:'doughnut',
-    data:{labels:sc,datasets:[{data:sc.map(cat=>filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0)),backgroundColor:COLORS.map(c=>c+'dd'),borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
+    type:'doughnut', // Menggunakan tipe Donut agar tampilan tengahnya bersih dan modern
+    plugins: [ChartDataLabels], // DAFTARKAN PLUGIN DATALABELS DI SINI
+    data:{
+      labels:sc,
+      datasets:[{
+        data:catTotals,
+        backgroundColor:COLORS.slice(0,sc.length),
+        borderWidth:2,
+        borderColor:'#fff'
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          position:'bottom',
+          labels:{boxWidth:10,font:{size:10}}
+        },
+        // SCRIPT KONFIGURASI PERSENTASE LANGSUNG KELIATAN TANPA DIKLIK
+        datalabels: {
+          color: '#fff', // Warna teks persentase
+          font: {
+            weight: 'bold',
+            size: 11
+          },
+          formatter: (value, ctx) => {
+            let sum = 0;
+            let dataArr = ctx.chart.data.datasets[0].data;
+            dataArr.map(data => { sum += data; });
+            let percentage = (value*100 / sum).toFixed(1);
+            return percentage > 3 ? percentage + '%' : ''; // Hanya tampilkan jika porsi > 3% agar tidak menumpuk sesak
+          }
+        }
+      }
+    }
   });
+
+  // DRAW LINE CHART TREND KATEGORI
   killChart('catLine');
   charts['catLine']=new Chart(document.getElementById('catLine'),{
     type:'line',
-    data:{labels:sw.map(w=>'Wk '+w),datasets:sc.map((cat,i)=>({label:cat,data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
+    data:{
+      labels:sw.map(w=>'Wk '+w),
+      datasets:sc.map((cat,i)=>({
+        label:cat,
+        data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),
+        borderColor:COLORS[i%COLORS.length],
+        backgroundColor:COLORS[i%COLORS.length]+'20',
+        tension:0.3,
+        fill:false,
+        pointRadius:4
+      }))
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},
+        datalabels:{display:false} // Matikan datalabels di line chart agar bersih
+      },
+      scales:{y:{beginAtZero:true}}
+    }
   });
 }
 function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCategory();}
-
-// ─── NAV ─────────────────────────────────────────────────────────────────────
-function showPage(p,el){
-  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
-  el.classList.add('active');
-  if(p==='kpi')renderKPI();
-  else if(p==='marketplace')renderMarketplace();
-  else if(p==='product')renderProduct();
-  else if(p==='category')renderCategory();
-}
-
-// ─── INIT ────────────────────────────────────────────────────────────────────
-async function init(){
-  try{
-    const [kpi,mp,prod,cat]=await Promise.all([fetchCSV(CSV_KPI),fetchCSV(CSV_MP),fetchCSV(CSV_PROD),fetchCSV(CSV_CAT)]);
-    D.kpi=kpi;D.mp=mp;D.prod=prod;D.cat=cat;
-    document.getElementById('lastSync').textContent=new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-    renderKPI();
-  }catch(e){
-    console.error(e);
-    ['kpiContent','mpContent','prodContent','catContent'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
-    });
-  }
-}
-init();
 </script>
 </body>
 </html>
