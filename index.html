@@ -1,235 +1,75 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCM Dashboard — Scarlett</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-:root{
-  --bg:#f0eef8;--card:#fff;--border:#e2daf2;
-  --text:#1a0a2e;--text2:#6b5b8a;
-  --green:#1D9E75;--blue:#5b3fa8;--orange:#e6944a;--red:#e05b5b;--pink:#e879a0;
-  --sidebar:#1e0d3b;--sidebar-text:#b8a8d8;--accent:#e879a0;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;}
-
-/* SIDEBAR */
-.sidebar{width:210px;background:var(--sidebar);padding:18px 12px;flex-shrink:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;}
-.logo{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px;}
-.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#e879a0,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;box-shadow:0 4px 12px rgba(232,121,160,0.4);}
-.logo-name{font-size:13px;font-weight:700;color:#fff;}
-.logo-sub{font-size:10px;color:var(--sidebar-text);margin-top:1px;}
-.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.nav-section{font-size:9px;color:var(--sidebar-text);text-transform:uppercase;letter-spacing:0.1em;margin:14px 4px 6px;}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--sidebar-text);font-size:12.5px;font-weight:500;transition:all 0.15s;margin-bottom:2px;}
-.nav-item.active{background:rgba(232,121,160,0.18);color:var(--accent);font-weight:600;}
-.nav-item:hover:not(.active){background:rgba(255,255,255,0.06);color:#fff;}
-.nav-icon{font-size:15px;width:20px;text-align:center;}
-.sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);font-size:10px;color:var(--sidebar-text);text-align:center;line-height:1.7;}
-
-/* MAIN */
-.main{margin-left:210px;flex:1;padding:24px;min-width:0;}
-.page{display:none;}
-.page.active{display:block;}
-
-/* HEADER & FILTER */
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
-.page-title{font-size:20px;font-weight:800;color:var(--text);}
-.page-sub{font-size:12px;color:var(--text2);margin-top:2px;}
-.live-badge{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--text2);font-weight:500;}
-.filter-bar{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.filter-select{font-size:11.5px;padding:5px 28px 5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text);outline:none;cursor:pointer;}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
-.chart-wrap{position:relative;height:270px;}
-
-/* === KPI MATRIX (YANG KAMU MAU) === */
-.kpi-matrix-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-}
-
-.matrix-header {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--blue);
-  margin-bottom: 14px;
-}
-
-.matrix-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-
-.matrix-table th {
-  background: #f8f6ff;
-  color: #43338f;
-  padding: 12px 10px;
-  text-align: center;
-  font-weight: 600;
-  border-bottom: 2px solid #c4b5f0;
-}
-
-.matrix-table td {
-  padding: 14px 10px;
-  text-align: center;
-  border-bottom: 1px solid #e2daf2;
-}
-
-.matrix-table .row-label {
-  text-align: left;
-  font-weight: 700;
-  background: #f8f6ff;
-  color: #4c3d7f;
-  width: 140px;
-}
-
-.row-order td { 
-  background: #f3e8ff; 
-  color: #6b21a8; 
-  font-weight: 600; 
-}
-
-.row-qty td { 
-  background: #f1f5f9; 
-}
-
-.row-percent td { 
-  font-weight: 500; 
-  color: #374151; 
-}
-
-.highlight {
-  background: #ede9fe !important;
-  font-weight: 700;
-  color: #5b3fa8;
-}
-</style>
-</head>
-<body>
-
-<aside class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">SC</div>
-    <div style="flex:1">
-      <div class="logo-name">Scarlett SCM</div>
-      <div class="logo-sub">Supply Chain Dashboard</div>
-    </div>
-    <div class="live-dot"></div>
-  </div>
-  <div class="nav-section">Menu</div>
-  <div class="nav-item active" onclick="showPage('kpi',this)"><span class="nav-icon">📊</span>KPI Weekly</div>
-  <div class="nav-item" onclick="showPage('marketplace',this)"><span class="nav-icon">🛒</span>Marketplace</div>
-  <div class="nav-item" onclick="showPage('product',this)"><span class="nav-icon">📦</span>Product Trend</div>
-  <div class="nav-item" onclick="showPage('category',this)"><span class="nav-icon">🏷️</span>Category</div>
-  <div class="sidebar-footer">
-    Last sync:<br><span id="lastSync">—</span><br>
-    <span style="color:#555;font-size:9px">Google Sheets Live CSV</span>
-  </div>
-</aside>
-
-<main class="main">
-  <!-- KPI PAGE -->
-  <div class="page active" id="page-kpi">
-    <div class="page-header">
-      <div><div class="page-title">📊 KPI Weekly</div><div class="page-sub">Ringkasan performa mingguan seluruh channel</div></div>
-      <div class="live-badge"><div class="dot"></div><span id="kpiStatus">Memuat...</span></div>
-    </div>
-    <div class="filter-bar">
-      <span class="filter-bar-label">🔽 Filter:</span>
-      <select class="filter-select" id="kpiWeek" onchange="renderKPI()"><option value="all">Semua Week</option></select>
-      <button onclick="document.getElementById('kpiWeek').value='all';renderKPI()" style="padding:6px 12px;margin-left:8px;">↺ Reset</button>
-    </div>
-    <div id="kpiContent"><div class="loading-state">Mengambil data KPI...</div></div>
-  </div>
-
-  <!-- Halaman lain (tetap sama seperti asli) -->
-  <div class="page" id="page-marketplace">...</div>
-  <div class="page" id="page-product">...</div>
-  <div class="page" id="page-category">...</div>
-</main>
-
 <script>
 const CSV_KPI  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1726885858&single=true&output=csv';
 const CSV_MP   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1508996446&single=true&output=csv';
 const CSV_PROD = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=747219576&single=true&output=csv';
 const CSV_CAT  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=971208042&single=true&output=csv';
 
-let D={kpi:[],mp:[],prod:[],cat:[]};
-let charts={};
+let D = {kpi:[], mp:[], prod:[], cat:[]};
 
-const toN=v=>{if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));return isNaN(n)?0:n;};
-const fmt=v=>Math.round(v).toLocaleString('id-ID');
+const toN = v => { if(!v && v !== 0) return 0; return parseFloat(String(v).replace(/[^0-9.-]/g,'')) || 0; };
+const fmt = v => Math.round(v).toLocaleString('id-ID');
 
-function findCol(data,kws){
-  if(!data||!data.length)return null;
-  const cols=Object.keys(data[0]);
-  for(const kw of kws){
-    const f=cols.find(c=>c.toLowerCase().replace(/[\s_-]/g,'').includes(kw.toLowerCase().replace(/[\s_-]/g,'')));
-    if(f)return f;
+function findCol(data, keywords) {
+  if(!data?.length) return null;
+  const cols = Object.keys(data[0]);
+  for (let kw of keywords) {
+    const found = cols.find(c => c.toLowerCase().replace(/[\s_-]/g,'').includes(kw.toLowerCase().replace(/[\s_-]/g,'')));
+    if (found) return found;
   }
   return null;
 }
 
-async function fetchCSV(url){
-  return new Promise((res,rej)=>{Papa.parse(url,{download:true,header:true,skipEmptyLines:true,complete:r=>res(r.data),error:e=>rej(e)})});
+async function fetchCSV(url) {
+  return new Promise((res, rej) => Papa.parse(url, {
+    download: true, 
+    header: true, 
+    skipEmptyLines: true, 
+    complete: r => res(r.data), 
+    error: rej
+  }));
 }
 
-function fillSel(id,vals){
-  const el=document.getElementById(id);
-  if(!el)return;
-  el.innerHTML=`<option value="all">Semua Week</option>`;
-  vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=`Wk ${v}`;el.appendChild(o);});
-}
-
-const gv=id=>document.getElementById(id)?document.getElementById(id).value:'all';
-
-// ================== KPI MATRIX ==================
-function renderKPI(){
+// ================== RENDER KPI CEPAT ==================
+function renderKPI() {
   const rows = D.kpi;
-  if(!rows.length){
-    document.getElementById('kpiContent').innerHTML='<div class="error-state">Data KPI belum tersedia.</div>';
-    return;
-  }
+  if (!rows.length) return;
 
-  const wkCol = findCol(rows,['week','minggu','wk']) || Object.keys(rows[0])[0];
-  const allWeeks = [...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  
-  fillSel('kpiWeek',allWeeks);
+  const wkCol = findCol(rows, ['week','minggu','wk']) || Object.keys(rows[0])[0];
+  const allWeeks = [...new Set(rows.map(r => r[wkCol]).filter(Boolean))].sort((a,b) => toN(a) - toN(b));
 
-  const fWk = gv('kpiWeek');
+  // Fill dropdown
+  const weekSelect = document.getElementById('kpiWeek');
+  weekSelect.innerHTML = `<option value="all">Semua Week</option>`;
+  allWeeks.forEach(w => {
+    const opt = document.createElement('option');
+    opt.value = w;
+    opt.textContent = `Wk ${w}`;
+    weekSelect.appendChild(opt);
+  });
+
+  const fWk = weekSelect.value;
   const latestWk = allWeeks[allWeeks.length-1];
   const displayWk = fWk === 'all' ? latestWk : fWk;
-  const cardLabel = fWk === 'all' ? `Wk ${latestWk} (Latest)` : `Wk ${displayWk}`;
 
-  const filteredRows = fWk === 'all' ? rows : rows.filter(r => String(r[wkCol]) === String(displayWk));
+  const filtered = fWk === 'all' ? rows : rows.filter(r => String(r[wkCol]) === String(displayWk));
 
+  // Hitung sekali saja
   const val = {
-    total: filteredRows.reduce((s,r) => s + toN(r[findCol(rows,['total','order','grand'])]), 0),
-    delivered: filteredRows.reduce((s,r) => s + toN(r[findCol(rows,['delivered','terkirim'])]), 0),
-    dispatched: filteredRows.reduce((s,r) => s + toN(r[findCol(rows,['dispatched','dikirim'])]), 0),
-    cancelled: filteredRows.reduce((s,r) => s + toN(r[findCol(rows,['cancelled','dibatalkan'])]), 0),
-    return: filteredRows.reduce((s,r) => s + toN(r[findCol(rows,['return','retur'])]), 0),
-    wh: filteredRows.reduce((s,r) => s + toN(r[findCol(rows,['wh','warehouse','gudang'])]), 0),
-    system: filteredRows.reduce((s,r) => s + toN(r[findCol(rows,['system','sys'])]), 0),
-    expedisi: filteredRows.reduce((s,r) => s + toN(r[findCol(rows,['expedisi','ekspedisi'])]), 0)
+    total: filtered.reduce((s,r) => s + toN(r[findCol(rows,['total','order','grand'])]), 0),
+    delivered: filtered.reduce((s,r) => s + toN(r[findCol(rows,['delivered','terkirim','success'])]), 0),
+    dispatched: filtered.reduce((s,r) => s + toN(r[findCol(rows,['dispatched','dikirim'])]), 0),
+    cancelled: filtered.reduce((s,r) => s + toN(r[findCol(rows,['cancelled','dibatalkan'])]), 0),
+    return: filtered.reduce((s,r) => s + toN(r[findCol(rows,['return','retur'])]), 0),
+    wh: filtered.reduce((s,r) => s + toN(r[findCol(rows,['wh','warehouse','gudang'])]), 0),
+    system: filtered.reduce((s,r) => s + toN(r[findCol(rows,['system','sys'])]), 0),
+    expedisi: filtered.reduce((s,r) => s + toN(r[findCol(rows,['expedisi','ekspedisi'])]), 0)
   };
 
   const totalBase = val.total || 1;
 
-  let html = `
+  const html = `
     <div class="kpi-matrix-card">
-      <div class="matrix-header">${cardLabel}</div>
+      <div class="matrix-header">${fWk === 'all' ? `Wk ${latestWk} (Latest)` : `Wk ${displayWk}`}</div>
       <table class="matrix-table">
         <thead>
           <tr>
@@ -287,27 +127,25 @@ function renderKPI(){
   document.getElementById('kpiStatus').textContent = `${allWeeks.length} weeks · Wk ${latestWk} latest`;
 }
 
-function showPage(p,el){
-  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+// NAV
+function showPage(p, el) {
+  document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   el.classList.add('active');
-  if(p==='kpi') renderKPI();
+  if(p === 'kpi') renderKPI();
 }
 
 // INIT
-async function init(){
-  try{
-    const [kpi,mp,prod,cat] = await Promise.all([fetchCSV(CSV_KPI),fetchCSV(CSV_MP),fetchCSV(CSV_PROD),fetchCSV(CSV_CAT)]);
-    D.kpi=kpi; D.mp=mp; D.prod=prod; D.cat=cat;
-    document.getElementById('lastSync').textContent = new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+async function init() {
+  try {
+    const [kpi] = await Promise.all([fetchCSV(CSV_KPI)]);
+    D.kpi = kpi;
+    document.getElementById('lastSync').textContent = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
     renderKPI();
-  }catch(e){
-    console.error(e);
-    document.getElementById('kpiContent').innerHTML = `<div class="error-state">Gagal memuat data. Cek koneksi.</div>`;
+  } catch(e) {
+    document.getElementById('kpiContent').innerHTML = `<div class="error-state">Gagal memuat data</div>`;
   }
 }
 init();
 </script>
-</body>
-</html>
