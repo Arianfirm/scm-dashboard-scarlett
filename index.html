@@ -77,31 +77,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .kpi-value.sm{font-size:15px;}
 .kpi-week-tag{display:inline-block;margin-top:5px;font-size:10px;background:#f0eef8;color:var(--blue);padding:2px 7px;border-radius:8px;font-weight:600;}
 
-/* MATRIX KPI CARDS SECTION (NEW DESIGN) */
-.matrix-container {margin-bottom: 20px;}
-.matrix-section-title {font-size:13px; font-weight:800; color:var(--text); margin-bottom:12px; letter-spacing:0.02em; display:flex; align-items:center; gap:6px;}
-.matrix-grid {display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 5px;}
-@media(max-width: 1200px) { .matrix-grid { grid-template-columns: repeat(4, 1fr); } }
-@media(max-width: 768px) { .matrix-grid { grid-template-columns: repeat(2, 1fr); } }
-
-.matrix-card {background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s; box-shadow: 0 2px 4px rgba(26,10,46,0.02);}
-.matrix-card:hover {transform: translateY(-2px); box-shadow: 0 6px 16px rgba(26,10,46,0.06); border-color: var(--blue);}
-.matrix-card.total-style {background: linear-gradient(135deg, #fbfaff, #f3efff); border: 1px solid #d5cbf5;}
-
-.matrix-header {border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin-bottom: 10px;}
-.matrix-title {font-size: 11px; font-weight: 800; color: var(--text); letter-spacing: 0.03em;}
-.total-style .matrix-title {color: var(--blue); font-size: 11.5px;}
-
-.matrix-body {display: flex; flex-direction: column; gap: 8px;}
-.matrix-row-item {display: flex; flex-direction: column; gap: 2px;}
-.matrix-row-label {font-size: 9.5px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.02em;}
-.matrix-row-val {font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; font-variant-numeric: tabular-nums;}
-.total-style .matrix-row-val {font-size: 16px;}
-
-.matrix-footer {margin-top: 10px; padding-top: 6px; border-top: 1px solid #f5f2fa; display: flex; align-items: center; justify-content: space-between;}
-.matrix-pct {font-size: 11px; font-weight: 700; color: var(--green); background: rgba(29,158,117,0.08); padding: 2px 6px; border-radius: 6px;}
-.matrix-pct.empty {color: var(--text2); background: #eee; font-weight: 500;}
-
 /* CHART */
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
 .chart-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
@@ -283,28 +258,41 @@ function fillSel(id,vals,label){
 const gv=id=>{const e=document.getElementById(id);return e?e.value:'all';};
 function killChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 
-// ─── KPI PAGE (UPDATED WITH MATRIX KPI CARDS) ────────────────────────────────
+// ─── KPI PAGE ────────────────────────────────────────────────────────────────
 function renderKPI(){
-  const rows=D.kpi;
+  const rows = D.kpi;
   if(!rows.length){document.getElementById('kpiContent').innerHTML='<div class="error-state">Data KPI belum tersedia.</div>';return;}
 
-  const wkCol=findCol(rows,['week','minggu','wk'])||Object.keys(rows[0])[0];
-  const metrics=metricCols(rows);
+  const wkCol = findCol(rows,['week','minggu','wk']) || Object.keys(rows[0])[0];
+  const metrics = metricCols(rows);
 
   // Auto-detect Qty col dan Order col utama
   const qtyCol  = findCol(rows,['totalqty','qty','jumlah']) || metrics.find(m=>/qty/i.test(m)) || metrics[1];
   const orderCol = findCol(rows,['totalorder','order','pesanan','unique']) || metrics.find(m=>/order/i.test(m)) || metrics[0];
 
-  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const allWeeks = [...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
   fillSel('kpiWeek',allWeeks,'Semua Week');
 
-  const fWk=gv('kpiWeek');
-  const latestWk=allWeeks[allWeeks.length-1];
-  const cardWk = fWk==='all' ? latestWk : fWk;
-  const cardRows=rows.filter(r=>String(r[wkCol])===String(cardWk));
-  const cardLabel=fWk==='all'?`Wk ${latestWk} (latest)`:`Wk ${cardWk}`;
+  const fWk = gv('kpiWeek');
+  const latestWk = allWeeks[allWeeks.length-1];
+  const cardWk = fWk === 'all' ? latestWk : fWk;
+  const cardRows = rows.filter(r=>String(r[wkCol])===String(cardWk));
+  const cardLabel = fWk === 'all' ? `Wk ${latestWk} (latest)` : `Wk ${cardWk}`;
 
-  // DEFINISI MAP MATRIKS UNTUK KARTU (Order & Qty digabung dalam satu card per status)
+  // 1. KPI CARDS
+  const CL = ['c0','c1','c2','c3','c4','c5'];
+  let html = '<div class="kpi-grid">';
+  metrics.forEach((m,i)=>{
+    const t = cardRows.reduce((s,r)=>s+toN(r[m]),0);
+    html += `<div class="kpi-card ${CL[i%6]}">
+      <div class="kpi-label">${m}</div>
+      <div class="kpi-value ${t>=1e8?'sm':''}">${fmt(t,m)}</div>
+      <div class="kpi-week-tag">${cardLabel}</div>
+    </div>`;
+  });
+  html += '</div>';
+
+  // 2. SUMMARY CROSS-TABULATION (Menampilkan data order dan quantity secara horizontal)
   const crossMap = [
     { label: 'DELIVERED',     qKey: metrics.find(m=>/deliv/i.test(m)), oKey: metrics.find(m=>/order.*deliv|deliv.*order/i.test(m)) },
     { label: 'DISPATCHED',    qKey: metrics.find(m=>/dispatch/i.test(m)), oKey: metrics.find(m=>/order.*dispatch|dispatch.*order/i.test(m)) },
@@ -318,63 +306,52 @@ function renderKPI(){
   const totalOrderVal = cardRows.reduce((s,r)=>s+toN(r[orderCol]),0);
   const totalQtyVal = cardRows.reduce((s,r)=>s+toN(r[qtyCol]),0);
 
-  // MEMBUAT LAYOUT KARTU MATRIKS (Pengganti Tabel Cross-Tabulation lama)
-  let html = `<div class="matrix-container">
-    <div class="matrix-section-title">📊 SUMMARY MATRIX CROSS-TABULATION (${cardLabel.toUpperCase()})</div>
-    <div class="matrix-grid">
-      
-      <div class="matrix-card total-style">
-        <div class="matrix-header">
-          <div class="matrix-title">[TOTAL]</div>
-        </div>
-        <div class="matrix-body">
-          <div class="matrix-row-item">
-            <span class="matrix-row-label">Order</span>
-            <span class="matrix-row-val" style="color:var(--blue);">${fmt(totalOrderVal)}</span>
-          </div>
-          <div class="matrix-row-item">
-            <span class="matrix-row-label">Quantity</span>
-            <span class="matrix-row-val">${fmt(totalQtyVal)}</span>
-          </div>
-        </div>
-        <div class="matrix-footer">
-          <span class="matrix-row-label">% to Total</span>
-          <span class="matrix-pct empty">—</span>
-        </div>
-      </div>`;
+  html += `<div class="table-card" style="margin-bottom:16px;">
+    <div class="table-header">
+      <div class="table-title">📊 SUMMARY CROSS-TABULATION (${cardLabel.toUpperCase()})</div>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="text-align:center;">
+      <thead>
+        <tr style="background:#f8f6ff;">
+          <th></th>
+          <th style="text-align:right; font-weight:700;">[TOTAL]</th>
+          ${crossMap.map(c=>`<th style="text-align:right; font-weight:700;">[${c.label}]</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700; text-align:left; background:#e0b0ff; color:#1a0a2e;">ORDER</td>
+          <td class="num" style="background:#e0b0ff; color:#1a0a2e;">${fmt(totalOrderVal)}</td>
+          ${crossMap.map(c=>{
+            const val = c.oKey ? cardRows.reduce((s,r)=>s+toN(r[c.oKey]),0) : 0;
+            return `<td class="num" style="background:#fdf2ff;">${val > 0 ? fmt(val) : '0'}</td>`;
+          }).join('')}
+        </tr>
+        <tr>
+          <td style="font-weight:700; text-align:left; background:#dae1e7;">QUANTITY</td>
+          <td class="num" style="background:#dae1e7;">${fmt(totalQtyVal)}</td>
+          ${crossMap.map(c=>{
+            const val = c.qKey ? cardRows.reduce((s,r)=>s+toN(r[c.qKey]),0) : 0;
+            return `<td class="num">${val > 0 ? fmt(val) : '0'}</td>`;
+          }).join('')}
+        </tr>
+        <tr>
+          <td style="font-weight:700; text-align:left;">% to TOTAL</td>
+          <td style="text-align:right; color:#6b5b8a;">—</td>
+          ${crossMap.map(c=>{
+            const val = c.qKey ? cardRows.reduce((s,r)=>s+toN(r[c.qKey]),0) : 0;
+            const pct = totalQtyVal > 0 ? ((val / totalQtyVal) * 100).toFixed(2) + '%' : '0.00%';
+            return `<td class="num" style="color:var(--blue);">${pct}</td>`;
+          }).join('')}
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>`;
 
-  // GENERATE KARTU PER STATUS SECARA DINAMIS
-  crossMap.forEach(c => {
-    const oVal = c.oKey ? cardRows.reduce((s,r)=>s+toN(r[c.oKey]),0) : 0;
-    const qVal = c.qKey ? cardRows.reduce((s,r)=>s+toN(r[c.qKey]),0) : 0;
-    const pct = totalQtyVal > 0 ? ((qVal / totalQtyVal) * 100).toFixed(2) + '%' : '0.00%';
-
-    html += `
-      <div class="matrix-card">
-        <div class="matrix-header">
-          <div class="matrix-title">[${c.label}]</div>
-        </div>
-        <div class="matrix-body">
-          <div class="matrix-row-item">
-            <span class="matrix-row-label">Order</span>
-            <span class="matrix-row-val" style="color:#a855f7;">${oVal > 0 ? fmt(oVal) : '0'}</span>
-          </div>
-          <div class="matrix-row-item">
-            <span class="matrix-row-label">Quantity</span>
-            <span class="matrix-row-val">${qVal > 0 ? fmt(qVal) : '0'}</span>
-          </div>
-        </div>
-        <div class="matrix-footer">
-          <span class="matrix-row-label">% to Total</span>
-          <span class="matrix-pct">${pct}</span>
-        </div>
-      </div>`;
-  });
-
-  html += `</div></div>`;
-
-  // TREND CHART (Kombinasi Bar & Line)
-  html+=`<div class="chart-card">
+  // 3. TREND CHART
+  html += `<div class="chart-card">
     <div class="chart-title">📈 Trend Mingguan</div>
     <div class="chart-sub">Bar = ${qtyCol || 'Qty'} &nbsp;|&nbsp; Line = ${orderCol || 'Order'}</div>
     <div class="chart-legend">
@@ -385,8 +362,8 @@ function renderKPI(){
     <div class="chart-wrap"><canvas id="kpiChart"></canvas></div>
   </div>`;
 
-  // TABLE DATA HISTORIS PER WEEK
-  html+=`<div class="table-card">
+  // 4. ALL DATA PER WEEK TABLE
+  html += `<div class="table-card">
     <div class="table-header">
       <div class="table-title">📋 Semua Data per Week</div>
       <div class="table-meta">${allWeeks.length} weeks · ${fWk!=='all'?`Wk ${fWk} disorot`:'Semua week ditampilkan'}</div>
@@ -394,23 +371,23 @@ function renderKPI(){
     <div style="overflow-x:auto">
     <table><thead><tr><th>Week</th>`;
   metrics.forEach(m=>html+=`<th style="text-align:right">${m}</th>`);
-  html+='</tr></thead><tbody>';
+  html += '</tr></thead><tbody>';
 
   allWeeks.forEach(wk=>{
-    const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
-    const isSelected=fWk!=='all'&&String(wk)===String(fWk);
-    html+=`<tr class="${isSelected?'highlighted':''}">
+    const wRows = rows.filter(r=>String(r[wkCol])===String(wk));
+    const isSelected = fWk!=='all'&&String(wk)===String(fWk);
+    html += `<tr class="${isSelected?'highlighted':''}">
       <td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
     metrics.forEach(m=>{
-      const t=wRows.reduce((s,r)=>s+toN(r[m]),0);
-      html+=`<td class="num">${fmt(t,m)}</td>`;
+      const t = wRows.reduce((s,r)=>s+toN(r[m]),0);
+      html += `<td class="num">${fmt(t,m)}</td>`;
     });
-    html+='</tr>';
+    html += '</tr>';
   });
-  html+='</tbody></table></div></div>';
+  html += '</tbody></table></div></div>';
 
-  document.getElementById('kpiContent').innerHTML=html;
-  document.getElementById('kpiStatus').textContent=`${allWeeks.length} weeks · Wk ${latestWk} latest`;
+  document.getElementById('kpiContent').innerHTML = html;
+  document.getElementById('kpiStatus').textContent = `${allWeeks.length} weeks · Wk ${latestWk} latest`;
 
   drawKpiTrend(rows, wkCol, allWeeks, qtyCol, orderCol, fWk);
 }
@@ -568,4 +545,140 @@ function renderProduct(){
 
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
   const allMPs=mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
-  const all
+  const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
+  fillSel('prodWeek',allWeeks,'Semua Week');
+  if(allMPs.length)fillSel('prodMP',allMPs,'Semua');
+  if(allCats.length)fillSel('prodCat',allCats,'Semua');
+
+  const fWk=gv('prodWeek'),fMP=gv('prodMP'),fCat=gv('prodCat');
+  let filtered=rows;
+  if(fWk!=='all')filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
+  if(fMP!=='all'&&mpCol)filtered=filtered.filter(r=>r[mpCol]===fMP);
+  if(fCat!=='all'&&catCol)filtered=filtered.filter(r=>r[catCol]===fCat);
+
+  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
+  const skuMap={};
+  filtered.forEach(r=>{
+    const k=r[skuCol]||'(unknown)';
+    if(!skuMap[k])skuMap[k]={sku:k,weeks:{},total:0};
+    const v=toN(r[prodMetric]),wk=String(r[wkCol]);
+    skuMap[k].weeks[wk]=(skuMap[k].weeks[wk]||0)+v;skuMap[k].total+=v;
+  });
+  const skus=Object.values(skuMap).sort((a,b)=>b.total-a.total);
+
+  let html=`<div class="metric-tabs" id="prodTabs">`;
+  metrics.forEach(m=>html+=`<div class="metric-tab ${m===prodMetric?'active':''}" onclick="prodSwitch('${m}',this)">${m}</div>`);
+  html+='</div>';
+  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 10 SKU — ${prodMetric}</div><div class="chart-wrap"><canvas id="prodBar"></canvas></div></div>`;
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
+  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
+  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
+  skus.forEach(s=>{
+    html+=`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;
+    sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmt(v,prodMetric):'—'}</td>`;});
+    html+=`<td class="tot">${fmt(s.total,prodMetric)}</td></tr>`;
+  });
+  html+='</tbody></table></div></div>';
+
+  document.getElementById('prodContent').innerHTML=html;
+  document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
+
+  killChart('prodBar');
+  const top10=skus.slice(0,10);
+  charts['prodBar']=new Chart(document.getElementById('prodBar'),{
+    type:'bar',
+    data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:COLORS.map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,prodMetric)}}}}
+  });
+}
+function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
+
+// ─── CATEGORY ────────────────────────────────────────────────────────────────
+function renderCategory(){
+  const rows=D.cat;
+  if(!rows.length){document.getElementById('catContent').innerHTML='<div class="error-state">Data Category belum tersedia.</div>';return;}
+  const wkCol=findCol(rows,['week','minggu','wk']);
+  const catCol=findCol(rows,['category','kategori','cat']);
+  const metrics=metricCols(rows);
+  if(!catMetric||!metrics.includes(catMetric))catMetric=metrics[0];
+
+  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
+  fillSel('catWeek',allWeeks,'Semua Week');
+  if(allCats.length)fillSel('catCat',allCats,'Semua');
+
+  const fWk=gv('catWeek'),fCat=gv('catCat');
+  let filtered=rows;
+  if(fWk!=='all')filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
+  if(fCat!=='all'&&catCol)filtered=filtered.filter(r=>r[catCol]—fCat);
+
+  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
+  const sc=catCol?[...new Set(filtered.map(r=>r[catCol]).filter(Boolean))].sort():[];
+
+  let html=`<div class="metric-tabs" id="catTabs">`;
+  metrics.forEach(m=>html+=`<div class="metric-tab ${m===catMetric?'active':''}" onclick="catSwitch('${m}',this)">${m}</div>`);
+  html+='</div>';
+  html+='<div class="chart-row">';
+  html+=`<div class="chart-card"><div class="chart-title">🏷️ Komposisi per Category</div><div class="chart-wrap"><canvas id="catPie"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">📅 Trend per Category</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div>`;
+  html+='</div>';
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Category × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Category</th>`;
+  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
+  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
+  sc.forEach(cat=>{
+    const tot=filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0);
+    html+=`<tr><td style="font-weight:600">${cat}</td>`;
+    sw.forEach(w=>{const v=filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<td class="num">${v>0?fmt(v,catMetric):'—'}</td>`;});
+    html+=`<td class="tot">${fmt(tot,catMetric)}</td></tr>`;
+  });
+  html+='</tbody></table></div></div>';
+
+  document.getElementById('catContent').innerHTML=html;
+  document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
+
+  killChart('catPie');
+  charts['catPie']=new Chart(document.getElementById('catPie'),{
+    type:'doughnut',
+    data:{labels:sc,datasets:[{data:sc.map(cat=>filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0)),backgroundColor:COLORS.map(c=>c+'dd'),borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
+  });
+  killChart('catLine');
+  charts['catLine']=new Chart(document.getElementById('catLine'),{
+    type:'line',
+    data:{labels:sw.map(w=>'Wk '+w),datasets:sc.map((cat,i)=>({label:cat,data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
+  });
+}
+function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCategory();}
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+function showPage(p,el){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  el.classList.add('active');
+  if(p==='kpi')renderKPI();
+  else if(p==='marketplace')renderMarketplace();
+  else if(p==='product')renderProduct();
+  else if(p==='category')renderCategory();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+async function init(){
+  try{
+    const [kpi,mp,prod,cat]=await Promise.all([fetchCSV(CSV_KPI),fetchCSV(CSV_MP),fetchCSV(CSV_PROD),fetchCSV(CSV_CAT)]);
+    D.kpi=kpi;D.mp=mp;D.prod=prod;D.cat=cat;
+    document.getElementById('lastSync').textContent=new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    renderKPI();
+  }catch(e){
+    console.error(e);
+    ['kpiContent','mpContent','prodContent','catContent'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
+    });
+  }
+}
+init();
+</script>
+</body>
+</html>
