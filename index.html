@@ -283,6 +283,15 @@ function fillSel(id,vals,label){
 const gv=id=>{const e=document.getElementById(id);return e?e.value:'all';};
 function killChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 
+// ─── HELPER: Strip "Qty"/"Quantity" dari nama kolom untuk header tampilan ────
+function stripQtyLabel(colName){
+  // Hapus kata "Qty", "Quantity", "Jumlah" (case-insensitive) beserta spasi/underscore sekitarnya
+  return colName
+    .replace(/[\s_-]*(qty|quantity|jumlah)[\s_-]*/gi, ' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
 // ─── KPI PAGE ────────────────────────────────────────────────────────────────
 function renderKPI(){
   const rows=D.kpi;
@@ -300,7 +309,6 @@ function renderKPI(){
   const qtyCol=findCol(rows,['totalqty','totalquantity'])||qtyCols.find(c=>/totalqty/i.test(c.replace(/[\s_-]/g,'')))||qtyCols[1]||qtyCols[0];
 
   // Sub-metrics = semua qty kecuali Total Order & Total Qty
-  // Urutan: Delivered, Dispatched, Cancelled, Return, sisanya
   const rawSub=qtyCols.filter(c=>c!==orderCol&&c!==qtyCol);
   const subCols=[
     ...rawSub.filter(c=>/deliv/i.test(c)),
@@ -310,14 +318,37 @@ function renderKPI(){
     ...rawSub.filter(c=>!/deliv|dispatch|cancel|return|retur/i.test(c))
   ].filter((c,i,a)=>a.indexOf(c)===i);
 
-  // Cari kolom order-level per sub-metric (misal "Order Dispatched", "Dispatched Order")
-  // Untuk Dispatched: cari kolom yang mengandung "dispatch" DAN "order" (bukan qty)
+  // Cari kolom unique order number per sub-metric
+  // Misal: "Dispatched Order", "Order Dispatched", "Delivered Order", dsb
   function findOrderSubCol(keyword){
     return cols.find(c=>
       c!==orderCol&&c!==qtyCol&&!/%/.test(c)&&
       new RegExp(keyword,'i').test(c)&&
       /order/i.test(c)
     )||null;
+  }
+
+  // Cari kolom unique order number (kolom terpisah yg eksplisit menyebut "unique order" atau "uniq order")
+  // Fallback: gunakan orderCol itu sendiri per sub jika ada kolom order-level
+  function findUniqueOrderForSub(subColName){
+    // Ambil keyword inti dari nama kolom (tanpa qty/quantity/jumlah)
+    const keyword = subColName
+      .replace(/qty|quantity|jumlah/gi,'')
+      .trim()
+      .split(/\s+/)
+      .filter(w=>w.length>2)[0]||'';
+    if(!keyword) return null;
+
+    // Cari: kolom yg mengandung keyword AND mengandung "order" AND bukan subCol itu sendiri
+    const found = cols.find(c=>
+      c !== orderCol &&
+      c !== qtyCol &&
+      c !== subColName &&
+      !/%/.test(c) &&
+      new RegExp(keyword,'i').test(c) &&
+      /order/i.test(c)
+    );
+    return found || null;
   }
 
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
@@ -333,12 +364,7 @@ function renderKPI(){
   const totalOrder=sum(orderCol);
   const totalQty=sum(qtyCol);
 
-  // ── KPI MATRIX — layout persis seperti screenshot ──────────────────────
-  // Header: [blank] | Total | Delivered | Dispatched | Cancelled | Return | ...
-  // Row 1: Total Order | totalOrder | — | [order count dispatch if exists] | — | — | ...
-  // Row 2: Total Qty   | totalQty   | qty per subCol
-  // Row 3: % of Total  | —          | subQty/totalQty %
-
+  // ── KPI MATRIX ──────────────────────────────────────────────────────────────
   let html=`<div class="kpi-matrix-card">
     <div class="kpi-matrix-header">
       <div class="kpi-matrix-title">📊 KPI Summary Matrix</div>
@@ -346,30 +372,41 @@ function renderKPI(){
     </div>
     <table class="kpi-matrix-table">
       <thead><tr>
-        <th style="min-width:120px"></th>
+        <th style="min-width:140px"></th>
         <th class="col-order">Total</th>`;
 
-  subCols.forEach(c=>html+=`<th>${c}</th>`);
+  // PERUBAHAN 3: Header sub-kolom — strip kata "Qty"/"Quantity" dari nama kolom
+  subCols.forEach(c=>html+=`<th>${stripQtyLabel(c)}</th>`);
   html+=`</tr></thead><tbody>`;
 
-  // Row 1: Total Order
+  // ── ROW 1: Unique Order Number ─────────────────────────────────────────────
+  // PERUBAHAN 1: Selalu tampilkan angka unique order number (bukan —)
   html+=`<tr class="row-nilai">
-    <td style="color:var(--blue);font-weight:700">📦 Total Order</td>
+    <td style="color:var(--blue);font-weight:700">🔢 Unique Order</td>
     <td class="col-order">${fmtN(totalOrder)}</td>`;
+
   subCols.forEach(c=>{
-    // Cek apakah ada kolom order-level untuk sub ini
-    const keyword=c.replace(/qty|quantity|jumlah/gi,'').trim().split(/\s+/)[0];
-    const orderSubCol=findOrderSubCol(keyword);
-    const v=orderSubCol?sum(orderSubCol):null;
-    if(v!==null&&v>0){
+    const uniqueCol = findUniqueOrderForSub(c);
+    const v = uniqueCol ? sum(uniqueCol) : null;
+
+    if(v !== null && v > 0){
       html+=`<td style="color:var(--blue);font-weight:600">${fmtN(v)}</td>`;
     } else {
-      html+=`<td style="color:#ccc">—</td>`;
+      // Fallback: jika tidak ada kolom order-level terpisah,
+      // estimasi dari proporsi qty sub terhadap total qty × total order
+      // supaya tidak pernah blank
+      const subQty = sum(c);
+      if(subQty > 0 && totalQty > 0){
+        const estimatedOrder = Math.round((subQty / totalQty) * totalOrder);
+        html+=`<td style="color:var(--blue);font-weight:600;opacity:0.75" title="Estimasi proporsional">${fmtN(estimatedOrder)}<sup style="font-size:8px;color:var(--text2)">~</sup></td>`;
+      } else {
+        html+=`<td style="color:#bbb">0</td>`;
+      }
     }
   });
   html+=`</tr>`;
 
-  // Row 2: Total Qty
+  // ── ROW 2: Total Qty ───────────────────────────────────────────────────────
   html+=`<tr class="row-nilai">
     <td style="color:var(--green);font-weight:700">📦 Total Qty</td>
     <td class="col-qty">${fmtN(totalQty)}</td>`;
@@ -378,13 +415,13 @@ function renderKPI(){
   });
   html+=`</tr>`;
 
-  // Row 3: % of Total (berdasarkan Total Qty)
+  // ── ROW 3: Service Level Qty (ganti dari % of Total) ───────────────────────
+  // PERUBAHAN 2: Label diubah dari "% of Total" → "Service Level Qty"
   html+=`<tr class="row-pct-qty">
-    <td style="color:var(--text2);font-weight:600">📊 % of Total</td>
+    <td style="color:var(--text2);font-weight:600">📊 Service Level Qty</td>
     <td style="color:#ccc">—</td>`;
   subCols.forEach(c=>{
     const pct=totalQty>0?(sum(c)/totalQty*100):0;
-    // Color coding: delivered hijau, cancelled/return merah, lainnya orange
     const color=/deliv/i.test(c)?'var(--green)':/cancel|return/i.test(c)?'var(--red)':'var(--orange)';
     html+=`<td style="color:${color};font-weight:600">${fmtPct(pct)}</td>`;
   });
@@ -427,15 +464,15 @@ function renderKPI(){
     </div>
     <div style="overflow-x:auto">
     <table><thead><tr><th>Week</th>`;
-  html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`; subCols.forEach(c=>html+=`<th style="text-align:right">${c}</th>`);
-  // Tambah kolom % of Total Qty per week
-  subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">% Qty: ${c}</th>`);
+  html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`;
+  // Header tabel bawah juga pakai stripQtyLabel
+  subCols.forEach(c=>html+=`<th style="text-align:right">${stripQtyLabel(c)}</th>`);
+  subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">SL%: ${stripQtyLabel(c)}</th>`);
   html+=`</tr></thead><tbody>`;
 
   allWeeks.forEach(wk=>{
     const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
     const isSelected=fWk!=='all'&&String(wk)===String(fWk);
-    const wOrder=wRows.reduce((s,r)=>s+toN(r[orderCol]),0);
     const wQty=wRows.reduce((s,r)=>s+toN(r[qtyCol]),0);
     html+=`<tr class="${isSelected?'highlighted':''}">
       <td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
