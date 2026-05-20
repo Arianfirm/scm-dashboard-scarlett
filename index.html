@@ -34,8 +34,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 
 /* MAIN */
 .main{margin-left:210px;flex:1;padding:24px;min-width:0;}
-
-/* PAGE HEADER */
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
 .page-title{font-size:20px;font-weight:800;color:var(--text);}
 .page-sub{font-size:12px;color:var(--text2);margin-top:2px;}
@@ -47,10 +45,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .filter-bar-label{font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;margin-right:4px;}
 .filter-item{display:flex;align-items:center;gap:6px;}
 .filter-item label{font-size:11px;color:var(--text2);white-space:nowrap;font-weight:500;}
-.filter-select{font-size:11.5px;padding:5px 28px 5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b5b8a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;min-width:130px;transition:border-color 0.12s;}
+.filter-select{font-size:11.5px;padding:5px 28px 5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b5b8a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;min-width:130px;}
 .filter-select:focus{border-color:var(--blue);}
 .filter-divider{width:1px;height:20px;background:var(--border);margin:0 2px;}
-.btn-reset{font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-weight:500;transition:all 0.12s;}
+.btn-reset{font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-weight:500;}
 .btn-reset:hover{border-color:var(--blue);color:var(--blue);}
 
 /* PAGE */
@@ -62,29 +60,53 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* KPI CARDS */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px;position:relative;overflow:hidden;}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-.kpi-card.c0::before{background:var(--green);}
-.kpi-card.c1::before{background:var(--blue);}
-.kpi-card.c2::before{background:var(--orange);}
-.kpi-card.c3::before{background:var(--red);}
-.kpi-card.c4::before{background:var(--pink);}
-.kpi-card.c5::before{background:#7c3aed;}
-.kpi-label{font-size:10.5px;color:var(--text2);font-weight:500;margin-bottom:5px;}
-.kpi-value{font-size:20px;font-weight:800;color:var(--text);line-height:1;}
-.kpi-value.sm{font-size:15px;}
-.kpi-week-tag{display:inline-block;margin-top:5px;font-size:10px;background:#f0eef8;color:var(--blue);padding:2px 7px;border-radius:8px;font-weight:600;}
+/* KPI MATRIX */
+.kpi-matrix-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px;overflow-x:auto;}
+.kpi-matrix-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.kpi-matrix-title{font-size:13px;font-weight:700;color:var(--text);}
+.kpi-week-badge{display:inline-block;background:#f0eef8;color:var(--blue);font-size:11px;font-weight:600;padding:3px 10px;border-radius:8px;border:1px solid #ddd6f8;}
+
+.kpi-matrix-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;}
+.kpi-matrix-table th{padding:9px 12px;text-align:center;background:#f8f6ff;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;font-size:11px;white-space:nowrap;position:sticky;top:0;}
+.kpi-matrix-table th:first-child{text-align:left;background:#f0eef8;color:var(--blue);font-weight:700;min-width:160px;border-right:2px solid var(--border);}
+.kpi-matrix-table td{padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.kpi-matrix-table td:first-child{text-align:left;font-weight:600;background:#faf9ff;border-right:2px solid var(--border);color:var(--text);font-size:11.5px;}
+.kpi-matrix-table tr:last-child td{border-bottom:none;}
+.kpi-matrix-table tr:hover td{background:#f8f6ff;}
+.kpi-matrix-table tr:hover td:first-child{background:#f0eef8;}
+
+/* Row styles */
+.row-nilai td{font-weight:700;color:var(--text);font-size:13px;}
+.row-nilai td:first-child{color:var(--blue);}
+.row-pct-order td{color:#1D9E75;font-size:12px;}
+.row-pct-order td:first-child{color:var(--text);}
+.row-pct-qty td{color:var(--orange);font-size:12px;}
+.row-pct-qty td:first-child{color:var(--text);}
+
+/* highlight col */
+.col-order{background:#f0f7ff!important;color:var(--blue)!important;font-weight:700!important;}
+.col-qty{background:#f0fff8!important;color:#1D9E75!important;font-weight:700!important;}
+
+/* SERVICE LEVEL CARDS */
+.sl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
+.sl-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;}
+.sl-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.sl-card.good::before{background:var(--green);}
+.sl-card.warn::before{background:var(--orange);}
+.sl-card.bad::before{background:var(--red);}
+.sl-card.blue::before{background:var(--blue);}
+.sl-label{font-size:10px;color:var(--text2);font-weight:500;margin-bottom:4px;}
+.sl-value{font-size:18px;font-weight:800;color:var(--text);}
+.sl-sub{font-size:10px;color:var(--text2);margin-top:3px;}
 
 /* CHART */
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
 .chart-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
-.chart-sub{font-size:10.5px;color:var(--text2);margin-bottom:12px;}
-.chart-wrap{position:relative;height:270px;}
+.chart-sub{font-size:10.5px;color:var(--text2);margin-bottom:10px;}
 .chart-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
 .legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.chart-wrap{position:relative;height:260px;}
 .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 @media(max-width:900px){.chart-row{grid-template-columns:1fr;}}
 
@@ -219,11 +241,15 @@ const COLORS=['#5b3fa8','#e879a0','#1D9E75','#e6944a','#e05b5b','#7c3aed','#0891
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 const toN=v=>{if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));return isNaN(n)?0:n;};
-const fmt=(v,col='')=>{
-  if(/%/.test(col))return toN(v).toFixed(2)+'%';
+const fmtN=v=>{
   if(v>=1e9)return 'Rp '+(v/1e9).toFixed(1)+'M';
   if(v>=1e6)return 'Rp '+(v/1e6).toFixed(1)+'jt';
   return Math.round(v).toLocaleString('id-ID');
+};
+const fmtPct=(v,decimals=2)=>v.toFixed(decimals)+'%';
+const fmt=(v,col='')=>{
+  if(/%/.test(col))return toN(v).toFixed(2)+'%';
+  return fmtN(toN(v));
 };
 
 function findCol(data,kws){
@@ -236,14 +262,9 @@ function findCol(data,kws){
   return null;
 }
 
-function metricCols(data){
+function allCols(data){
   if(!data||!data.length)return[];
-  const SKIP=/^(week|minggu|wk|marketplace|platform|channel|category|kategori|sku|product|produk|name|nama|brand|type|tipe|no|id|kode|date|tanggal)$/i;
-  return Object.keys(data[0]).filter(k=>{
-    const cl=k.toLowerCase().replace(/[\s_-]/g,'');
-    if(SKIP.test(cl))return false;
-    return data.some(r=>toN(r[k])!==0);
-  });
+  return Object.keys(data[0]);
 }
 
 function fetchCSV(url){
@@ -267,158 +288,199 @@ function renderKPI(){
   const rows=D.kpi;
   if(!rows.length){document.getElementById('kpiContent').innerHTML='<div class="error-state">Data KPI belum tersedia.</div>';return;}
 
-  const wkCol=findCol(rows,['week','minggu','wk'])||Object.keys(rows[0])[0];
-  const metrics=metricCols(rows);
+  const cols=allCols(rows);
+  const wkCol=findCol(rows,['week','minggu','wk'])||cols[0];
 
-  // Auto-detect Qty col dan Order col
-  const qtyCol  = findCol(rows,['totalqty','qty','jumlah']) || metrics.find(m=>/qty/i.test(m)) || metrics[1];
-  const orderCol = findCol(rows,['totalorder','order','pesanan','unique']) || metrics.find(m=>/order/i.test(m)) || metrics[0];
+  // Pisahkan qty dan persen
+  const pctCols=cols.filter(c=>/%/.test(c)&&c!==wkCol);
+  const qtyCols=cols.filter(c=>!/%/.test(c)&&c!==wkCol&&rows.some(r=>toN(r[c])!==0));
+
+  // Denominators
+  const orderCol=findCol(rows,['totalorder','order','pesanan'])||qtyCols.find(c=>/order/i.test(c))||qtyCols[0];
+  const qtyCol=findCol(rows,['totalqty','totalquantity'])||qtyCols.find(c=>/totalqty/i.test(c.replace(/[\s_-]/g,'')))||qtyCols[1]||qtyCols[0];
+
+  // Sub-metrics = semua qty kecuali Total Order & Total Qty
+  // Urutan: Delivered, Dispatched, Cancelled, Return, sisanya
+  const rawSub=qtyCols.filter(c=>c!==orderCol&&c!==qtyCol);
+  const subCols=[
+    ...rawSub.filter(c=>/deliv/i.test(c)),
+    ...rawSub.filter(c=>/dispatch/i.test(c)),
+    ...rawSub.filter(c=>/cancel/i.test(c)),
+    ...rawSub.filter(c=>/return|retur/i.test(c)),
+    ...rawSub.filter(c=>!/deliv|dispatch|cancel|return|retur/i.test(c))
+  ].filter((c,i,a)=>a.indexOf(c)===i);
+
+  // Cari kolom order-level per sub-metric (misal "Order Dispatched", "Dispatched Order")
+  // Untuk Dispatched: cari kolom yang mengandung "dispatch" DAN "order" (bukan qty)
+  function findOrderSubCol(keyword){
+    return cols.find(c=>
+      c!==orderCol&&c!==qtyCol&&!/%/.test(c)&&
+      new RegExp(keyword,'i').test(c)&&
+      /order/i.test(c)
+    )||null;
+  }
 
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
   fillSel('kpiWeek',allWeeks,'Semua Week');
 
   const fWk=gv('kpiWeek');
-  // Cards: tampilkan data week terpilih. Jika "all" → tampilkan latest week
   const latestWk=allWeeks[allWeeks.length-1];
-  const cardWk = fWk==='all' ? latestWk : fWk;
+  const cardWk=fWk==='all'?latestWk:fWk;
   const cardRows=rows.filter(r=>String(r[wkCol])===String(cardWk));
   const cardLabel=fWk==='all'?`Wk ${latestWk} (latest)`:`Wk ${cardWk}`;
 
-  // KPI CARDS — ikuti filter
-  const CL=['c0','c1','c2','c3','c4','c5'];
-  let html='<div class="kpi-grid">';
-  metrics.forEach((m,i)=>{
-    const t=cardRows.reduce((s,r)=>s+toN(r[m]),0);
-    html+=`<div class="kpi-card ${CL[i%6]}">
-      <div class="kpi-label">${m}</div>
-      <div class="kpi-value ${t>=1e8?'sm':''}">${fmt(t,m)}</div>
-      <div class="kpi-week-tag">${cardLabel}</div>
-    </div>`;
-  });
-  html+='</div>';
+  const sum=col=>col?cardRows.reduce((s,r)=>s+toN(r[col]),0):0;
+  const totalOrder=sum(orderCol);
+  const totalQty=sum(qtyCol);
 
-  // TREND CHART — Bar: Total Qty | Line: Total Order (semua week selalu tampil)
+  // ── KPI MATRIX — layout persis seperti screenshot ──────────────────────
+  // Header: [blank] | Total | Delivered | Dispatched | Cancelled | Return | ...
+  // Row 1: Total Order | totalOrder | — | [order count dispatch if exists] | — | — | ...
+  // Row 2: Total Qty   | totalQty   | qty per subCol
+  // Row 3: % of Total  | —          | subQty/totalQty %
+
+  let html=`<div class="kpi-matrix-card">
+    <div class="kpi-matrix-header">
+      <div class="kpi-matrix-title">📊 KPI Summary Matrix</div>
+      <span class="kpi-week-badge">📅 ${cardLabel}</span>
+    </div>
+    <table class="kpi-matrix-table">
+      <thead><tr>
+        <th style="min-width:120px"></th>
+        <th class="col-order">Total</th>`;
+
+  subCols.forEach(c=>html+=`<th>${c}</th>`);
+  html+=`</tr></thead><tbody>`;
+
+  // Row 1: Total Order
+  html+=`<tr class="row-nilai">
+    <td style="color:var(--blue);font-weight:700">📦 Total Order</td>
+    <td class="col-order">${fmtN(totalOrder)}</td>`;
+  subCols.forEach(c=>{
+    // Cek apakah ada kolom order-level untuk sub ini
+    const keyword=c.replace(/qty|quantity|jumlah/gi,'').trim().split(/\s+/)[0];
+    const orderSubCol=findOrderSubCol(keyword);
+    const v=orderSubCol?sum(orderSubCol):null;
+    if(v!==null&&v>0){
+      html+=`<td style="color:var(--blue);font-weight:600">${fmtN(v)}</td>`;
+    } else {
+      html+=`<td style="color:#ccc">—</td>`;
+    }
+  });
+  html+=`</tr>`;
+
+  // Row 2: Total Qty
+  html+=`<tr class="row-nilai">
+    <td style="color:var(--green);font-weight:700">📦 Total Qty</td>
+    <td class="col-qty">${fmtN(totalQty)}</td>`;
+  subCols.forEach(c=>{
+    html+=`<td style="font-weight:600">${fmtN(sum(c))}</td>`;
+  });
+  html+=`</tr>`;
+
+  // Row 3: % of Total (berdasarkan Total Qty)
+  html+=`<tr class="row-pct-qty">
+    <td style="color:var(--text2);font-weight:600">📊 % of Total</td>
+    <td style="color:#ccc">—</td>`;
+  subCols.forEach(c=>{
+    const pct=totalQty>0?(sum(c)/totalQty*100):0;
+    // Color coding: delivered hijau, cancelled/return merah, lainnya orange
+    const color=/deliv/i.test(c)?'var(--green)':/cancel|return/i.test(c)?'var(--red)':'var(--orange)';
+    html+=`<td style="color:${color};font-weight:600">${fmtPct(pct)}</td>`;
+  });
+  html+=`</tr></tbody></table></div>`;
+
+  // ── SERVICE LEVEL CARDS (kolom %) ────────────────────────────────────────
+  if(pctCols.length){
+    html+=`<div style="margin-bottom:6px;font-size:11px;font-weight:600;color:var(--text2);">📈 Service Level & Rate</div>`;
+    html+=`<div class="sl-grid">`;
+    pctCols.forEach(c=>{
+      const v=sum(c);
+      const pct=toN(v);
+      const cls=pct>=95?'good':pct>=85?'warn':'bad';
+      html+=`<div class="sl-card ${cls}">
+        <div class="sl-label">${c}</div>
+        <div class="sl-value">${fmtPct(pct)}</div>
+        <div class="sl-sub">${cardLabel}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  // ── TREND CHART ──────────────────────────────────────────────────────────
   html+=`<div class="chart-card">
     <div class="chart-title">📈 Trend Mingguan</div>
-    <div class="chart-sub">Bar = ${qtyCol || 'Qty'} &nbsp;|&nbsp; Line = ${orderCol || 'Order'}</div>
+    <div class="chart-sub">Bar = ${qtyCol} &nbsp;|&nbsp; Line = ${orderCol}</div>
     <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>${qtyCol||'Qty'} (Bar)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>${orderCol||'Order'} (Line)</div>
-      ${fWk!=='all'?`<div class="legend-item" style="color:var(--blue)">▶ Week ${fWk} disorot</div>`:''}
+      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>${qtyCol} (Bar, kiri)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>${orderCol} (Line, kanan)</div>
+      ${fWk!=='all'?`<div class="legend-item" style="color:var(--blue);font-weight:600">▶ Week ${fWk} disorot</div>`:''}
     </div>
     <div class="chart-wrap"><canvas id="kpiChart"></canvas></div>
   </div>`;
 
-  // TABLE — SELALU semua week, week terpilih di-highlight
+  // ── TABEL SEMUA WEEK ─────────────────────────────────────────────────────
   html+=`<div class="table-card">
     <div class="table-header">
       <div class="table-title">📋 Semua Data per Week</div>
-      <div class="table-meta">${allWeeks.length} weeks · ${fWk!=='all'?`Wk ${fWk} disorot`:'Semua week ditampilkan'}</div>
+      <div class="table-meta">${allWeeks.length} weeks · ${fWk!=='all'?`Wk ${fWk} disorot`:'semua ditampilkan'}</div>
     </div>
     <div style="overflow-x:auto">
     <table><thead><tr><th>Week</th>`;
-  metrics.forEach(m=>html+=`<th style="text-align:right">${m}</th>`);
-  html+='</tr></thead><tbody>';
+  html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`; subCols.forEach(c=>html+=`<th style="text-align:right">${c}</th>`);
+  // Tambah kolom % of Total Qty per week
+  subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">% Qty: ${c}</th>`);
+  html+=`</tr></thead><tbody>`;
 
-  // Selalu tampilkan SEMUA weeks, highlight yang dipilih
   allWeeks.forEach(wk=>{
     const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
     const isSelected=fWk!=='all'&&String(wk)===String(fWk);
+    const wOrder=wRows.reduce((s,r)=>s+toN(r[orderCol]),0);
+    const wQty=wRows.reduce((s,r)=>s+toN(r[qtyCol]),0);
     html+=`<tr class="${isSelected?'highlighted':''}">
       <td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
-    metrics.forEach(m=>{
-      const t=wRows.reduce((s,r)=>s+toN(r[m]),0);
-      html+=`<td class="num">${fmt(t,m)}</td>`;
+    [orderCol,qtyCol,...subCols].forEach(c=>{
+      const v=wRows.reduce((s,r)=>s+toN(r[c]),0);
+      html+=`<td class="num">${fmtN(v)}</td>`;
     });
-    html+='</tr>';
+    subCols.forEach(c=>{
+      const v=wRows.reduce((s,r)=>s+toN(r[c]),0);
+      const pct=wQty>0?(v/wQty*100):0;
+      html+=`<td class="num" style="color:var(--orange)">${fmtPct(pct)}</td>`;
+    });
+    html+=`</tr>`;
   });
-  html+='</tbody></table></div></div>';
+  html+=`</tbody></table></div></div>`;
 
   document.getElementById('kpiContent').innerHTML=html;
   document.getElementById('kpiStatus').textContent=`${allWeeks.length} weeks · Wk ${latestWk} latest`;
 
-  // Draw combined chart
-  drawKpiTrend(rows, wkCol, allWeeks, qtyCol, orderCol, fWk);
-}
+  // Draw trend chart
+  const qtyVals=allWeeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[qtyCol]),0));
+  const orderVals=allWeeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[orderCol]),0));
+  const barColors=allWeeks.map(wk=>fWk!=='all'&&String(wk)===String(fWk)?'#5b3fa8':'#5b3fa8aa');
 
-function drawKpiTrend(rows, wkCol, weeks, qtyCol, orderCol, selectedWk){
   killChart('kpiChart');
   const ctx=document.getElementById('kpiChart');
   if(!ctx)return;
-
-  const qtyVals  = weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[qtyCol]),0));
-  const orderVals= weeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[orderCol]),0));
-
-  // Highlight selected week bar
-  const barColors = weeks.map(wk=>
-    selectedWk!=='all'&&String(wk)===String(selectedWk) ? '#5b3fa8' : '#5b3fa8aa'
-  );
-
   charts['kpiChart']=new Chart(ctx,{
     data:{
-      labels:weeks.map(w=>'Wk '+w),
+      labels:allWeeks.map(w=>'Wk '+w),
       datasets:[
-        {
-          type:'bar',
-          label:qtyCol||'Total Qty',
-          data:qtyVals,
-          backgroundColor:barColors,
-          borderColor:'#5b3fa8',
-          borderWidth:1.5,
-          borderRadius:4,
-          yAxisID:'yQty',
-          order:2
-        },
-        {
-          type:'line',
-          label:orderCol||'Total Order',
-          data:orderVals,
-          borderColor:'#e879a0',
-          backgroundColor:'#e879a020',
-          borderWidth:2.5,
-          pointRadius:5,
-          pointBackgroundColor:weeks.map(wk=>selectedWk!=='all'&&String(wk)===String(selectedWk)?'#e879a0':'#e879a0'),
-          pointBorderColor:'#fff',
-          pointBorderWidth:2,
-          tension:0.35,
-          fill:false,
-          yAxisID:'yOrder',
-          order:1
-        }
+        {type:'bar',label:qtyCol,data:qtyVals,backgroundColor:barColors,borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:4,yAxisID:'yQty',order:2},
+        {type:'line',label:orderCol,data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.35,fill:false,yAxisID:'yOrder',order:1}
       ]
     },
     options:{
-      responsive:true,
-      maintainAspectRatio:false,
+      responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{display:false},
-        tooltip:{
-          callbacks:{
-            label:ctx=>{
-              const v=ctx.parsed.y;
-              return ` ${ctx.dataset.label}: ${Math.round(v).toLocaleString('id-ID')}`;
-            }
-          }
-        }
-      },
+        tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return ` ${ctx.dataset.label}: ${Math.round(v).toLocaleString('id-ID')}`;}}
+      }},
       scales:{
-        yQty:{
-          type:'linear',
-          position:'left',
-          beginAtZero:true,
-          title:{display:true,text:qtyCol||'Qty',color:'#5b3fa8',font:{size:10,weight:'600'}},
-          ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},
-          grid:{color:'#e2daf2'}
-        },
-        yOrder:{
-          type:'linear',
-          position:'right',
-          beginAtZero:true,
-          title:{display:true,text:orderCol||'Order',color:'#e879a0',font:{size:10,weight:'600'}},
-          ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},
-          grid:{drawOnChartArea:false}
-        }
+        yQty:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:qtyCol,color:'#5b3fa8',font:{size:10,weight:'600'}},ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},
+        yOrder:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:orderCol,color:'#e879a0',font:{size:10,weight:'600'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}
       }
     }
   });
@@ -430,7 +492,7 @@ function renderMarketplace(){
   if(!rows.length){document.getElementById('mpContent').innerHTML='<div class="error-state">Data Marketplace belum tersedia.</div>';return;}
   const wkCol=findCol(rows,['week','minggu','wk']);
   const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
-  const metrics=metricCols(rows);
+  const metrics=allCols(rows).filter(c=>c!==wkCol&&c!==mpCol&&rows.some(r=>toN(r[c])!==0));
   if(!mpMetric||!metrics.includes(mpMetric))mpMetric=metrics[0];
 
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
@@ -448,11 +510,9 @@ function renderMarketplace(){
 
   let html=`<div class="metric-tabs" id="mpTabs">`;
   metrics.forEach(m=>html+=`<div class="metric-tab ${m===mpMetric?'active':''}" onclick="mpSwitch('${m}',this)">${m}</div>`);
-  html+='</div>';
-  html+='<div class="chart-row">';
+  html+='</div><div class="chart-row">';
   html+=`<div class="chart-card"><div class="chart-title">🛒 Total per Marketplace</div><div class="chart-wrap"><canvas id="mpBar"></canvas></div></div>`;
-  html+=`<div class="chart-card"><div class="chart-title">📅 Trend Mingguan</div><div class="chart-wrap"><canvas id="mpLine"></canvas></div></div>`;
-  html+='</div>';
+  html+=`<div class="chart-card"><div class="chart-title">📅 Trend Mingguan</div><div class="chart-wrap"><canvas id="mpLine"></canvas></div></div></div>`;
   html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Marketplace × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Marketplace</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
@@ -463,22 +523,13 @@ function renderMarketplace(){
     html+=`<td class="tot">${fmt(tot,mpMetric)}</td></tr>`;
   });
   html+='</tbody></table></div></div>';
-
   document.getElementById('mpContent').innerHTML=html;
   document.getElementById('mpStatus').textContent=`${sm.length} marketplace · ${sw.length} weeks`;
 
   killChart('mpBar');
-  charts['mpBar']=new Chart(document.getElementById('mpBar'),{
-    type:'bar',
-    data:{labels:sm,datasets:[{data:sm.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0)),backgroundColor:COLORS.slice(0,sm.length).map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,mpMetric)}}}}
-  });
+  charts['mpBar']=new Chart(document.getElementById('mpBar'),{type:'bar',data:{labels:sm,datasets:[{data:sm.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0)),backgroundColor:COLORS.slice(0,sm.length).map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,mpMetric)}}}}});
   killChart('mpLine');
-  charts['mpLine']=new Chart(document.getElementById('mpLine'),{
-    type:'line',
-    data:{labels:sw.map(w=>'Wk '+w),datasets:sm.map((mp,i)=>({label:mp,data:sw.map(w=>filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
-  });
+  charts['mpLine']=new Chart(document.getElementById('mpLine'),{type:'line',data:{labels:sw.map(w=>'Wk '+w),datasets:sm.map((mp,i)=>({label:mp,data:sw.map(w=>filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}});
 }
 function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderMarketplace();}
 
@@ -490,7 +541,7 @@ function renderProduct(){
   const skuCol=findCol(rows,['sku','product','produk','name','nama','item','barang','kode']);
   const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
   const catCol=findCol(rows,['category','kategori','cat']);
-  const metrics=metricCols(rows);
+  const metrics=allCols(rows).filter(c=>c!==wkCol&&c!==skuCol&&c!==mpCol&&c!==catCol&&rows.some(r=>toN(r[c])!==0));
   if(!prodMetric||!metrics.includes(prodMetric))prodMetric=metrics[0];
 
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
@@ -508,12 +559,7 @@ function renderProduct(){
 
   const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
   const skuMap={};
-  filtered.forEach(r=>{
-    const k=r[skuCol]||'(unknown)';
-    if(!skuMap[k])skuMap[k]={sku:k,weeks:{},total:0};
-    const v=toN(r[prodMetric]),wk=String(r[wkCol]);
-    skuMap[k].weeks[wk]=(skuMap[k].weeks[wk]||0)+v;skuMap[k].total+=v;
-  });
+  filtered.forEach(r=>{const k=r[skuCol]||'(unknown)';if(!skuMap[k])skuMap[k]={sku:k,weeks:{},total:0};const v=toN(r[prodMetric]),wk=String(r[wkCol]);skuMap[k].weeks[wk]=(skuMap[k].weeks[wk]||0)+v;skuMap[k].total+=v;});
   const skus=Object.values(skuMap).sort((a,b)=>b.total-a.total);
 
   let html=`<div class="metric-tabs" id="prodTabs">`;
@@ -523,23 +569,13 @@ function renderProduct(){
   html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  skus.forEach(s=>{
-    html+=`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;
-    sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmt(v,prodMetric):'—'}</td>`;});
-    html+=`<td class="tot">${fmt(s.total,prodMetric)}</td></tr>`;
-  });
+  skus.forEach(s=>{html+=`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmtN(v):'—'}</td>`;});html+=`<td class="tot">${fmtN(s.total)}</td></tr>`;});
   html+='</tbody></table></div></div>';
-
   document.getElementById('prodContent').innerHTML=html;
   document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
-
   killChart('prodBar');
   const top10=skus.slice(0,10);
-  charts['prodBar']=new Chart(document.getElementById('prodBar'),{
-    type:'bar',
-    data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:COLORS.map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,prodMetric)}}}}
-  });
+  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:COLORS.map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtN(v)}}}}});
 }
 function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
 
@@ -549,13 +585,13 @@ function renderCategory(){
   if(!rows.length){document.getElementById('catContent').innerHTML='<div class="error-state">Data Category belum tersedia.</div>';return;}
   const wkCol=findCol(rows,['week','minggu','wk']);
   const catCol=findCol(rows,['category','kategori','cat']);
-  const metrics=metricCols(rows);
+  const metrics=allCols(rows).filter(c=>c!==wkCol&&c!==catCol&&rows.some(r=>toN(r[c])!==0));
   if(!catMetric||!metrics.includes(catMetric))catMetric=metrics[0];
 
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
+  const allCatVals=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
   fillSel('catWeek',allWeeks,'Semua Week');
-  if(allCats.length)fillSel('catCat',allCats,'Semua');
+  if(allCatVals.length)fillSel('catCat',allCatVals,'Semua');
 
   const fWk=gv('catWeek'),fCat=gv('catCat');
   let filtered=rows;
@@ -567,156 +603,22 @@ function renderCategory(){
 
   let html=`<div class="metric-tabs" id="catTabs">`;
   metrics.forEach(m=>html+=`<div class="metric-tab ${m===catMetric?'active':''}" onclick="catSwitch('${m}',this)">${m}</div>`);
-  html+='</div>';
-  html+='<div class="chart-row">';
+  html+='</div><div class="chart-row">';
   html+=`<div class="chart-card"><div class="chart-title">🏷️ Komposisi per Category</div><div class="chart-wrap"><canvas id="catPie"></canvas></div></div>`;
-  html+=`<div class="chart-card"><div class="chart-title">📅 Trend per Category</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div>`;
-  html+='</div>';
+  html+=`<div class="chart-card"><div class="chart-title">📅 Trend per Category</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div></div>`;
   html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Category × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Category</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  sc.forEach(cat=>{
-    const tot=filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0);
-    html+=`<tr><td style="font-weight:600">${cat}</td>`;
-    sw.forEach(w=>{const v=filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<td class="num">${v>0?fmt(v,catMetric):'—'}</td>`;});
-    html+=`<td class="tot">${fmt(tot,catMetric)}</td></tr>`;
-  });
+  sc.forEach(cat=>{const tot=filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<tr><td style="font-weight:600">${cat}</td>`;sw.forEach(w=>{const v=filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<td class="num">${v>0?fmt(v,catMetric):'—'}</td>`;});html+=`<td class="tot">${fmt(tot,catMetric)}</td></tr>`;});
   html+='</tbody></table></div></div>';
-
   document.getElementById('catContent').innerHTML=html;
   document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
 
+  const pieData=sc.map(cat=>filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0));
   killChart('catPie');
-
-const pieData = sc.map(cat =>
-  filtered
-    .filter(r => r[catCol] === cat)
-    .reduce((s, r) => s + toN(r[catMetric]), 0)
-);
-
-charts['catPie'] = new Chart(document.getElementById('catPie'), {
-  type: 'doughnut',
-
-  data: {
-    labels: sc,
-    datasets: [{
-      data: pieData,
-      backgroundColor: COLORS.map(c => c + 'dd'),
-      borderColor: '#fff',
-      borderWidth: 2,
-      hoverOffset: 8
-    }]
-  },
-
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-
-    plugins: {
-
-      legend: {
-        position: 'right',
-        labels: {
-          boxWidth: 12,
-          font: {
-            size: 11
-          }
-        }
-      },
-
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-
-            const value = context.raw;
-
-            const total = context.dataset.data.reduce(
-              (a, b) => a + b,
-              0
-            );
-
-            const percent = (
-              (value / total) * 100
-            ).toFixed(1);
-
-            return `${context.label}: ${fmt(value, catMetric)} (${percent}%)`;
-          }
-        }
-      }
-
-    }
-  },
-
-  plugins: [{
-
-    id: 'piePercent',
-
-    afterDraw(chart) {
-
-      const {
-        ctx
-      } = chart;
-
-      const dataset = chart.data.datasets[0];
-
-      const total = dataset.data.reduce(
-        (a, b) => a + b,
-        0
-      );
-
-      chart.getDatasetMeta(0).data.forEach((arc, index) => {
-
-        const value = dataset.data[index];
-
-        const percent = (
-          (value / total) * 100
-        ).toFixed(1) + '%';
-
-        // skip kalau terlalu kecil
-        if ((value / total) < 0.04) return;
-
-        const angle =
-          (arc.startAngle + arc.endAngle) / 2;
-
-        const radius =
-          arc.outerRadius * 0.72;
-
-        const x =
-          arc.x + Math.cos(angle) * radius;
-
-        const y =
-          arc.y + Math.sin(angle) * radius;
-
-        ctx.save();
-
-        ctx.fillStyle = '#ffffff';
-
-        ctx.font =
-          'bold 12px Plus Jakarta Sans';
-
-        ctx.textAlign = 'center';
-
-        ctx.textBaseline = 'middle';
-
-        ctx.shadowColor = 'rgba(0,0,0,0.25)';
-        ctx.shadowBlur = 4;
-
-        ctx.fillText(percent, x, y);
-
-        ctx.restore();
-
-      });
-
-    }
-
-  }]
-});
+  charts['catPie']=new Chart(document.getElementById('catPie'),{type:'doughnut',data:{labels:sc,datasets:[{data:pieData,backgroundColor:COLORS.map(c=>c+'dd'),borderColor:'#fff',borderWidth:2,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return `${ctx.label}: ${fmtN(v)} (${pct}%)`;}}}}},plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.04)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.72,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 11px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.25)';ctx.shadowBlur=4;ctx.fillText(((v/tot)*100).toFixed(1)+'%',x,y);ctx.restore();});}}]});
   killChart('catLine');
-  charts['catLine']=new Chart(document.getElementById('catLine'),{
-    type:'line',
-    data:{labels:sw.map(w=>'Wk '+w),datasets:sc.map((cat,i)=>({label:cat,data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}
-  });
+  charts['catLine']=new Chart(document.getElementById('catLine'),{type:'line',data:{labels:sw.map(w=>'Wk '+w),datasets:sc.map((cat,i)=>({label:cat,data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}});
 }
 function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCategory();}
 
@@ -741,10 +643,7 @@ async function init(){
     renderKPI();
   }catch(e){
     console.error(e);
-    ['kpiContent','mpContent','prodContent','catContent'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
-    });
+    ['kpiContent','mpContent','prodContent','catContent'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;});
   }
 }
 init();
