@@ -1,652 +1,1275 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCM Dashboard — Scarlett</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>SCM Offline Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-:root{
-  --bg:#f0eef8;--card:#fff;--border:#e2daf2;
-  --text:#1a0a2e;--text2:#6b5b8a;
-  --green:#1D9E75;--blue:#5b3fa8;--orange:#e6944a;--red:#e05b5b;--pink:#e879a0;
-  --sidebar:#1e0d3b;--sidebar-text:#b8a8d8;--accent:#e879a0;
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;}
+
+:root{
+
+--bg:#0B0911;
+--sidebar:#12101B;
+
+--card:#171320;
+--card2:#211C2D;
+
+--text:#FFFFFF;
+--muted:#8B90A7;
+
+--purple:#7C3AED;
+--purple2:#A855F7;
+
+--green:#22C55E;
+--red:#EF4444;
+
+--border:rgba(255,255,255,.06);
+
+}
+
+body{
+
+background:
+linear-gradient(
+180deg,
+#0B0911,
+#141020
+);
+
+font-family:'Plus Jakarta Sans',sans-serif;
+
+color:var(--text);
+
+display:flex;
+
+}
 
 /* SIDEBAR */
-.sidebar{width:210px;background:var(--sidebar);padding:18px 12px;flex-shrink:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;}
-.logo{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px;}
-.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#e879a0,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;box-shadow:0 4px 12px rgba(232,121,160,0.4);}
-.logo-name{font-size:13px;font-weight:700;color:#fff;}
-.logo-sub{font-size:10px;color:var(--sidebar-text);margin-top:1px;}
-.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.nav-section{font-size:9px;color:var(--sidebar-text);text-transform:uppercase;letter-spacing:0.1em;margin:14px 4px 6px;}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--sidebar-text);font-size:12.5px;font-weight:500;transition:all 0.15s;margin-bottom:2px;}
-.nav-item.active{background:rgba(232,121,160,0.18);color:var(--accent);font-weight:600;}
-.nav-item:hover:not(.active){background:rgba(255,255,255,0.06);color:#fff;}
-.nav-icon{font-size:15px;width:20px;text-align:center;}
-.sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);font-size:10px;color:var(--sidebar-text);text-align:center;line-height:1.7;}
+
+.sidebar{
+
+width:250px;
+
+height:100vh;
+
+position:fixed;
+
+left:0;
+top:0;
+
+background:var(--sidebar);
+
+border-right:1px solid var(--border);
+
+padding:28px 18px;
+
+overflow:auto;
+
+}
+
+.logo{
+
+margin-bottom:40px;
+
+}
+
+.logo h1{
+
+font-size:28px;
+
+font-weight:800;
+
+}
+
+.logo p{
+
+margin-top:6px;
+
+font-size:12px;
+
+color:var(--muted);
+
+}
+
+.nav{
+
+display:flex;
+
+flex-direction:column;
+
+gap:12px;
+
+}
+
+.nav button{
+
+border:none;
+
+background:transparent;
+
+padding:16px 18px;
+
+border-radius:18px;
+
+color:var(--muted);
+
+font-size:14px;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:.25s;
+
+text-align:left;
+
+}
+
+.nav button:hover{
+
+background:#1E1A2A;
+
+color:white;
+
+}
+
+.nav button.active{
+
+background:
+linear-gradient(
+135deg,
+var(--purple),
+var(--purple2)
+);
+
+color:white;
+
+}
 
 /* MAIN */
-.main{margin-left:210px;flex:1;padding:24px;min-width:0;}
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
-.page-title{font-size:20px;font-weight:800;color:var(--text);}
-.page-sub{font-size:12px;color:var(--text2);margin-top:2px;}
-.live-badge{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--text2);font-weight:500;white-space:nowrap;}
-.live-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;}
 
-/* FILTER BAR */
-.filter-bar{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.filter-bar-label{font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;margin-right:4px;}
-.filter-item{display:flex;align-items:center;gap:6px;}
-.filter-item label{font-size:11px;color:var(--text2);white-space:nowrap;font-weight:500;}
-.filter-select{font-size:11.5px;padding:5px 28px 5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b5b8a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;min-width:130px;}
-.filter-select:focus{border-color:var(--blue);}
-.filter-divider{width:1px;height:20px;background:var(--border);margin:0 2px;}
-.btn-reset{font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-weight:500;}
-.btn-reset:hover{border-color:var(--blue);color:var(--blue);}
+.main{
+
+margin-left:250px;
+
+width:100%;
+
+padding:30px;
+
+}
+
+/* TOPBAR */
+
+.topbar{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:28px;
+
+}
+
+.title h2{
+
+font-size:34px;
+
+font-weight:800;
+
+}
+
+.title p{
+
+margin-top:6px;
+
+font-size:13px;
+
+color:var(--muted);
+
+}
+
+select{
+
+background:#1F1A2B;
+
+border:none;
+
+padding:14px 18px;
+
+border-radius:14px;
+
+color:white;
+
+outline:none;
+
+font-weight:600;
+
+}
 
 /* PAGE */
-.page{display:none;}
-.page.active{display:block;}
 
-/* LOADING */
-.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--text2);}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
+.page{
+display:none;
+}
 
-/* KPI MATRIX */
-.kpi-matrix-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px;overflow-x:auto;}
-.kpi-matrix-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
-.kpi-matrix-title{font-size:13px;font-weight:700;color:var(--text);}
-.kpi-week-badge{display:inline-block;background:#f0eef8;color:var(--blue);font-size:11px;font-weight:600;padding:3px 10px;border-radius:8px;border:1px solid #ddd6f8;}
+.page.active{
+display:block;
+}
 
-.kpi-matrix-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;}
-.kpi-matrix-table th{padding:9px 12px;text-align:center;background:#f8f6ff;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;font-size:11px;white-space:nowrap;position:sticky;top:0;}
-.kpi-matrix-table th:first-child{text-align:left;background:#f0eef8;color:var(--blue);font-weight:700;min-width:160px;border-right:2px solid var(--border);}
-.kpi-matrix-table td{padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;font-variant-numeric:tabular-nums;}
-.kpi-matrix-table td:first-child{text-align:left;font-weight:600;background:#faf9ff;border-right:2px solid var(--border);color:var(--text);font-size:11.5px;}
-.kpi-matrix-table tr:last-child td{border-bottom:none;}
-.kpi-matrix-table tr:hover td{background:#f8f6ff;}
-.kpi-matrix-table tr:hover td:first-child{background:#f0eef8;}
+/* KPI */
 
-/* Row styles */
-.row-nilai td{font-weight:700;color:var(--text);font-size:13px;}
-.row-nilai td:first-child{color:var(--blue);}
-.row-pct-order td{color:#1D9E75;font-size:12px;}
-.row-pct-order td:first-child{color:var(--text);}
-.row-pct-qty td{color:var(--orange);font-size:12px;}
-.row-pct-qty td:first-child{color:var(--text);}
+.kpi-grid{
 
-/* highlight col */
-.col-order{background:#f0f7ff!important;color:var(--blue)!important;font-weight:700!important;}
-.col-qty{background:#f0fff8!important;color:#1D9E75!important;font-weight:700!important;}
+display:grid;
 
-/* SERVICE LEVEL CARDS */
-.sl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
-.sl-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;}
-.sl-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-.sl-card.good::before{background:var(--green);}
-.sl-card.warn::before{background:var(--orange);}
-.sl-card.bad::before{background:var(--red);}
-.sl-card.blue::before{background:var(--blue);}
-.sl-label{font-size:10px;color:var(--text2);font-weight:500;margin-bottom:4px;}
-.sl-value{font-size:18px;font-weight:800;color:var(--text);}
-.sl-sub{font-size:10px;color:var(--text2);margin-top:3px;}
+grid-template-columns:repeat(2,1fr);
 
-/* CHART */
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
-.chart-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
-.chart-sub{font-size:10.5px;color:var(--text2);margin-bottom:10px;}
-.chart-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
-.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
-.chart-wrap{position:relative;height:260px;}
-.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
-@media(max-width:900px){.chart-row{grid-template-columns:1fr;}}
+gap:24px;
 
-/* METRIC TABS */
-.metric-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
-.metric-tab{padding:4px 11px;border-radius:5px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.12s;}
-.metric-tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
-.metric-tab:hover:not(.active){border-color:var(--blue);color:var(--blue);}
+margin-bottom:24px;
+
+}
+
+.kpi{
+
+background:var(--card);
+
+border:1px solid var(--border);
+
+border-radius:30px;
+
+padding:28px;
+
+}
+
+.kpi-top{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:20px;
+
+}
+
+.kpi-title{
+
+font-size:20px;
+
+font-weight:700;
+
+}
+
+.badge{
+
+padding:8px 14px;
+
+border-radius:999px;
+
+font-size:12px;
+
+font-weight:700;
+
+color:white;
+
+}
+
+.mt{
+background:var(--purple);
+}
+
+.gt{
+background:var(--red);
+}
+
+.kpi-big{
+
+font-size:72px;
+
+font-weight:800;
+
+line-height:1;
+
+margin-bottom:24px;
+
+}
+
+.kpi-detail{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:14px;
+
+}
+
+.detail{
+
+background:var(--card2);
+
+padding:16px;
+
+border-radius:18px;
+
+}
+
+.detail small{
+
+font-size:11px;
+
+color:var(--muted);
+
+}
+
+.detail strong{
+
+display:block;
+
+margin-top:8px;
+
+font-size:22px;
+
+}
+
+/* GRID */
+
+.grid{
+
+display:grid;
+
+grid-template-columns:2fr 1fr;
+
+gap:24px;
+
+margin-bottom:24px;
+
+}
+
+/* CARD */
+
+.card{
+
+background:var(--card);
+
+border:1px solid var(--border);
+
+border-radius:30px;
+
+padding:28px;
+
+}
+
+.card-title{
+
+font-size:18px;
+
+font-weight:700;
+
+margin-bottom:22px;
+
+}
 
 /* TABLE */
-.table-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;overflow-x:auto;}
-.table-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
-.table-title{font-size:12.5px;font-weight:700;color:var(--text);}
-.table-meta{font-size:11px;color:var(--text2);}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-th{text-align:left;padding:7px 10px;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;font-size:11px;white-space:nowrap;}
-td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:#f8f6ff;}
-tr.highlighted td{background:#f0eef8!important;font-weight:600;}
-tr.highlighted td:first-child{border-left:3px solid var(--blue);}
-td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
-td.tot{text-align:right;font-weight:700;color:var(--blue);}
-.wk{display:inline-block;background:#f0eef8;color:var(--blue);font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid #ddd6f8;}
-.wk.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
-.error-state{background:#fff5f5;border:1px solid #fecdd3;border-radius:10px;padding:14px 18px;color:var(--red);font-size:12.5px;margin-bottom:14px;}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+}
+
+th{
+
+padding:14px;
+
+text-align:left;
+
+font-size:12px;
+
+color:var(--muted);
+
+border-bottom:1px solid var(--border);
+
+}
+
+td{
+
+padding:18px 14px;
+
+font-size:13px;
+
+border-bottom:1px solid rgba(255,255,255,.05);
+
+}
+
+/* SKU */
+
+.sku-grid{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:22px;
+
+}
+
+.sku-card{
+
+background:var(--card);
+
+border:1px solid var(--border);
+
+border-radius:26px;
+
+padding:24px;
+
+}
+
+.sku-name{
+
+font-size:15px;
+
+font-weight:700;
+
+line-height:1.5;
+
+margin-bottom:18px;
+
+}
+
+.sku-detail{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:14px;
+
+}
+
+.sku-box{
+
+background:var(--card2);
+
+padding:14px;
+
+border-radius:16px;
+
+}
+
+.sku-box small{
+
+font-size:11px;
+
+color:var(--muted);
+
+}
+
+.sku-box strong{
+
+display:block;
+
+margin-top:8px;
+
+font-size:18px;
+
+}
+
+.loss{
+color:var(--red);
+}
+
+.success{
+color:var(--green);
+}
+
+.cf{
+color:#A855F7;
+}
+
+canvas{
+max-height:320px;
+}
+
+@media(max-width:1200px){
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.sku-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+@media(max-width:900px){
+
+.sidebar{
+position:relative;
+width:100%;
+height:auto;
+}
+
+.main{
+margin-left:0;
+}
+
+.kpi-grid{
+grid-template-columns:1fr;
+}
+
+}
+
 </style>
+
 </head>
+
 <body>
 
-<aside class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">SC</div>
-    <div style="flex:1">
-      <div class="logo-name">Scarlett SCM</div>
-      <div class="logo-sub">Supply Chain Dashboard</div>
-    </div>
-    <div class="live-dot"></div>
-  </div>
-  <div class="nav-section">Menu</div>
-  <div class="nav-item active" onclick="showPage('kpi',this)"><span class="nav-icon">📊</span>KPI Weekly</div>
-  <div class="nav-item" onclick="showPage('marketplace',this)"><span class="nav-icon">🛒</span>Marketplace</div>
-  <div class="nav-item" onclick="showPage('product',this)"><span class="nav-icon">📦</span>Product Trend</div>
-  <div class="nav-item" onclick="showPage('category',this)"><span class="nav-icon">🏷️</span>Category</div>
-  <div class="sidebar-footer">
-    Last sync:<br><span id="lastSync">—</span><br>
-    <span style="color:#555;font-size:9px">Google Sheets Live CSV</span>
-  </div>
-</aside>
+<!-- SIDEBAR -->
 
-<main class="main">
+<div class="sidebar">
 
-  <!-- KPI -->
-  <div class="page active" id="page-kpi">
-    <div class="page-header">
-      <div><div class="page-title">📊 KPI Weekly</div><div class="page-sub">Ringkasan performa mingguan seluruh channel</div></div>
-      <div class="live-badge"><div class="dot"></div><span id="kpiStatus">Memuat...</span></div>
-    </div>
-    <div class="filter-bar">
-      <span class="filter-bar-label">🔽 Filter:</span>
-      <div class="filter-item">
-        <label>Week</label>
-        <select class="filter-select" id="kpiWeek" onchange="renderKPI()"><option value="all">Semua Week</option></select>
-      </div>
-      <div class="filter-divider"></div>
-      <button class="btn-reset" onclick="document.getElementById('kpiWeek').value='all';renderKPI()">↺ Reset</button>
-    </div>
-    <div id="kpiContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data KPI...</div></div></div>
-  </div>
+<div class="logo">
 
-  <!-- MARKETPLACE -->
-  <div class="page" id="page-marketplace">
-    <div class="page-header">
-      <div><div class="page-title">🛒 Marketplace Weekly</div><div class="page-sub">Performa per marketplace per minggu</div></div>
-      <div class="live-badge"><div class="dot"></div><span id="mpStatus">Memuat...</span></div>
-    </div>
-    <div class="filter-bar">
-      <span class="filter-bar-label">🔽 Filter:</span>
-      <div class="filter-item"><label>Week</label><select class="filter-select" id="mpWeek" onchange="renderMarketplace()"><option value="all">Semua Week</option></select></div>
-      <div class="filter-item"><label>Marketplace</label><select class="filter-select" id="mpMP" onchange="renderMarketplace()"><option value="all">Semua</option></select></div>
-      <div class="filter-divider"></div>
-      <button class="btn-reset" onclick="document.getElementById('mpWeek').value='all';document.getElementById('mpMP').value='all';renderMarketplace()">↺ Reset</button>
-    </div>
-    <div id="mpContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Marketplace...</div></div></div>
-  </div>
+<h1>SCM Dashboard</h1>
 
-  <!-- PRODUCT -->
-  <div class="page" id="page-product">
-    <div class="page-header">
-      <div><div class="page-title">📦 Product Trend</div><div class="page-sub">Tren produk per SKU per minggu</div></div>
-      <div class="live-badge"><div class="dot"></div><span id="prodStatus">Memuat...</span></div>
-    </div>
-    <div class="filter-bar">
-      <span class="filter-bar-label">🔽 Filter:</span>
-      <div class="filter-item"><label>Week</label><select class="filter-select" id="prodWeek" onchange="renderProduct()"><option value="all">Semua Week</option></select></div>
-      <div class="filter-item"><label>Marketplace</label><select class="filter-select" id="prodMP" onchange="renderProduct()"><option value="all">Semua</option></select></div>
-      <div class="filter-item"><label>Category</label><select class="filter-select" id="prodCat" onchange="renderProduct()"><option value="all">Semua</option></select></div>
-      <div class="filter-divider"></div>
-      <button class="btn-reset" onclick="document.getElementById('prodWeek').value='all';document.getElementById('prodMP').value='all';document.getElementById('prodCat').value='all';renderProduct()">↺ Reset</button>
-    </div>
-    <div id="prodContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Product...</div></div></div>
-  </div>
+<p>Executive Monitoring</p>
 
-  <!-- CATEGORY -->
-  <div class="page" id="page-category">
-    <div class="page-header">
-      <div><div class="page-title">🏷️ Category Weekly</div><div class="page-sub">Breakdown performa per kategori</div></div>
-      <div class="live-badge"><div class="dot"></div><span id="catStatus">Memuat...</span></div>
-    </div>
-    <div class="filter-bar">
-      <span class="filter-bar-label">🔽 Filter:</span>
-      <div class="filter-item"><label>Week</label><select class="filter-select" id="catWeek" onchange="renderCategory()"><option value="all">Semua Week</option></select></div>
-      <div class="filter-item"><label>Category</label><select class="filter-select" id="catCat" onchange="renderCategory()"><option value="all">Semua</option></select></div>
-      <div class="filter-divider"></div>
-      <button class="btn-reset" onclick="document.getElementById('catWeek').value='all';document.getElementById('catCat').value='all';renderCategory()">↺ Reset</button>
-    </div>
-    <div id="catContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Category...</div></div></div>
-  </div>
+</div>
 
-</main>
+<div class="nav">
+
+<button class="active"
+onclick="showPage('overview',this)">
+Overview
+</button>
+
+<button onclick="showPage('loss',this)">
+Trend SKU Loss
+</button>
+
+<button onclick="showPage('best',this)">
+Trend SKU Laku
+</button>
+
+</div>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+<div class="topbar">
+
+<div class="title">
+
+<h2>Supply Chain Dashboard</h2>
+
+<p>Realtime KPI Monitoring</p>
+
+</div>
+
+<select id="weekFilter"></select>
+
+</div>
+
+<!-- OVERVIEW -->
+
+<div class="page active"
+id="overviewPage">
+
+<div class="kpi-grid">
+
+<!-- MT -->
+
+<div class="kpi">
+
+<div class="kpi-top">
+
+<div class="kpi-title">
+Modern Trade
+</div>
+
+<div class="badge mt">
+MT
+</div>
+
+</div>
+
+<div class="kpi-big"
+id="mtCF">
+0%
+</div>
+
+<div class="kpi-detail">
+
+<div class="detail">
+<small>ORDER</small>
+<strong id="mtOrder">0</strong>
+</div>
+
+<div class="detail">
+<small>DELIVERY</small>
+<strong id="mtDelivery">0</strong>
+</div>
+
+<div class="detail">
+<small>GAP</small>
+<strong id="mtGap">0</strong>
+</div>
+
+<div class="detail">
+<small>CASE FILL</small>
+<strong id="mtCF2">0%</strong>
+</div>
+
+</div>
+
+</div>
+
+<!-- GT -->
+
+<div class="kpi">
+
+<div class="kpi-top">
+
+<div class="kpi-title">
+General Trade
+</div>
+
+<div class="badge gt">
+GT
+</div>
+
+</div>
+
+<div class="kpi-big"
+id="gtCF">
+0%
+</div>
+
+<div class="kpi-detail">
+
+<div class="detail">
+<small>ORDER</small>
+<strong id="gtOrder">0</strong>
+</div>
+
+<div class="detail">
+<small>DELIVERY</small>
+<strong id="gtDelivery">0</strong>
+</div>
+
+<div class="detail">
+<small>GAP</small>
+<strong id="gtGap">0</strong>
+</div>
+
+<div class="detail">
+<small>CASE FILL</small>
+<strong id="gtCF2">0%</strong>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- CHART -->
+
+<div class="grid">
+
+<div class="card">
+
+<div class="card-title">
+Channel Breakdown
+</div>
+
+<canvas id="barChart"></canvas>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Overall Case Fill
+</div>
+
+<canvas id="donutChart"></canvas>
+
+</div>
+
+</div>
+
+<!-- TABLE -->
+
+<div class="card">
+
+<div class="card-title">
+KPI Breakdown
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Breakdown</th>
+<th>Order</th>
+<th>Delivery</th>
+<th>Gap</th>
+<th>CF%</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tableBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- LOSS -->
+
+<div class="page"
+id="lossPage">
+
+<div class="sku-grid"
+id="lossContainer">
+</div>
+
+</div>
+
+<!-- BEST -->
+
+<div class="page"
+id="bestPage">
+
+<div class="sku-grid"
+id="bestContainer">
+</div>
+
+</div>
+
+</div>
 
 <script>
-const CSV_KPI  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1726885858&single=true&output=csv';
-const CSV_MP   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1508996446&single=true&output=csv';
-const CSV_PROD = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=747219576&single=true&output=csv';
-const CSV_CAT  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=971208042&single=true&output=csv';
 
-let D={kpi:[],mp:[],prod:[],cat:[]};
-let charts={};
-let mpMetric=null,prodMetric=null,catMetric=null;
-const COLORS=['#5b3fa8','#e879a0','#1D9E75','#e6944a','#e05b5b','#7c3aed','#0891b2','#ca8a04','#be185d','#15803d'];
+/* =========================
+CSV API
+========================= */
 
-// ─── UTILS ───────────────────────────────────────────────────────────────────
-const toN=v=>{if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));return isNaN(n)?0:n;};
-const fmtN=v=>{
-  if(v>=1e9)return 'Rp '+(v/1e9).toFixed(1)+'M';
-  if(v>=1e6)return 'Rp '+(v/1e6).toFixed(1)+'jt';
-  return Math.round(v).toLocaleString('id-ID');
-};
-const fmtPct=(v,decimals=2)=>v.toFixed(decimals)+'%';
-const fmt=(v,col='')=>{
-  if(/%/.test(col))return toN(v).toFixed(2)+'%';
-  return fmtN(toN(v));
-};
+const KPI_CHANNEL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vSzawLo-UIWO6rctA1PJGsrpEQyoFzkONyyhYOPknMXJHVlV24tVXX0LhNM6N8q1nmN-InEme4C3iGE/pub?gid=349702860&single=true&output=csv";
 
-function findCol(data,kws){
-  if(!data||!data.length)return null;
-  const cols=Object.keys(data[0]);
-  for(const kw of kws){
-    const f=cols.find(c=>c.toLowerCase().replace(/[\s_-]/g,'').includes(kw.toLowerCase().replace(/[\s_-]/g,'')));
-    if(f)return f;
-  }
-  return null;
+const KPI_BREAKDOWN =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vSzawLo-UIWO6rctA1PJGsrpEQyoFzkONyyhYOPknMXJHVlV24tVXX0LhNM6N8q1nmN-InEme4C3iGE/pub?gid=1343041753&single=true&output=csv";
+
+const TOP_LOSS_PRODUCT =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vSzawLo-UIWO6rctA1PJGsrpEQyoFzkONyyhYOPknMXJHVlV24tVXX0LhNM6N8q1nmN-InEme4C3iGE/pub?gid=1801155860&single=true&output=csv";
+
+/* GLOBAL */
+
+let channelData = [];
+let breakdownData = [];
+let lossData = [];
+
+let barChart;
+let donutChart;
+
+/* NUMBER FORMAT */
+
+function num(v){
+
+return parseFloat(
+String(v || 0)
+.replace(",", ".")
+) || 0;
+
 }
 
-function allCols(data){
-  if(!data||!data.length)return[];
-  return Object.keys(data[0]);
+function fmt(v){
+
+return num(v)
+.toLocaleString("id-ID");
+
 }
 
-function fetchCSV(url){
-  return new Promise((res,rej)=>{
-    Papa.parse(url,{download:true,header:true,skipEmptyLines:true,complete:r=>res(r.data),error:e=>rej(e)});
-  });
+/* CSV PARSER */
+
+function parseCSV(text){
+
+const lines =
+text.trim().split('\n');
+
+const headers =
+lines[0]
+.split(',')
+.map(h =>
+h.replace(/"/g,'').trim()
+);
+
+return lines.slice(1).map(line => {
+
+const values =
+line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+
+const obj = {};
+
+headers.forEach((header,index)=>{
+
+obj[header] =
+values && values[index]
+? values[index]
+.replace(/^"|"$/g,'')
+.trim()
+: '';
+
+});
+
+return obj;
+
+});
+
 }
 
-function fillSel(id,vals,label){
-  const el=document.getElementById(id);if(!el)return;
-  const prev=el.value;
-  el.innerHTML=`<option value="all">${label}</option>`;
-  vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);});
-  if(vals.map(String).includes(String(prev)))el.value=prev;
-}
-const gv=id=>{const e=document.getElementById(id);return e?e.value:'all';};
-function killChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+/* NAVIGATION */
 
-// ─── KPI PAGE ────────────────────────────────────────────────────────────────
-function renderKPI(){
-  const rows=D.kpi;
-  if(!rows.length){document.getElementById('kpiContent').innerHTML='<div class="error-state">Data KPI belum tersedia.</div>';return;}
+function showPage(page,btn){
 
-  const cols=allCols(rows);
-  const wkCol=findCol(rows,['week','minggu','wk'])||cols[0];
+document
+.querySelectorAll(".page")
+.forEach(p=>p.classList.remove("active"));
 
-  // Pisahkan qty dan persen
-  const pctCols=cols.filter(c=>/%/.test(c)&&c!==wkCol);
-  const qtyCols=cols.filter(c=>!/%/.test(c)&&c!==wkCol&&rows.some(r=>toN(r[c])!==0));
+document
+.querySelectorAll(".nav button")
+.forEach(b=>b.classList.remove("active"));
 
-  // Denominators
-  const orderCol=findCol(rows,['totalorder','order','pesanan'])||qtyCols.find(c=>/order/i.test(c))||qtyCols[0];
-  const qtyCol=findCol(rows,['totalqty','totalquantity'])||qtyCols.find(c=>/totalqty/i.test(c.replace(/[\s_-]/g,'')))||qtyCols[1]||qtyCols[0];
+btn.classList.add("active");
 
-  // Sub-metrics = semua qty kecuali Total Order & Total Qty
-  // Urutan: Delivered, Dispatched, Cancelled, Return, sisanya
-  const rawSub=qtyCols.filter(c=>c!==orderCol&&c!==qtyCol);
-  const subCols=[
-    ...rawSub.filter(c=>/deliv/i.test(c)),
-    ...rawSub.filter(c=>/dispatch/i.test(c)),
-    ...rawSub.filter(c=>/cancel/i.test(c)),
-    ...rawSub.filter(c=>/return|retur/i.test(c)),
-    ...rawSub.filter(c=>!/deliv|dispatch|cancel|return|retur/i.test(c))
-  ].filter((c,i,a)=>a.indexOf(c)===i);
+document.getElementById(page+"Page")
+.classList.add("active");
 
-  // Cari kolom order-level per sub-metric (misal "Order Dispatched", "Dispatched Order")
-  // Untuk Dispatched: cari kolom yang mengandung "dispatch" DAN "order" (bukan qty)
-  function findOrderSubCol(keyword){
-    return cols.find(c=>
-      c!==orderCol&&c!==qtyCol&&!/%/.test(c)&&
-      new RegExp(keyword,'i').test(c)&&
-      /order/i.test(c)
-    )||null;
-  }
-
-  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  fillSel('kpiWeek',allWeeks,'Semua Week');
-
-  const fWk=gv('kpiWeek');
-  const latestWk=allWeeks[allWeeks.length-1];
-  const cardWk=fWk==='all'?latestWk:fWk;
-  const cardRows=rows.filter(r=>String(r[wkCol])===String(cardWk));
-  const cardLabel=fWk==='all'?`Wk ${latestWk} (latest)`:`Wk ${cardWk}`;
-
-  const sum=col=>col?cardRows.reduce((s,r)=>s+toN(r[col]),0):0;
-  const totalOrder=sum(orderCol);
-  const totalQty=sum(qtyCol);
-
-  // ── KPI MATRIX — layout persis seperti screenshot ──────────────────────
-  // Header: [blank] | Total | Delivered | Dispatched | Cancelled | Return | ...
-  // Row 1: Total Order | totalOrder | — | [order count dispatch if exists] | — | — | ...
-  // Row 2: Total Qty   | totalQty   | qty per subCol
-  // Row 3: % of Total  | —          | subQty/totalQty %
-
-  let html=`<div class="kpi-matrix-card">
-    <div class="kpi-matrix-header">
-      <div class="kpi-matrix-title">📊 KPI Summary Matrix</div>
-      <span class="kpi-week-badge">📅 ${cardLabel}</span>
-    </div>
-    <table class="kpi-matrix-table">
-      <thead><tr>
-        <th style="min-width:120px"></th>
-        <th class="col-order">Total</th>`;
-
-  subCols.forEach(c=>html+=`<th>${c}</th>`);
-  html+=`</tr></thead><tbody>`;
-
-  // Row 1: Total Order
-  html+=`<tr class="row-nilai">
-    <td style="color:var(--blue);font-weight:700">📦 Total Order</td>
-    <td class="col-order">${fmtN(totalOrder)}</td>`;
-  subCols.forEach(c=>{
-    // Cek apakah ada kolom order-level untuk sub ini
-    const keyword=c.replace(/qty|quantity|jumlah/gi,'').trim().split(/\s+/)[0];
-    const orderSubCol=findOrderSubCol(keyword);
-    const v=orderSubCol?sum(orderSubCol):null;
-    if(v!==null&&v>0){
-      html+=`<td style="color:var(--blue);font-weight:600">${fmtN(v)}</td>`;
-    } else {
-      html+=`<td style="color:#ccc">—</td>`;
-    }
-  });
-  html+=`</tr>`;
-
-  // Row 2: Total Qty
-  html+=`<tr class="row-nilai">
-    <td style="color:var(--green);font-weight:700">📦 Total Qty</td>
-    <td class="col-qty">${fmtN(totalQty)}</td>`;
-  subCols.forEach(c=>{
-    html+=`<td style="font-weight:600">${fmtN(sum(c))}</td>`;
-  });
-  html+=`</tr>`;
-
-  // Row 3: % of Total (berdasarkan Total Qty)
-  html+=`<tr class="row-pct-qty">
-    <td style="color:var(--text2);font-weight:600">📊 % of Total</td>
-    <td style="color:#ccc">—</td>`;
-  subCols.forEach(c=>{
-    const pct=totalQty>0?(sum(c)/totalQty*100):0;
-    // Color coding: delivered hijau, cancelled/return merah, lainnya orange
-    const color=/deliv/i.test(c)?'var(--green)':/cancel|return/i.test(c)?'var(--red)':'var(--orange)';
-    html+=`<td style="color:${color};font-weight:600">${fmtPct(pct)}</td>`;
-  });
-  html+=`</tr></tbody></table></div>`;
-
-  // ── SERVICE LEVEL CARDS (kolom %) ────────────────────────────────────────
-  if(pctCols.length){
-    html+=`<div style="margin-bottom:6px;font-size:11px;font-weight:600;color:var(--text2);">📈 Service Level & Rate</div>`;
-    html+=`<div class="sl-grid">`;
-    pctCols.forEach(c=>{
-      const v=sum(c);
-      const pct=toN(v);
-      const cls=pct>=95?'good':pct>=85?'warn':'bad';
-      html+=`<div class="sl-card ${cls}">
-        <div class="sl-label">${c}</div>
-        <div class="sl-value">${fmtPct(pct)}</div>
-        <div class="sl-sub">${cardLabel}</div>
-      </div>`;
-    });
-    html+=`</div>`;
-  }
-
-  // ── TREND CHART ──────────────────────────────────────────────────────────
-  html+=`<div class="chart-card">
-    <div class="chart-title">📈 Trend Mingguan</div>
-    <div class="chart-sub">Bar = ${qtyCol} &nbsp;|&nbsp; Line = ${orderCol}</div>
-    <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>${qtyCol} (Bar, kiri)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>${orderCol} (Line, kanan)</div>
-      ${fWk!=='all'?`<div class="legend-item" style="color:var(--blue);font-weight:600">▶ Week ${fWk} disorot</div>`:''}
-    </div>
-    <div class="chart-wrap"><canvas id="kpiChart"></canvas></div>
-  </div>`;
-
-  // ── TABEL SEMUA WEEK ─────────────────────────────────────────────────────
-  html+=`<div class="table-card">
-    <div class="table-header">
-      <div class="table-title">📋 Semua Data per Week</div>
-      <div class="table-meta">${allWeeks.length} weeks · ${fWk!=='all'?`Wk ${fWk} disorot`:'semua ditampilkan'}</div>
-    </div>
-    <div style="overflow-x:auto">
-    <table><thead><tr><th>Week</th>`;
-  html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`; subCols.forEach(c=>html+=`<th style="text-align:right">${c}</th>`);
-  // Tambah kolom % of Total Qty per week
-  subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">% Qty: ${c}</th>`);
-  html+=`</tr></thead><tbody>`;
-
-  allWeeks.forEach(wk=>{
-    const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
-    const isSelected=fWk!=='all'&&String(wk)===String(fWk);
-    const wOrder=wRows.reduce((s,r)=>s+toN(r[orderCol]),0);
-    const wQty=wRows.reduce((s,r)=>s+toN(r[qtyCol]),0);
-    html+=`<tr class="${isSelected?'highlighted':''}">
-      <td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
-    [orderCol,qtyCol,...subCols].forEach(c=>{
-      const v=wRows.reduce((s,r)=>s+toN(r[c]),0);
-      html+=`<td class="num">${fmtN(v)}</td>`;
-    });
-    subCols.forEach(c=>{
-      const v=wRows.reduce((s,r)=>s+toN(r[c]),0);
-      const pct=wQty>0?(v/wQty*100):0;
-      html+=`<td class="num" style="color:var(--orange)">${fmtPct(pct)}</td>`;
-    });
-    html+=`</tr>`;
-  });
-  html+=`</tbody></table></div></div>`;
-
-  document.getElementById('kpiContent').innerHTML=html;
-  document.getElementById('kpiStatus').textContent=`${allWeeks.length} weeks · Wk ${latestWk} latest`;
-
-  // Draw trend chart
-  const qtyVals=allWeeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[qtyCol]),0));
-  const orderVals=allWeeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[orderCol]),0));
-  const barColors=allWeeks.map(wk=>fWk!=='all'&&String(wk)===String(fWk)?'#5b3fa8':'#5b3fa8aa');
-
-  killChart('kpiChart');
-  const ctx=document.getElementById('kpiChart');
-  if(!ctx)return;
-  charts['kpiChart']=new Chart(ctx,{
-    data:{
-      labels:allWeeks.map(w=>'Wk '+w),
-      datasets:[
-        {type:'bar',label:qtyCol,data:qtyVals,backgroundColor:barColors,borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:4,yAxisID:'yQty',order:2},
-        {type:'line',label:orderCol,data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.35,fill:false,yAxisID:'yOrder',order:1}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return ` ${ctx.dataset.label}: ${Math.round(v).toLocaleString('id-ID')}`;}}
-      }},
-      scales:{
-        yQty:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:qtyCol,color:'#5b3fa8',font:{size:10,weight:'600'}},ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},
-        yOrder:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:orderCol,color:'#e879a0',font:{size:10,weight:'600'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}
-      }
-    }
-  });
 }
 
-// ─── MARKETPLACE ─────────────────────────────────────────────────────────────
-function renderMarketplace(){
-  const rows=D.mp;
-  if(!rows.length){document.getElementById('mpContent').innerHTML='<div class="error-state">Data Marketplace belum tersedia.</div>';return;}
-  const wkCol=findCol(rows,['week','minggu','wk']);
-  const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
-  const metrics=allCols(rows).filter(c=>c!==wkCol&&c!==mpCol&&rows.some(r=>toN(r[c])!==0));
-  if(!mpMetric||!metrics.includes(mpMetric))mpMetric=metrics[0];
+/* LOAD DATA */
 
-  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  const allMPs=mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
-  fillSel('mpWeek',allWeeks,'Semua Week');
-  if(allMPs.length)fillSel('mpMP',allMPs,'Semua');
+async function loadData(){
 
-  const fWk=gv('mpWeek'),fMP=gv('mpMP');
-  let filtered=rows;
-  if(fWk!=='all')filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
-  if(fMP!=='all'&&mpCol)filtered=filtered.filter(r=>r[mpCol]===fMP);
+const [c1,c2,c3] = await Promise.all([
 
-  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
-  const sm=mpCol?[...new Set(filtered.map(r=>r[mpCol]).filter(Boolean))].sort():[];
+fetch(KPI_CHANNEL).then(r=>r.text()),
+fetch(KPI_BREAKDOWN).then(r=>r.text()),
+fetch(TOP_LOSS_PRODUCT).then(r=>r.text())
 
-  let html=`<div class="metric-tabs" id="mpTabs">`;
-  metrics.forEach(m=>html+=`<div class="metric-tab ${m===mpMetric?'active':''}" onclick="mpSwitch('${m}',this)">${m}</div>`);
-  html+='</div><div class="chart-row">';
-  html+=`<div class="chart-card"><div class="chart-title">🛒 Total per Marketplace</div><div class="chart-wrap"><canvas id="mpBar"></canvas></div></div>`;
-  html+=`<div class="chart-card"><div class="chart-title">📅 Trend Mingguan</div><div class="chart-wrap"><canvas id="mpLine"></canvas></div></div></div>`;
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Marketplace × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Marketplace</th>`;
-  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
-  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  sm.forEach(mp=>{
-    const tot=filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0);
-    html+=`<tr><td style="font-weight:600">${mp}</td>`;
-    sw.forEach(w=>{const v=filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0);html+=`<td class="num">${v>0?fmt(v,mpMetric):'—'}</td>`;});
-    html+=`<td class="tot">${fmt(tot,mpMetric)}</td></tr>`;
-  });
-  html+='</tbody></table></div></div>';
-  document.getElementById('mpContent').innerHTML=html;
-  document.getElementById('mpStatus').textContent=`${sm.length} marketplace · ${sw.length} weeks`;
+]);
 
-  killChart('mpBar');
-  charts['mpBar']=new Chart(document.getElementById('mpBar'),{type:'bar',data:{labels:sm,datasets:[{data:sm.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0)),backgroundColor:COLORS.slice(0,sm.length).map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmt(v,mpMetric)}}}}});
-  killChart('mpLine');
-  charts['mpLine']=new Chart(document.getElementById('mpLine'),{type:'line',data:{labels:sw.map(w=>'Wk '+w),datasets:sm.map((mp,i)=>({label:mp,data:sw.map(w=>filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}});
-}
-function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderMarketplace();}
+channelData = parseCSV(c1);
+breakdownData = parseCSV(c2);
+lossData = parseCSV(c3);
 
-// ─── PRODUCT ─────────────────────────────────────────────────────────────────
-function renderProduct(){
-  const rows=D.prod;
-  if(!rows.length){document.getElementById('prodContent').innerHTML='<div class="error-state">Data Product belum tersedia.</div>';return;}
-  const wkCol=findCol(rows,['week','minggu','wk']);
-  const skuCol=findCol(rows,['sku','product','produk','name','nama','item','barang','kode']);
-  const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
-  const catCol=findCol(rows,['category','kategori','cat']);
-  const metrics=allCols(rows).filter(c=>c!==wkCol&&c!==skuCol&&c!==mpCol&&c!==catCol&&rows.some(r=>toN(r[c])!==0));
-  if(!prodMetric||!metrics.includes(prodMetric))prodMetric=metrics[0];
+setupWeek();
 
-  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  const allMPs=mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
-  const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
-  fillSel('prodWeek',allWeeks,'Semua Week');
-  if(allMPs.length)fillSel('prodMP',allMPs,'Semua');
-  if(allCats.length)fillSel('prodCat',allCats,'Semua');
-
-  const fWk=gv('prodWeek'),fMP=gv('prodMP'),fCat=gv('prodCat');
-  let filtered=rows;
-  if(fWk!=='all')filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
-  if(fMP!=='all'&&mpCol)filtered=filtered.filter(r=>r[mpCol]===fMP);
-  if(fCat!=='all'&&catCol)filtered=filtered.filter(r=>r[catCol]===fCat);
-
-  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
-  const skuMap={};
-  filtered.forEach(r=>{const k=r[skuCol]||'(unknown)';if(!skuMap[k])skuMap[k]={sku:k,weeks:{},total:0};const v=toN(r[prodMetric]),wk=String(r[wkCol]);skuMap[k].weeks[wk]=(skuMap[k].weeks[wk]||0)+v;skuMap[k].total+=v;});
-  const skus=Object.values(skuMap).sort((a,b)=>b.total-a.total);
-
-  let html=`<div class="metric-tabs" id="prodTabs">`;
-  metrics.forEach(m=>html+=`<div class="metric-tab ${m===prodMetric?'active':''}" onclick="prodSwitch('${m}',this)">${m}</div>`);
-  html+='</div>';
-  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 10 SKU — ${prodMetric}</div><div class="chart-wrap"><canvas id="prodBar"></canvas></div></div>`;
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
-  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
-  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  skus.forEach(s=>{html+=`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmtN(v):'—'}</td>`;});html+=`<td class="tot">${fmtN(s.total)}</td></tr>`;});
-  html+='</tbody></table></div></div>';
-  document.getElementById('prodContent').innerHTML=html;
-  document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
-  killChart('prodBar');
-  const top10=skus.slice(0,10);
-  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:COLORS.map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtN(v)}}}}});
-}
-function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
-
-// ─── CATEGORY ────────────────────────────────────────────────────────────────
-function renderCategory(){
-  const rows=D.cat;
-  if(!rows.length){document.getElementById('catContent').innerHTML='<div class="error-state">Data Category belum tersedia.</div>';return;}
-  const wkCol=findCol(rows,['week','minggu','wk']);
-  const catCol=findCol(rows,['category','kategori','cat']);
-  const metrics=allCols(rows).filter(c=>c!==wkCol&&c!==catCol&&rows.some(r=>toN(r[c])!==0));
-  if(!catMetric||!metrics.includes(catMetric))catMetric=metrics[0];
-
-  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  const allCatVals=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
-  fillSel('catWeek',allWeeks,'Semua Week');
-  if(allCatVals.length)fillSel('catCat',allCatVals,'Semua');
-
-  const fWk=gv('catWeek'),fCat=gv('catCat');
-  let filtered=rows;
-  if(fWk!=='all')filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
-  if(fCat!=='all'&&catCol)filtered=filtered.filter(r=>r[catCol]===fCat);
-
-  const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
-  const sc=catCol?[...new Set(filtered.map(r=>r[catCol]).filter(Boolean))].sort():[];
-
-  let html=`<div class="metric-tabs" id="catTabs">`;
-  metrics.forEach(m=>html+=`<div class="metric-tab ${m===catMetric?'active':''}" onclick="catSwitch('${m}',this)">${m}</div>`);
-  html+='</div><div class="chart-row">';
-  html+=`<div class="chart-card"><div class="chart-title">🏷️ Komposisi per Category</div><div class="chart-wrap"><canvas id="catPie"></canvas></div></div>`;
-  html+=`<div class="chart-card"><div class="chart-title">📅 Trend per Category</div><div class="chart-wrap"><canvas id="catLine"></canvas></div></div></div>`;
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Category × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Category</th>`;
-  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
-  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  sc.forEach(cat=>{const tot=filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<tr><td style="font-weight:600">${cat}</td>`;sw.forEach(w=>{const v=filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0);html+=`<td class="num">${v>0?fmt(v,catMetric):'—'}</td>`;});html+=`<td class="tot">${fmt(tot,catMetric)}</td></tr>`;});
-  html+='</tbody></table></div></div>';
-  document.getElementById('catContent').innerHTML=html;
-  document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
-
-  const pieData=sc.map(cat=>filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0));
-  killChart('catPie');
-  charts['catPie']=new Chart(document.getElementById('catPie'),{type:'doughnut',data:{labels:sc,datasets:[{data:pieData,backgroundColor:COLORS.map(c=>c+'dd'),borderColor:'#fff',borderWidth:2,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return `${ctx.label}: ${fmtN(v)} (${pct}%)`;}}}}},plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.04)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.72,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 11px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.25)';ctx.shadowBlur=4;ctx.fillText(((v/tot)*100).toFixed(1)+'%',x,y);ctx.restore();});}}]});
-  killChart('catLine');
-  charts['catLine']=new Chart(document.getElementById('catLine'),{type:'line',data:{labels:sw.map(w=>'Wk '+w),datasets:sc.map((cat,i)=>({label:cat,data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true}}}});
-}
-function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCategory();}
-
-// ─── NAV ─────────────────────────────────────────────────────────────────────
-function showPage(p,el){
-  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
-  el.classList.add('active');
-  if(p==='kpi')renderKPI();
-  else if(p==='marketplace')renderMarketplace();
-  else if(p==='product')renderProduct();
-  else if(p==='category')renderCategory();
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-async function init(){
-  try{
-    const [kpi,mp,prod,cat]=await Promise.all([fetchCSV(CSV_KPI),fetchCSV(CSV_MP),fetchCSV(CSV_PROD),fetchCSV(CSV_CAT)]);
-    D.kpi=kpi;D.mp=mp;D.prod=prod;D.cat=cat;
-    document.getElementById('lastSync').textContent=new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-    renderKPI();
-  }catch(e){
-    console.error(e);
-    ['kpiContent','mpContent','prodContent','catContent'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;});
-  }
+/* WEEK FILTER */
+
+function setupWeek(){
+
+const weeks =
+[...new Set(
+breakdownData.map(d=>d.Week)
+)];
+
+const select =
+document.getElementById("weekFilter");
+
+select.innerHTML =
+weeks.map(w=>
+`<option value="${w}">${w}</option>`
+).join('');
+
+render(weeks[0]);
+
+select.addEventListener(
+"change",
+()=>render(select.value)
+);
+
 }
-init();
+
+/* RENDER */
+
+function render(week){
+
+const channels =
+channelData.filter(
+d=>d.Week === week
+);
+
+const breakdown =
+breakdownData.filter(
+d=>d.Week === week
+);
+
+const losses =
+lossData.filter(
+d=>d.Week === week
+);
+
+const mt =
+channels.find(d=>
+(d.Channel || '').includes("MT")
+);
+
+const gt =
+channels.find(d=>
+(d.Channel || '').includes("GT")
+);
+
+/* MT */
+
+if(mt){
+
+mtOrder.innerHTML =
+fmt(mt["Order Quantity"]);
+
+mtDelivery.innerHTML =
+fmt(mt["Delivery Quantity"]);
+
+mtGap.innerHTML =
+fmt(mt["GAP"]);
+
+mtCF.innerHTML =
+num(mt["Case Fill"]).toFixed(2)+"%";
+
+mtCF2.innerHTML =
+num(mt["Case Fill"]).toFixed(2)+"%";
+
+}
+
+/* GT */
+
+if(gt){
+
+gtOrder.innerHTML =
+fmt(gt["Order Quantity"]);
+
+gtDelivery.innerHTML =
+fmt(gt["Delivery Quantity"]);
+
+gtGap.innerHTML =
+fmt(gt["GAP"]);
+
+gtCF.innerHTML =
+num(gt["Case Fill"]).toFixed(2)+"%";
+
+gtCF2.innerHTML =
+num(gt["Case Fill"]).toFixed(2)+"%";
+
+}
+
+/* TABLE */
+
+tableBody.innerHTML =
+breakdown.map(d=>`
+
+<tr>
+
+<td>${d["Channel"] || '-'}</td>
+
+<td>${fmt(d["Order Quantity"])}</td>
+
+<td>${fmt(d["Delivery Quantity"])}</td>
+
+<td>${fmt(d["GAP"])}</td>
+
+<td>
+${num(d["Case Fill"]).toFixed(2)}%
+</td>
+
+</tr>
+
+`).join('');
+
+/* LOSS */
+
+lossContainer.innerHTML =
+losses
+
+.filter(d =>
+num(d["GAP"]) < 0
+)
+
+.sort((a,b)=>
+num(a["GAP"])
+-
+num(b["GAP"])
+)
+
+.slice(0,12)
+
+.map(d=>`
+
+<div class="sku-card">
+
+<div class="sku-name">
+${d["Product Name"] || '-'}
+</div>
+
+<div class="sku-detail">
+
+<div class="sku-box">
+<small>ORDER</small>
+<strong>
+${fmt(d["Order Quantity"])}
+</strong>
+</div>
+
+<div class="sku-box">
+<small>DELIVERY</small>
+<strong>
+${fmt(d["Delivery Quantity"])}
+</strong>
+</div>
+
+<div class="sku-box">
+<small>GAP</small>
+<strong class="loss">
+${fmt(d["GAP"])}
+</strong>
+</div>
+
+<div class="sku-box">
+<small>CASE FILL</small>
+<strong class="cf">
+${num(d["Case Fill"]).toFixed(1)}%
+</strong>
+</div>
+
+</div>
+
+</div>
+
+`).join('');
+
+/* BEST */
+
+bestContainer.innerHTML =
+losses
+
+.sort((a,b)=>
+num(b["Delivery Quantity"])
+-
+num(a["Delivery Quantity"])
+)
+
+.slice(0,12)
+
+.map(d=>`
+
+<div class="sku-card">
+
+<div class="sku-name">
+${d["Product Name"] || '-'}
+</div>
+
+<div class="sku-detail">
+
+<div class="sku-box">
+<small>ORDER</small>
+<strong>
+${fmt(d["Order Quantity"])}
+</strong>
+</div>
+
+<div class="sku-box">
+<small>DELIVERY</small>
+<strong class="success">
+${fmt(d["Delivery Quantity"])}
+</strong>
+</div>
+
+<div class="sku-box">
+<small>GAP</small>
+<strong>
+${fmt(d["GAP"])}
+</strong>
+</div>
+
+<div class="sku-box">
+<small>CASE FILL</small>
+<strong class="cf">
+${num(d["Case Fill"]).toFixed(1)}%
+</strong>
+</div>
+
+</div>
+
+</div>
+
+`).join('');
+
+buildCharts(breakdown);
+
+}
+
+/* CHART */
+
+function buildCharts(data){
+
+if(barChart) barChart.destroy();
+if(donutChart) donutChart.destroy();
+
+barChart =
+new Chart(
+
+document.getElementById("barChart"),
+
+{
+
+type:"bar",
+
+data:{
+
+labels:
+data.map(d=>
+d["Channel"]
+),
+
+datasets:[{
+
+data:
+data.map(d=>
+num(d["Case Fill"])
+),
+
+borderRadius:14,
+
+backgroundColor:[
+"#EF4444",
+"#7C3AED"
+]
+
+}]
+
+},
+
+options:{
+
+plugins:{
+legend:{
+display:false
+}
+},
+
+scales:{
+
+y:{
+
+min:0,
+max:110,
+
+ticks:{
+callback:v=>v+"%"
+}
+
+}
+
+}
+
+}
+
+}
+
+);
+
+const avg =
+data.length
+? data.reduce((a,b)=>
+a + num(b["Case Fill"])
+,0) / data.length
+: 0;
+
+donutChart =
+new Chart(
+
+document.getElementById("donutChart"),
+
+{
+
+type:"doughnut",
+
+data:{
+
+labels:["Delivered","Gap"],
+
+datasets:[{
+
+data:[
+avg,
+100-avg
+],
+
+backgroundColor:[
+"#7C3AED",
+"#EF4444"
+]
+
+}]
+
+},
+
+options:{
+
+cutout:"76%",
+
+plugins:{
+legend:{
+display:false
+}
+}
+
+}
+
+}
+
+);
+
+}
+
+loadData();
+
 </script>
+
 </body>
 </html>
