@@ -412,10 +412,10 @@ function renderKPI(){
   const ctx=document.getElementById('kpiChart');if(!ctx)return;
   charts['kpiChart']=new Chart(ctx,{data:{labels:allWeeks.map(w=>'Wk '+w),datasets:[
     {type:'bar',label:qtyCol,data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:4,yAxisID:'yQty',order:2,
-      datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
+      datalabels:{anchor:'end',align:'top',offset:8,clamp:true,color:'#5b3fa8',font:{weight:'700',size:10},padding:{top:4,bottom:2},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
     {type:'line',label:orderCol,data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.35,fill:false,yAxisID:'yOrder',order:1,
-      datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},
+      datalabels:{anchor:'end',align:'top',offset:12,clamp:true,color:'#e879a0',font:{weight:'700',size:10},padding:{top:6,bottom:2},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
     tooltip:{callbacks:{label:c=>{return ` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},
     datalabels:{}},
   scales:{yQty:{type:'linear',position:'left',beginAtZero:true,ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},yOrder:{type:'linear',position:'right',beginAtZero:true,ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
@@ -658,14 +658,14 @@ function renderDaily(){
   charts['dailyQtyChart']=new Chart(document.getElementById('dailyQtyChart'),{
     data:{labels,datasets:[
       {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1,borderRadius:3,yAxisID:'yQty',order:2,
-        datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:9},
+        datalabels:{anchor:'end',align:'top',offset:8,clamp:true,color:'#5b3fa8',font:{weight:'700',size:9},padding:{top:4,bottom:2},
           formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
       {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e879a0',tension:0.3,fill:false,yAxisID:'yOrder',order:1,
-        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:9},
+        datalabels:{anchor:'end',align:'top',offset:12,clamp:true,color:'#e879a0',font:{weight:'700',size:9},padding:{top:6,bottom:2},
           formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},
+      layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},
         datalabels:{}},
       scales:{
@@ -683,11 +683,11 @@ function renderDaily(){
       label:'Service Level %',data:slVals,
       borderColor:'#1D9E75',backgroundColor:'#1D9E7520',borderWidth:2.5,
       pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:true,
-      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:9},
+      datalabels:{anchor:'end',align:'top',offset:10,clamp:true,color:'#1D9E75',font:{weight:'700',size:9},padding:{top:5,bottom:2},
         formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
     }]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
+      layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
         datalabels:{}},
       scales:{
@@ -876,7 +876,7 @@ function renderMonthly(){
           formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},
+      layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},
         datalabels:{}},
       scales:{
@@ -890,11 +890,11 @@ function renderMonthly(){
   charts['monthlySLChart']=new Chart(document.getElementById('monthlySLChart'),{
     type:'line',
     data:{labels,datasets:[{label:'SL%',data:slVals,borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:true,
-      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:11},
+      datalabels:{anchor:'end',align:'top',offset:12,clamp:true,color:'#1D9E75',font:{weight:'700',size:11},padding:{top:6,bottom:2},
         formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
     }]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
+      layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
         datalabels:{}},
       scales:{y:{beginAtZero:false,min:50,max:100,ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}}
