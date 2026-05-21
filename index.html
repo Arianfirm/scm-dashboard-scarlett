@@ -6,6 +6,8 @@
 <title>SCM Dashboard — Scarlett</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
@@ -273,6 +275,18 @@ td.sl-bad{color:var(--red);font-weight:700;}
 </main>
 
 <script>
+// Register datalabels plugin
+Chart.register(ChartDataLabels);
+
+// Helper format label ringkas untuk chart
+const fmtLabel=v=>{
+  if(!v||v===0)return "";
+  if(v>=1e6)return (v/1e6).toFixed(1)+"jt";
+  if(v>=1e3)return (v/1e3).toFixed(0)+"rb";
+  return Math.round(v).toLocaleString("id-ID");
+};
+const fmtLabelPct=v=>v>0?v.toFixed(1)+"%":"";
+
 // ─── CSV URLS ────────────────────────────────────────────────────────────────
 const CSV_KPI     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1726885858&single=true&output=csv';
 const CSV_MP      = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1508996446&single=true&output=csv';
@@ -397,10 +411,14 @@ function renderKPI(){
   killChart('kpiChart');
   const ctx=document.getElementById('kpiChart');if(!ctx)return;
   charts['kpiChart']=new Chart(ctx,{data:{labels:allWeeks.map(w=>'Wk '+w),datasets:[
-    {type:'bar',label:qtyCol,data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:4,yAxisID:'yQty',order:2},
-    {type:'line',label:orderCol,data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.35,fill:false,yAxisID:'yOrder',order:1}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{return ` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`;
-  }}}},scales:{yQty:{type:'linear',position:'left',beginAtZero:true,ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},yOrder:{type:'linear',position:'right',beginAtZero:true,ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
+    {type:'bar',label:qtyCol,data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:4,yAxisID:'yQty',order:2,
+      datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'line',label:orderCol,data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.35,fill:false,yAxisID:'yOrder',order:1,
+      datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>{return ` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},
+    datalabels:{}},
+  scales:{yQty:{type:'linear',position:'left',beginAtZero:true,ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},yOrder:{type:'linear',position:'right',beginAtZero:true,ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
 }
 
 // ─── MARKETPLACE ─────────────────────────────────────────────────────────────
@@ -639,11 +657,17 @@ function renderDaily(){
   killChart('dailyQtyChart');
   charts['dailyQtyChart']=new Chart(document.getElementById('dailyQtyChart'),{
     data:{labels,datasets:[
-      {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1,borderRadius:3,yAxisID:'yQty',order:2},
-      {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2,pointRadius:3,pointBackgroundColor:'#e879a0',tension:0.3,fill:false,yAxisID:'yOrder',order:1}
+      {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1,borderRadius:3,yAxisID:'yQty',order:2,
+        datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:9},
+          formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e879a0',tension:0.3,fill:false,yAxisID:'yOrder',order:1,
+        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:9},
+          formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},
+        datalabels:{}},
       scales:{
         yQty:{type:'linear',position:'left',beginAtZero:true,ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},
         yOrder:{type:'linear',position:'right',beginAtZero:true,ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}},
@@ -658,10 +682,14 @@ function renderDaily(){
     data:{labels,datasets:[{
       label:'Service Level %',data:slVals,
       borderColor:'#1D9E75',backgroundColor:'#1D9E7520',borderWidth:2.5,
-      pointRadius:3,pointBackgroundColor:'#1D9E75',tension:0.3,fill:true
+      pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:true,
+      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:9},
+        formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
     }]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}}},
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
+        datalabels:{}},
       scales:{
         y:{beginAtZero:false,min:50,max:100,ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}},
         x:{ticks:{maxRotation:45,font:{size:9}}}
@@ -840,11 +868,17 @@ function renderMonthly(){
   killChart('monthlyQtyChart');
   charts['monthlyQtyChart']=new Chart(document.getElementById('monthlyQtyChart'),{
     data:{labels,datasets:[
-      {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:5,yAxisID:'yQty',order:2},
-      {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrder',order:1}
+      {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:5,yAxisID:'yQty',order:2,
+        datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},
+          formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrder',order:1,
+        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},
+          formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},
+        datalabels:{}},
       scales:{
         yQty:{type:'linear',position:'left',beginAtZero:true,ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},
         yOrder:{type:'linear',position:'right',beginAtZero:true,ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}
@@ -855,9 +889,14 @@ function renderMonthly(){
   killChart('monthlySLChart');
   charts['monthlySLChart']=new Chart(document.getElementById('monthlySLChart'),{
     type:'line',
-    data:{labels,datasets:[{label:'SL%',data:slVals,borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:true}]},
+    data:{labels,datasets:[{label:'SL%',data:slVals,borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:true,
+      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:11},
+        formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
+    }]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}}},
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
+        datalabels:{}},
       scales:{y:{beginAtZero:false,min:50,max:100,ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}}
     }
   });
