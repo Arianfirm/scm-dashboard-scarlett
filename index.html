@@ -7,7 +7,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
@@ -143,6 +142,17 @@ td.sl-bad{color:var(--red);font-weight:700;}
 .wk{display:inline-block;background:#f0eef8;color:var(--blue);font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid #ddd6f8;}
 .wk.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
 .error-state{background:#fff5f5;border:1px solid #fecdd3;border-radius:10px;padding:14px 18px;color:var(--red);font-size:12.5px;margin-bottom:14px;}
+
+/* COD BREAKDOWN */
+.cod-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.cod-badge.cod{background:#fff3e0;color:#e6944a;border:1px solid #f9c96a;}
+.cod-badge.ncod{background:#e8f5e9;color:#1D9E75;border:1px solid #a5d6a7;}
+.cod-split{display:flex;gap:6px;justify-content:center;align-items:center;}
+.trend-selector{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.trend-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.12s;}
+.trend-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.trend-btn:hover:not(.active){border-color:var(--blue);color:var(--blue);}
+.chart-wrap.xtall{height:380px;}
 </style>
 </head>
 <body>
@@ -166,6 +176,7 @@ td.sl-bad{color:var(--red);font-weight:700;}
   <div class="nav-section">Trend</div>
   <div class="nav-item" onclick="showPage('daily',this)"><span class="nav-icon">📅</span>Daily Trend</div>
   <div class="nav-item" onclick="showPage('monthly',this)"><span class="nav-icon">📆</span>Monthly Trend</div>
+  <div class="nav-item" onclick="showPage('cod',this)"><span class="nav-icon">💳</span>COD vs Non-COD</div>
 
   <div class="sidebar-footer">
     Last sync:<br><span id="lastSync">—</span><br>
@@ -272,6 +283,23 @@ td.sl-bad{color:var(--red);font-weight:700;}
     <div id="monthlyContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Monthly...</div></div></div>
   </div>
 
+
+  <!-- COD TREND -->
+  <div class="page" id="page-cod">
+    <div class="page-header">
+      <div><div class="page-title">💳 COD vs Non-COD Trend</div><div class="page-sub">Breakdown Return & Cancel berdasarkan metode pembayaran</div></div>
+      <div class="live-badge"><div class="dot"></div><span id="codStatus">Memuat...</span></div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-bar-label">🔽 Filter:</span>
+      <div class="filter-item"><label>Marketplace</label><select class="filter-select" id="codMP" onchange="renderCOD()"><option value="all">Semua</option></select></div>
+      <div class="filter-item"><label>Week</label><select class="filter-select" id="codWeek" onchange="renderCOD()"><option value="all">Semua Week</option></select></div>
+      <div class="filter-divider"></div>
+      <button class="btn-reset" onclick="document.getElementById('codMP').value='all';document.getElementById('codWeek').value='all';renderCOD()">↺ Reset</button>
+    </div>
+    <div id="codContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data COD...</div></div></div>
+  </div>
+
 </main>
 
 <script>
@@ -294,8 +322,9 @@ const CSV_PROD    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschN
 const CSV_CAT     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=971208042&single=true&output=csv';
 const CSV_DAILY   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=2067098956&single=true&output=csv';
 const CSV_MONTHLY = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=2093562578&single=true&output=csv';
+const CSV_COD     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=YOUR_COD_GID&single=true&output=csv';
 
-let D={kpi:[],mp:[],prod:[],cat:[],daily:[],monthly:[]};
+let D={kpi:[],mp:[],prod:[],cat:[],daily:[],monthly:[],cod:[]};
 let charts={};
 let mpMetric=null,prodMetric=null,catMetric=null;
 const COLORS=['#5b3fa8','#e879a0','#1D9E75','#e6944a','#e05b5b','#7c3aed','#0891b2','#ca8a04','#be185d','#15803d'];
@@ -412,10 +441,10 @@ function renderKPI(){
   const ctx=document.getElementById('kpiChart');if(!ctx)return;
   charts['kpiChart']=new Chart(ctx,{data:{labels:allWeeks.map(w=>'Wk '+w),datasets:[
     {type:'bar',label:qtyCol,data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:4,yAxisID:'yQty',order:2,
-      datalabels:{anchor:'end',align:'top',offset:8,clamp:true,color:'#5b3fa8',font:{weight:'700',size:10},padding:{top:4,bottom:2},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
+      datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
     {type:'line',label:orderCol,data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.35,fill:false,yAxisID:'yOrder',order:1,
-      datalabels:{anchor:'end',align:'top',offset:12,clamp:true,color:'#e879a0',font:{weight:'700',size:10},padding:{top:6,bottom:2},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
+      datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},
     tooltip:{callbacks:{label:c=>{return ` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},
     datalabels:{}},
   scales:{yQty:{type:'linear',position:'left',beginAtZero:true,ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},yOrder:{type:'linear',position:'right',beginAtZero:true,ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
@@ -658,14 +687,14 @@ function renderDaily(){
   charts['dailyQtyChart']=new Chart(document.getElementById('dailyQtyChart'),{
     data:{labels,datasets:[
       {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1,borderRadius:3,yAxisID:'yQty',order:2,
-        datalabels:{anchor:'end',align:'top',offset:8,clamp:true,color:'#5b3fa8',font:{weight:'700',size:9},padding:{top:4,bottom:2},
+        datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:9},
           formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
       {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e879a0',tension:0.3,fill:false,yAxisID:'yOrder',order:1,
-        datalabels:{anchor:'end',align:'top',offset:12,clamp:true,color:'#e879a0',font:{weight:'700',size:9},padding:{top:6,bottom:2},
+        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:9},
           formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
+      plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},
         datalabels:{}},
       scales:{
@@ -683,11 +712,11 @@ function renderDaily(){
       label:'Service Level %',data:slVals,
       borderColor:'#1D9E75',backgroundColor:'#1D9E7520',borderWidth:2.5,
       pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:true,
-      datalabels:{anchor:'end',align:'top',offset:10,clamp:true,color:'#1D9E75',font:{weight:'700',size:9},padding:{top:5,bottom:2},
+      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:9},
         formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
     }]},
     options:{responsive:true,maintainAspectRatio:false,
-      layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
+      plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
         datalabels:{}},
       scales:{
@@ -876,7 +905,7 @@ function renderMonthly(){
           formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
+      plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},
         datalabels:{}},
       scales:{
@@ -890,11 +919,11 @@ function renderMonthly(){
   charts['monthlySLChart']=new Chart(document.getElementById('monthlySLChart'),{
     type:'line',
     data:{labels,datasets:[{label:'SL%',data:slVals,borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:true,
-      datalabels:{anchor:'end',align:'top',offset:12,clamp:true,color:'#1D9E75',font:{weight:'700',size:11},padding:{top:6,bottom:2},
+      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:11},
         formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
     }]},
     options:{responsive:true,maintainAspectRatio:false,
-      layout:{padding:{top:28,right:18,left:10,bottom:8}},plugins:{legend:{display:false},
+      plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
         datalabels:{}},
       scales:{y:{beginAtZero:false,min:50,max:100,ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}}
@@ -925,6 +954,263 @@ function renderMonthly(){
   }
 }
 
+
+// ─── COD vs NON-COD TREND ────────────────────────────────────────────────────
+let codTrendView = 'weekly'; // weekly | daily (via KPI_Weekly / Daily_Trend)
+
+function renderCOD(){
+  const rows = D.cod;
+  if(!rows.length){
+    document.getElementById('codContent').innerHTML='<div class="error-state">Data COD Trend belum tersedia. Pastikan tab COD_Trend sudah di-publish di Google Sheets.</div>';
+    return;
+  }
+
+  const wkCol  = findCol(rows,['week','minggu','wk']);
+  const mpCol  = findCol(rows,['marketplace','platform','mp']);
+  const payCol = findCol(rows,['paytype','pay type','payment','pay']);
+  const ordCol = findCol(rows,['totalorder','order']);
+  const qtyCol = findCol(rows,['totalqty','qty']);
+  const retCol = findCol(rows,['qtyreturn','return']);
+  const canCol = findCol(rows,['qtycancelled','cancelled']);
+  const retRCol= findCol(rows,['returnrate','return rate','return%']);
+  const canRCol= findCol(rows,['cancelrate','cancel rate','cancel%']);
+  const slCol  = findCol(rows,['servicelevel','sl%','sl']);
+
+  const allMPs   = [...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort();
+  const allWeeks = [...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  fillSel('codMP',   allMPs,   'Semua');
+  fillSel('codWeek', allWeeks, 'Semua Week');
+
+  const fMP  = gv('codMP');
+  const fWk  = gv('codWeek');
+
+  let filtered = rows;
+  if(fMP!=='all' && mpCol)  filtered = filtered.filter(r=>r[mpCol]===fMP);
+  if(fWk!=='all' && wkCol)  filtered = filtered.filter(r=>String(r[wkCol])===String(fWk));
+
+  // Summary cards total COD vs Non-COD
+  const cod  = filtered.filter(r=>r[payCol]==='COD');
+  const ncod = filtered.filter(r=>r[payCol]==='Non-COD');
+
+  const sumF = (arr,col) => arr.reduce((s,r)=>s+toN(r[col]),0);
+  const codQty   = sumF(cod,qtyCol),  ncodQty   = sumF(ncod,qtyCol);
+  const codRet   = sumF(cod,retCol),  ncodRet   = sumF(ncod,retCol);
+  const codCan   = sumF(cod,canCol),  ncodCan   = sumF(ncod,canCol);
+  const codOrd   = sumF(cod,ordCol),  ncodOrd   = sumF(ncod,ordCol);
+
+  const codRetR  = codQty  ? (codRet /codQty *100).toFixed(2)  : '0.00';
+  const ncodRetR = ncodQty ? (ncodRet/ncodQty*100).toFixed(2)  : '0.00';
+  const codCanR  = codQty  ? (codCan /codQty *100).toFixed(2)  : '0.00';
+  const ncodCanR = ncodQty ? (ncodCan/ncodQty*100).toFixed(2)  : '0.00';
+
+  let html = `
+  <!-- Summary cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+    <!-- COD Card -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;border-top:4px solid #e6944a;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:18px">💵</span>
+        <span style="font-weight:700;font-size:14px;color:#e6944a">COD</span>
+        <span style="font-size:11px;color:var(--text2)">(Cash on Delivery)</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div><div style="font-size:10px;color:var(--text2)">Total Qty</div><div style="font-weight:800;font-size:16px">${fmtN(codQty)}</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Total Order</div><div style="font-weight:800;font-size:16px">${fmtN(codOrd)}</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Return Rate</div><div style="font-weight:800;font-size:16px;color:var(--red)">${codRetR}%</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Qty Return</div><div style="font-weight:700;font-size:14px;color:var(--red)">${fmtN(codRet)}</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Qty Cancel</div><div style="font-weight:700;font-size:14px;color:var(--orange)">${fmtN(codCan)}</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Cancel Rate</div><div style="font-weight:800;font-size:16px;color:var(--orange)">${codCanR}%</div></div>
+      </div>
+    </div>
+    <!-- Non-COD Card -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;border-top:4px solid #1D9E75;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:18px">💳</span>
+        <span style="font-weight:700;font-size:14px;color:#1D9E75">Non-COD</span>
+        <span style="font-size:11px;color:var(--text2)">(Transfer / QRIS / dll)</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div><div style="font-size:10px;color:var(--text2)">Total Qty</div><div style="font-weight:800;font-size:16px">${fmtN(ncodQty)}</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Total Order</div><div style="font-weight:800;font-size:16px">${fmtN(ncodOrd)}</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Return Rate</div><div style="font-weight:800;font-size:16px;color:var(--red)">${ncodRetR}%</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Qty Return</div><div style="font-weight:700;font-size:14px;color:var(--red)">${fmtN(ncodRet)}</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Qty Cancel</div><div style="font-weight:700;font-size:14px;color:var(--orange)">${fmtN(ncodCan)}</div></div>
+        <div><div style="font-size:10px;color:var(--text2)">Cancel Rate</div><div style="font-weight:800;font-size:16px;color:var(--orange)">${ncodCanR}%</div></div>
+      </div>
+    </div>
+  </div>`;
+
+  // ── Chart 1: Return Rate COD vs Non-COD per Week ──
+  const weeks = [...new Set(filtered.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const retCOD_wk  = weeks.map(w=>{ const r=filtered.filter(x=>String(x[wkCol])===String(w)&&x[payCol]==='COD'); const q=r.reduce((s,x)=>s+toN(x[qtyCol]),0); return q?(r.reduce((s,x)=>s+toN(x[retCol]),0)/q*100):0; });
+  const retNCOD_wk = weeks.map(w=>{ const r=filtered.filter(x=>String(x[wkCol])===String(w)&&x[payCol]==='Non-COD'); const q=r.reduce((s,x)=>s+toN(x[qtyCol]),0); return q?(r.reduce((s,x)=>s+toN(x[retCol]),0)/q*100):0; });
+  const canCOD_wk  = weeks.map(w=>{ const r=filtered.filter(x=>String(x[wkCol])===String(w)&&x[payCol]==='COD'); const q=r.reduce((s,x)=>s+toN(x[qtyCol]),0); return q?(r.reduce((s,x)=>s+toN(x[canCol]),0)/q*100):0; });
+  const canNCOD_wk = weeks.map(w=>{ const r=filtered.filter(x=>String(x[wkCol])===String(w)&&x[payCol]==='Non-COD'); const q=r.reduce((s,x)=>s+toN(x[qtyCol]),0); return q?(r.reduce((s,x)=>s+toN(x[canCol]),0)/q*100):0; });
+
+  html += `<div class="chart-row">
+    <div class="chart-card">
+      <div class="chart-title">📈 Return Rate % — COD vs Non-COD per Week</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Return COD %</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Return Non-COD %</div>
+      </div>
+      <div class="chart-wrap"><canvas id="codReturnChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📉 Cancel Rate % — COD vs Non-COD per Week</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Cancel COD %</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Cancel Non-COD %</div>
+      </div>
+      <div class="chart-wrap"><canvas id="codCancelChart"></canvas></div>
+    </div>
+  </div>`;
+
+  // ── Chart 2: Qty Return & Cancel COD vs Non-COD per Marketplace (combined frame) ──
+  const mps = fMP==='all' ? allMPs : [fMP];
+  const qtyRetCOD_mp  = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='COD').reduce((s,r)=>s+toN(r[retCol]),0));
+  const qtyRetNCOD_mp = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='Non-COD').reduce((s,r)=>s+toN(r[retCol]),0));
+  const qtyCanCOD_mp  = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='COD').reduce((s,r)=>s+toN(r[canCol]),0));
+  const qtyCanNCOD_mp = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='Non-COD').reduce((s,r)=>s+toN(r[canCol]),0));
+  const qtyTot_mp     = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0));
+  const ordTot_mp     = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[ordCol]),0));
+
+  html += `<div class="chart-card">
+    <div class="chart-title">🛒 Qty & Order per Marketplace — COD vs Non-COD (Combined View)</div>
+    <div class="chart-sub">Bar stacked = Qty Return + Cancel | Line = Total Order per Marketplace</div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Return COD</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e6944a80"></div>Return Non-COD</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e05b5b"></div>Cancel COD</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e05b5b80"></div>Cancel Non-COD</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8;border-radius:50%"></div>Total Order (Line)</div>
+    </div>
+    <div class="chart-wrap xtall"><canvas id="codMPChart"></canvas></div>
+  </div>`;
+
+  // ── Tabel breakdown per Week × Marketplace × PayType ──
+  html += `<div class="table-card">
+    <div class="table-header">
+      <div class="table-title">📋 Detail COD vs Non-COD per Week × Marketplace</div>
+      <div class="table-meta">${filtered.length} baris</div>
+    </div>
+    <div style="overflow-x:auto"><table><thead><tr>
+      <th>Week</th><th>Marketplace</th><th>Pay Type</th>
+      <th style="text-align:right;color:var(--blue)">Order</th>
+      <th style="text-align:right;color:var(--green)">Total Qty</th>
+      <th style="text-align:right">Qty Return</th>
+      <th style="text-align:right">Qty Cancel</th>
+      <th style="text-align:right;color:var(--red)">Return %</th>
+      <th style="text-align:right;color:var(--orange)">Cancel %</th>
+      <th style="text-align:right;color:var(--green)">SL %</th>
+    </tr></thead><tbody>`;
+
+  [...filtered].sort((a,b)=>{
+    const wa=toN(a[wkCol]),wb=toN(b[wkCol]);
+    if(wa!==wb) return wa-wb;
+    if(a[mpCol]<b[mpCol]) return -1;
+    if(a[mpCol]>b[mpCol]) return 1;
+    return a[payCol]==='COD'?-1:1;
+  }).forEach(r=>{
+    const rr=toN(r[retRCol]||0), cr=toN(r[canRCol]||0), sl=toN(r[slCol]||0);
+    const isCod = r[payCol]==='COD';
+    html+=`<tr>
+      <td><span class="wk">Wk ${r[wkCol]}</span></td>
+      <td style="font-weight:600">${r[mpCol]||'—'}</td>
+      <td><span class="cod-badge ${isCod?'cod':'ncod'}">${r[payCol]||'—'}</span></td>
+      <td class="num">${fmtN(toN(r[ordCol]))}</td>
+      <td class="num">${fmtN(toN(r[qtyCol]))}</td>
+      <td class="num" style="color:var(--red)">${fmtN(toN(r[retCol]))}</td>
+      <td class="num" style="color:var(--orange)">${fmtN(toN(r[canCol]))}</td>
+      <td class="num ${slClass(100-rr)}" style="color:var(--red)">${rr.toFixed(2)}%</td>
+      <td class="num" style="color:var(--orange)">${cr.toFixed(2)}%</td>
+      <td class="num ${slClass(sl)}">${sl.toFixed(2)}%</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div></div>';
+
+  document.getElementById('codContent').innerHTML = html;
+  document.getElementById('codStatus').textContent = `${allWeeks.length} weeks · ${allMPs.length} marketplace`;
+
+  // ── Draw Charts ──
+  const lineOpts = {
+    responsive:true, maintainAspectRatio:false,
+    layout:{padding:{top:24,right:12,left:8,bottom:8}},
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},datalabels:{},
+      tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}}},
+    scales:{
+      y:{beginAtZero:true, ticks:{callback:v=>v+'%'}, grid:{color:'#e2daf2'}},
+      x:{ticks:{font:{size:10}}}
+    }
+  };
+
+  killChart('codReturnChart');
+  charts['codReturnChart'] = new Chart(document.getElementById('codReturnChart'),{
+    type:'line',
+    data:{labels:weeks.map(w=>'Wk '+w), datasets:[
+      {label:'Return COD %',   data:retCOD_wk,  borderColor:'#e6944a', backgroundColor:'#e6944a20', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#e6944a', tension:0.3, fill:false,
+        datalabels:{anchor:'top',align:'top',color:'#e6944a',font:{weight:'700',size:9},formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {label:'Return Non-COD %',data:retNCOD_wk,borderColor:'#1D9E75', backgroundColor:'#1D9E7520', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#1D9E75', tension:0.3, fill:false,
+        datalabels:{anchor:'bottom',align:'bottom',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
+    ]},
+    options:{...lineOpts,layout:{padding:{top:28,right:12,left:8,bottom:20}}}
+  });
+
+  killChart('codCancelChart');
+  charts['codCancelChart'] = new Chart(document.getElementById('codCancelChart'),{
+    type:'line',
+    data:{labels:weeks.map(w=>'Wk '+w), datasets:[
+      {label:'Cancel COD %',   data:canCOD_wk,  borderColor:'#e05b5b', backgroundColor:'#e05b5b20', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#e05b5b', tension:0.3, fill:false,
+        datalabels:{anchor:'top',align:'top',color:'#e05b5b',font:{weight:'700',size:9},formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {label:'Cancel Non-COD %',data:canNCOD_wk,borderColor:'#7c3aed', backgroundColor:'#7c3aed20', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#7c3aed', tension:0.3, fill:false,
+        datalabels:{anchor:'bottom',align:'bottom',color:'#7c3aed',font:{weight:'700',size:9},formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
+    ]},
+    options:{...lineOpts,layout:{padding:{top:28,right:12,left:8,bottom:20}}}
+  });
+
+  // Combined chart: stacked bar (Return+Cancel, COD+NonCOD) + line Order per MP
+  killChart('codMPChart');
+  charts['codMPChart'] = new Chart(document.getElementById('codMPChart'),{
+    data:{labels:mps, datasets:[
+      {type:'bar', label:'Return COD',     data:qtyRetCOD_mp,  backgroundColor:'#e6944add', borderColor:'#e6944a', borderWidth:1, borderRadius:3, stack:'return', yAxisID:'yQty', order:3,
+        datalabels:{anchor:'center',align:'center',color:'#fff',font:{weight:'700',size:9},formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'bar', label:'Return Non-COD', data:qtyRetNCOD_mp, backgroundColor:'#e6944a77', borderColor:'#e6944a', borderWidth:1, borderRadius:0, stack:'return', yAxisID:'yQty', order:3,
+        datalabels:{anchor:'center',align:'center',color:'#e6944a',font:{weight:'700',size:9},formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'bar', label:'Cancel COD',     data:qtyCanCOD_mp,  backgroundColor:'#e05b5bdd', borderColor:'#e05b5b', borderWidth:1, borderRadius:3, stack:'cancel', yAxisID:'yQty', order:3,
+        datalabels:{anchor:'center',align:'center',color:'#fff',font:{weight:'700',size:9},formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'bar', label:'Cancel Non-COD', data:qtyCanNCOD_mp, backgroundColor:'#e05b5b77', borderColor:'#e05b5b', borderWidth:1, borderRadius:0, stack:'cancel', yAxisID:'yQty', order:3,
+        datalabels:{anchor:'center',align:'center',color:'#e05b5b',font:{weight:'700',size:9},formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'line', label:'Total Qty',     data:qtyTot_mp,     borderColor:'#5b3fa8', backgroundColor:'#5b3fa820', borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#5b3fa8', pointBorderColor:'#fff', pointBorderWidth:2, tension:0.3, fill:false, yAxisID:'yOrd', order:1,
+        datalabels:{anchor:'top',align:'top',color:'#5b3fa8',font:{weight:'700',size:9},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'line', label:'Total Order',   data:ordTot_mp,     borderColor:'#e879a0', backgroundColor:'#e879a020', borderWidth:2, pointRadius:4, pointBackgroundColor:'#e879a0', pointBorderColor:'#fff', pointBorderWidth:2, tension:0.3, fill:false, yAxisID:'yOrd2', order:2,
+        datalabels:{anchor:'bottom',align:'bottom',color:'#e879a0',font:{weight:'700',size:9},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:32,right:20,left:10,bottom:10}},
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+        datalabels:{},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}
+      },
+      scales:{
+        yQty:{type:'linear',position:'left',beginAtZero:true,stacked:true,
+          title:{display:true,text:'Qty Return / Cancel',color:'#e05b5b',font:{size:9,weight:'600'}},
+          ticks:{color:'#e05b5b',callback:v=>fmtLabel(v)},grid:{color:'#e2daf2'}},
+        yOrd:{type:'linear',position:'right',beginAtZero:true,
+          title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:9,weight:'600'}},
+          ticks:{color:'#5b3fa8',callback:v=>fmtLabel(v)},grid:{drawOnChartArea:false}},
+        yOrd2:{type:'linear',position:'right',beginAtZero:true,
+          title:{display:true,text:'Total Order',color:'#e879a0',font:{size:9,weight:'600'}},
+          ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false},
+          offset:true}
+      }
+    }
+  });
+}
+
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 function showPage(p,el){
   document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
@@ -937,21 +1223,22 @@ function showPage(p,el){
   else if(p==='category')renderCategory();
   else if(p==='daily')renderDaily();
   else if(p==='monthly')renderMonthly();
+  else if(p==='cod')renderCOD();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 async function init(){
   try{
-    const [kpi,mp,prod,cat,daily,monthly]=await Promise.all([
+    const [kpi,mp,prod,cat,daily,monthly,cod]=await Promise.all([
       fetchCSV(CSV_KPI),fetchCSV(CSV_MP),fetchCSV(CSV_PROD),fetchCSV(CSV_CAT),
-      fetchCSV(CSV_DAILY),fetchCSV(CSV_MONTHLY)
+      fetchCSV(CSV_DAILY),fetchCSV(CSV_MONTHLY),fetchCSV(CSV_COD)
     ]);
-    D.kpi=kpi;D.mp=mp;D.prod=prod;D.cat=cat;D.daily=daily;D.monthly=monthly;
+    D.kpi=kpi;D.mp=mp;D.prod=prod;D.cat=cat;D.daily=daily;D.monthly=monthly;D.cod=cod;
     document.getElementById('lastSync').textContent=new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
     renderKPI();
   }catch(e){
     console.error(e);
-    ['kpiContent','mpContent','prodContent','catContent','dailyContent','monthlyContent'].forEach(id=>{
+    ['kpiContent','mpContent','prodContent','catContent','dailyContent','monthlyContent','codContent'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
     });
