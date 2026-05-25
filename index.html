@@ -458,7 +458,7 @@ function renderKPI(){
 
   const serviceLevelCol=pctCols.find(c=>/service level/i.test(c));
   const slExcludeCol=pctCols.find(c=>/sl[^\w]*excl|exclude.*cancel|exclude.*return|sl\s*excl/i.test(c));
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Semua Data per Week</div><div class="table-meta">${allWeeks.length} weeks</div></div><div style="overflow-x:auto"><table><thead><tr><th>Week</th>`;
+  html+=`<div class="kpi-matrix-card"><div class="kpi-matrix-header"><div class="kpi-matrix-title">📋 KPI Summary Matrix</div><div class="kpi-week-badge">${allWeeks.length} weeks</div></div><div style="overflow-x:auto"><table class="kpi-matrix-table"><thead><tr><th>Week</th>`;
   html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`;
   subCols.forEach(c=>html+=`<th style="text-align:right">${stripQtyLabel(c)}</th>`);
   subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">SL%: ${stripQtyLabel(c)}</th>`);
