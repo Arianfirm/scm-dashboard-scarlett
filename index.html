@@ -427,14 +427,24 @@ function renderKPI(){
   html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`;
   subCols.forEach(c=>html+=`<th style="text-align:right">${stripQtyLabel(c)}</th>`);
   subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">SL%: ${stripQtyLabel(c)}</th>`);
+  html+=`<th style="text-align:right;color:var(--orange);font-weight:700">Service Level %</th><th style="text-align:right;color:var(--green);font-weight:700">SL Excl Cancel Return %</th>`;
   html+=`</tr></thead><tbody>`;
+  const deliveredCol=findCol(rows,['qtydelivered','delivered']);
+  const returnCol=findCol(rows,['qtyreturn','return']);
+  const cancelCol=findCol(rows,['qtycancelled','cancelled']);
   allWeeks.forEach(wk=>{
     const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
     const isSelected=fWk!=='all'&&String(wk)===String(fWk);
     const wQty=wRows.reduce((s,r)=>s+toN(r[qtyCol]),0);
+    const wDelivered=wRows.reduce((s,r)=>s+toN(r[deliveredCol]),0);
+    const wRetCan=wRows.reduce((s,r)=>s+toN(r[returnCol])+toN(r[cancelCol]),0);
+    const wQtyExclude=wQty-wRetCan;
+    const slInclude=wQty>0?(wDelivered/wQty*100):0;
+    const slExclude=wQtyExclude>0?(wDelivered/wQtyExclude*100):0;
     html+=`<tr class="${isSelected?'highlighted':''}"><td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
     [orderCol,qtyCol,...subCols].forEach(c=>{html+=`<td class="num">${fmtN(wRows.reduce((s,r)=>s+toN(r[c]),0))}</td>`;});
     subCols.forEach(c=>{const v=wRows.reduce((s,r)=>s+toN(r[c]),0);html+=`<td class="num" style="color:var(--orange)">${fmtPct(wQty>0?(v/wQty*100):0)}</td>`;});
+    html+=`<td class="num" style="color:var(--orange);font-weight:600">${fmtPct(slInclude)}</td><td class="num" style="color:var(--green);font-weight:600">${fmtPct(slExclude)}</td>`;
     html+=`</tr>`;
   });
   html+=`</tbody></table></div></div>`;
