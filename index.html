@@ -665,17 +665,19 @@ function renderWoW(){
   const rows=D.kpi;if(!rows.length){document.getElementById('wowContent').innerHTML='<div class="error-state">Data KPI belum tersedia untuk WoW.</div>';return;}
   const wkCol=findCol(rows,['week','minggu','wk']);
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  if(!allWeeks.length){document.getElementById('wowContent').innerHTML='<div class="error-state">Data week tidak tersedia untuk WoW.</div>';return;}
   fillSel('wowWeek',allWeeks,'Semua Week');
   const fWk=gv('wowWeek');
   const currentWk=fWk==='all'?allWeeks[allWeeks.length-1]:fWk;
-  const currentIdx=allWeeks.indexOf(String(currentWk));
-  const prevWk=currentIdx>0?allWeeks[currentIdx-1]:null;
-  const currRows=rows.filter(r=>String(r[wkCol])===String(currentWk));
+  const currentIdx=allWeeks.findIndex(w=>String(w)===String(currentWk));
+  const validIdx=currentIdx<0?allWeeks.length-1:currentIdx;
+  const prevWk=validIdx>0?allWeeks[validIdx-1]:null;
+  const currRows=rows.filter(r=>String(r[wkCol])===String(allWeeks[validIdx]));
   const prevRows=prevWk?rows.filter(r=>String(r[wkCol])===String(prevWk)):[];
   
   const cols=allCols(rows);
-  const orderCol=findCol(rows,['totalorder','order','pesanan'])||cols.find(c=>/order/i.test(c)&&toN(currRows[0]?.[c])>0)||cols[1];
-  const qtyCol=findCol(rows,['totalqty','totalquantity'])||cols.find(c=>/totalqty/i.test(c.replace(/[\s_-]/g,'')))||cols[2];
+  const orderCol=findCol(rows,['totalorder','order','pesanan'])||cols.find(c=>/order/i.test(c)&&rows.some(r=>toN(r[c])>0))||cols[1];
+  const qtyCol=findCol(rows,['totalqty','totalquantity'])||cols.find(c=>/totalqty/i.test(c.replace(/[\s_-]/g,'')))||cols.find(c=>/qty|quantity|jumlah/i.test(c)&&rows.some(r=>toN(r[c])>0))||cols[2];
   const deliveredCol=findCol(rows,['qtydelivered','delivered']);
   const cancelCol=findCol(rows,['qtycancelled','cancelled']);
   const returnCol=findCol(rows,['qtyreturn','return']);
