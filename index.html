@@ -538,7 +538,7 @@ function renderProduct(){
   document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
   killChart('prodBar');
   const top10=skus.slice(0,10);
-  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:COLORS.map(c=>c+'bb'),borderColor:COLORS,borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,title:{display:true,text:prodMetric,color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>fmtN(v)}},y:{title:{display:true,text:'SKU / Product',color:'#6b5b8a',font:{size:11,weight:'700'}}}}}});
+  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:top10.map(()=>'#8a44ffbb'),borderColor:'#8a44ff',borderWidth:1.5,borderRadius:5,datalabels:{anchor:'end',align:'end',color:'#3f136a',font:{weight:'700',size:11},formatter:(v)=>fmtN(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{}},scales:{x:{beginAtZero:true,title:{display:true,text:prodMetric,color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>fmtN(v)}},y:{title:{display:true,text:'SKU / Product',color:'#6b5b8a',font:{size:11,weight:'700'}}}}}});
 }
 function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
 
