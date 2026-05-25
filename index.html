@@ -413,19 +413,9 @@ function renderKPI(){
   subCols.forEach(c=>{const pct=totalQty>0?(sum(c)/totalQty*100):0;const color=/deliv/i.test(c)?'var(--green)':/cancel|return/i.test(c)?'var(--red)':'var(--orange)';html+=`<td style="color:${color};font-weight:600">${fmtPct(pct)}</td>`;});
   html+=`</tr></tbody></table></div>`;
 
-  if(pctCols.length||true){
-    const delCol=findCol(rows,['qtydelivered','delivered']);
-    const retCol=findCol(rows,['qtyreturn','return']);
-    const canCol=findCol(rows,['qtycancelled','cancelled']);
-    const cardDelivered=cardRows.reduce((s,r)=>s+toN(r[delCol]),0);
-    const cardRetCan=cardRows.reduce((s,r)=>s+toN(r[retCol])+toN(r[canCol]),0);
-    const cardQtyExclude=totalQty-cardRetCan;
-    const cardSlInclude=totalQty>0?(cardDelivered/totalQty*100):0;
-    const cardSlExclude=cardQtyExclude>0?(cardDelivered/cardQtyExclude*100):0;
-    
+  if(pctCols.length){
     html+=`<div style="margin-bottom:6px;font-size:11px;font-weight:600;color:var(--text2);">📈 Service Level & Rate</div><div class="sl-grid">`;
-    html+=`<div class="sl-card ${cardSlInclude>=95?'good':cardSlInclude>=85?'warn':'bad'}"><div class="sl-label">Service Level %</div><div class="sl-value">${fmtPct(cardSlInclude)}</div><div class="sl-sub">${cardLabel}</div></div>`;
-    html+=`<div class="sl-card ${cardSlExclude>=95?'good':cardSlExclude>=85?'warn':'bad'}"><div class="sl-label">SL Excl Cancelled Return %</div><div class="sl-value">${fmtPct(cardSlExclude)}</div><div class="sl-sub">${cardLabel}</div></div>`;
+    pctCols.forEach(c=>{const pct=toN(sum(c));const cls=pct>=95?'good':pct>=85?'warn':'bad';html+=`<div class="sl-card ${cls}"><div class="sl-label">${c}</div><div class="sl-value">${fmtPct(pct)}</div><div class="sl-sub">${cardLabel}</div></div>`;});
     html+=`</div>`;
   }
 
@@ -437,26 +427,14 @@ function renderKPI(){
   html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`;
   subCols.forEach(c=>html+=`<th style="text-align:right">${stripQtyLabel(c)}</th>`);
   subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">SL%: ${stripQtyLabel(c)}</th>`);
-  html+=`<th style="text-align:right;color:var(--orange);font-weight:700">Service Level %</th><th style="text-align:right;color:var(--green);font-weight:700">SL Excl Cancelled Return %</th>`;
   html+=`</tr></thead><tbody>`;
-  
-  const filteredWeeks=fWk==='all'?allWeeks:[fWk];
-  filteredWeeks.forEach(wk=>{
+  allWeeks.forEach(wk=>{
     const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
     const isSelected=fWk!=='all'&&String(wk)===String(fWk);
     const wQty=wRows.reduce((s,r)=>s+toN(r[qtyCol]),0);
-    const wRetCol=findCol(rows,['qtyreturn','return']);
-    const wCanCol=findCol(rows,['qtycancelled','cancelled']);
-    const wRetCan=wRows.reduce((s,r)=>s+toN(r[wRetCol])+toN(r[wCanCol]),0);
-    const wQtyExclude=wQty-wRetCan;
-    const wDelCol=findCol(rows,['qtydelivered','delivered']);
-    const wDelivered=wRows.reduce((s,r)=>s+toN(r[wDelCol]),0);
-    const slInclude=wQty>0?(wDelivered/wQty*100):0;
-    const slExclude=wQtyExclude>0?(wDelivered/wQtyExclude*100):0;
     html+=`<tr class="${isSelected?'highlighted':''}"><td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
     [orderCol,qtyCol,...subCols].forEach(c=>{html+=`<td class="num">${fmtN(wRows.reduce((s,r)=>s+toN(r[c]),0))}</td>`;});
     subCols.forEach(c=>{const v=wRows.reduce((s,r)=>s+toN(r[c]),0);html+=`<td class="num" style="color:var(--orange)">${fmtPct(wQty>0?(v/wQty*100):0)}</td>`;});
-    html+=`<td class="num" style="color:var(--orange);font-weight:600">${fmtPct(slInclude)}</td><td class="num" style="color:var(--green);font-weight:600">${fmtPct(slExclude)}</td>`;
     html+=`</tr>`;
   });
   html+=`</tbody></table></div></div>`;
