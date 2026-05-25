@@ -365,26 +365,6 @@ let D={kpi:[],mp:[],prod:[],cat:[],daily:[],monthly:[],cod:[],cod_daily:[]};
 let charts={};
 let mpMetric=null,prodMetric=null,catMetric=null;
 const COLORS=['#5b3fa8','#e879a0','#1D9E75','#e6944a','#e05b5b','#7c3aed','#0891b2','#ca8a04','#be185d','#15803d'];
-const DATA_URLS={kpi:CSV_KPI,mp:CSV_MP,prod:CSV_PROD,cat:CSV_CAT,daily:CSV_DAILY,monthly:CSV_MONTHLY,cod:CSV_COD,cod_daily:CSV_COD_DAILY};
-const dataPromises={};
-async function loadData(key){
-  if(D[key]&&D[key].length)return D[key];
-  const url=DATA_URLS[key];
-  if(!url)throw new Error(`Data URL untuk ${key} tidak ditemukan`);
-  if(!dataPromises[key]){
-    dataPromises[key]=fetchCSV(url).catch(err=>{delete dataPromises[key];throw err;});
-  }
-  D[key]=await dataPromises[key];
-  return D[key];
-}
-async function ensurePageData(page){
-  if(page==='cod'){
-    if(!D.cod.length)await loadData('cod');
-    if(!D.cod_daily.length)await loadData('cod_daily');
-    return;
-  }
-  if(!D[page]||!D[page].length)await loadData(page);
-}
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 const toN=v=>{if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));return isNaN(n)?0:n;};
@@ -1568,43 +1548,37 @@ function renderCOD(){
 }
 
 // ─── NAV ─────────────────────────────────────────────────────────────────────
-async function showPage(p,el){
+function showPage(p,el){
   document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   el.classList.add('active');
-
-  try{
-    if(p==='kpi'){await ensurePageData('kpi');renderKPI();}
-    else if(p==='marketplace'){await ensurePageData('mp');renderMarketplace();}
-    else if(p==='product'){await ensurePageData('prod');renderProduct();}
-    else if(p==='category'){await ensurePageData('cat');renderCategory();}
-    else if(p==='wow'){await ensurePageData('kpi');renderWoW();}
-    else if(p==='daily'){await ensurePageData('daily');renderDaily();}
-    else if(p==='monthly'){await ensurePageData('monthly');renderMonthly();}
-    else if(p==='cod'){await ensurePageData('cod');renderCOD();}
-  }catch(e){
-    console.error(e);
-    const pageId='page-'+p;
-    const pageEl=document.getElementById(pageId);
-    if(pageEl){
-      const contentId=pageId.replace('page-','')+'Content';
-      const el=document.getElementById(contentId);
-      if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data untuk halaman ini. Cek koneksi.<br><small>${e.message||''}</small></div>`;
-    }
-  }
+  if(p==='kpi')renderKPI();
+  else if(p==='marketplace')renderMarketplace();
+  else if(p==='product')renderProduct();
+  else if(p==='category')renderCategory();
+  else if(p==='wow')renderWoW();
+  else if(p==='daily')renderDaily();
+  else if(p==='monthly')renderMonthly();
+  else if(p==='cod')renderCOD();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 async function init(){
   try{
-    await loadData('kpi');
+    const [kpi,mp,prod,cat,daily,monthly,cod,cod_daily]=await Promise.all([
+      fetchCSV(CSV_KPI),fetchCSV(CSV_MP),fetchCSV(CSV_PROD),fetchCSV(CSV_CAT),
+      fetchCSV(CSV_DAILY),fetchCSV(CSV_MONTHLY),fetchCSV(CSV_COD),fetchCSV(CSV_COD_DAILY)
+    ]);
+    D.kpi=kpi;D.mp=mp;D.prod=prod;D.cat=cat;D.daily=daily;D.monthly=monthly;D.cod=cod;D.cod_daily=cod_daily;
     document.getElementById('lastSync').textContent=new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
     renderKPI();
   }catch(e){
     console.error(e);
-    const el=document.getElementById('kpiContent');
-    if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data KPI. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
+    ['kpiContent','mpContent','prodContent','catContent','dailyContent','monthlyContent','codContent'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
+    });
   }
 }
 init();
