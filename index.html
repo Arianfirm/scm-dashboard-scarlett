@@ -452,10 +452,6 @@ function renderKPI(){
     <canvas id="sparkSL" style="height:36px!important;width:100%!important"></canvas></div></div>
   </div>`;
 
-  html+=`<div style="margin-bottom:6px;font-size:11px;font-weight:600;color:var(--text2);">📈 Service Level & Rate</div><div class="sl-grid">`;
-  pctCols.forEach(c=>{const pct=toN(sum(c));const cls=pct>=95?'good':pct>=85?'warn':'bad';html+=`<div class="sl-card ${cls}"><div class="sl-label">${c}</div><div class="sl-value">${fmtPct(pct)}</div><div class="sl-sub">${cardLabel}</div></div>`;});
-  html+=`</div>`;
-
   html+=`<div class="chart-card"><div class="chart-title">📈 Trend Mingguan</div><div class="chart-sub">Bar = ${qtyCol} | Line = ${orderCol}</div>
   <div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>${qtyCol} (Bar)</div><div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>${orderCol} (Line)</div></div>
   <div class="chart-wrap"><canvas id="kpiChart"></canvas></div></div>`;
