@@ -676,7 +676,6 @@ function renderDaily(){
     <th style="text-align:right">Cancelled</th>
     <th style="text-align:right">Return</th>
     <th style="text-align:right">SL%</th>
-    <th style="text-align:right;color:var(--green);font-weight:700">SL Excl Cancel Return %</th>
   </tr></thead><tbody>`;
   const delCol=findCol(rows,['qtydelivered','delivered']);
   const disCol=findCol(rows,['qtydispatched','dispatched']);
@@ -694,8 +693,6 @@ function renderDaily(){
       <td class="num">${canCol?fmtN(toN(r[canCol])):'—'}</td>
       <td class="num">${retCol?fmtN(toN(r[retCol])):'—'}</td>
       <td class="num ${slClass(sl)}">${fmtPct(sl)}</td>
-      <td class="num" style="color:var(--green)">${slExclC2?fmtPct(toN(r[slExclC2])):'—'}</td>
-    </tr>`;
   });
   html+='</tbody></table></div></div>';
 
@@ -890,7 +887,6 @@ function renderMonthly(){
   const disC2=findCol(rows,['qtydispatched','dispatched']);
   const canC2=findCol(rows,['qtycancelled','cancelled']);
   const retC2=findCol(rows,['qtyreturn','return']);
-  const slExclC2=findCol(rows,['slexcl','sl excl','slexclcancel','excl cancel']);
   [...filtered].sort((a,b)=>{
     const ka=`${a[yearCol]}-${String(a[monthCol]).padStart(2,'0')}`;
     const kb=`${b[yearCol]}-${String(b[monthCol]).padStart(2,'0')}`;
