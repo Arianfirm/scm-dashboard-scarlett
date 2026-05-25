@@ -425,14 +425,21 @@ function renderKPI(){
   html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`;
   subCols.forEach(c=>html+=`<th style="text-align:right">${stripQtyLabel(c)}</th>`);
   subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">SL%: ${stripQtyLabel(c)}</th>`);
+  html+=`<th style="text-align:right;color:var(--blue);font-weight:700">SL% Include</th><th style="text-align:right;color:var(--green);font-weight:700">SL% Exclude</th>`;
   html+=`</tr></thead><tbody>`;
   allWeeks.forEach(wk=>{
     const wRows=rows.filter(r=>String(r[wkCol])===String(wk));
     const isSelected=fWk!=='all'&&String(wk)===String(fWk);
     const wQty=wRows.reduce((s,r)=>s+toN(r[qtyCol]),0);
+    const wRetCan=wRows.reduce((s,r)=>s+toN(r[findCol(rows,['qtyreturn','return'])])+ toN(r[findCol(rows,['qtycancelled','cancelled'])]),0);
+    const wQtyExclude=wQty-wRetCan;
+    const wDelivered=wRows.reduce((s,r)=>s+toN(r[findCol(rows,['qtydelivered','delivered'])]),0);
+    const slInclude=wQty>0?(wDelivered/wQty*100):0;
+    const slExclude=wQtyExclude>0?(wDelivered/wQtyExclude*100):0;
     html+=`<tr class="${isSelected?'highlighted':''}"><td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
     [orderCol,qtyCol,...subCols].forEach(c=>{html+=`<td class="num">${fmtN(wRows.reduce((s,r)=>s+toN(r[c]),0))}</td>`;});
     subCols.forEach(c=>{const v=wRows.reduce((s,r)=>s+toN(r[c]),0);html+=`<td class="num" style="color:var(--orange)">${fmtPct(wQty>0?(v/wQty*100):0)}</td>`;});
+    html+=`<td class="num" style="color:var(--blue);font-weight:600">${fmtPct(slInclude)}</td><td class="num" style="color:var(--green);font-weight:600">${fmtPct(slExclude)}</td>`;
     html+=`</tr>`;
   });
   
@@ -443,15 +450,26 @@ function renderKPI(){
   const totalDel=rows.reduce((s,r)=>s+toN(r[delCol]),0);
   const totalRetCancel=rows.reduce((s,r)=>s+toN(r[findCol(rows,['qtyreturn','return'])])+ toN(r[findCol(rows,['qtycancelled','cancelled'])]),0);
   const slExcludeRetCancel=totalQty>0?((totalQty-totalRetCancel)/totalQty*100):0;
+  const slIncludeTotal=totalQty>0?(totalDel/totalQty*100):0;
+  const qtyExcludeTotal=totalQty-totalRetCancel;
+  const slExcludeTotal=qtyExcludeTotal>0?(totalDel/qtyExcludeTotal*100):0;
   
   html+=`<tr style="background:#f0f0f0;font-weight:700;border-top:2px solid var(--border)"><td style="color:var(--blue)">📦 Dispatch + Delivered</td><td colspan="2" style="text-align:right;color:var(--blue)">${fmtN(totalDisp+totalDel)}</td>`;
   subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
   subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
+  html+=`<td class="num" style="color:var(--text2)">—</td><td class="num" style="color:var(--text2)">—</td>`;
   html+=`</tr>`;
   
-  html+=`<tr style="background:#f0f0f0;font-weight:700"><td style="color:var(--green)">📊 SL exclude (Return & Cancel)</td><td colspan="2" style="text-align:right;color:var(--green)">${fmtPct(slExcludeRetCancel)}</td>`;
+  html+=`<tr style="background:#f0f0f0;font-weight:700"><td style="color:var(--green)">📊 SL (Include)</td><td colspan="2" style="text-align:right;color:var(--green)">${fmtPct(slIncludeTotal)}</td>`;
   subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
   subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
+  html+=`<td class="num" style="color:var(--blue);font-weight:700">${fmtPct(slIncludeTotal)}</td><td class="num" style="color:var(--text2)">—</td>`;
+  html+=`</tr>`;
+
+  html+=`<tr style="background:#f0f0f0;font-weight:700"><td style="color:var(--green)">📊 SL (Exclude R&C)</td><td colspan="2" style="text-align:right;color:var(--green)">${fmtPct(slExcludeTotal)}</td>`;
+  subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
+  subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
+  html+=`<td class="num" style="color:var(--text2)">—</td><td class="num" style="color:var(--green);font-weight:700">${fmtPct(slExcludeTotal)}</td>`;
   html+=`</tr>`;
   
   html+=`</tbody></table></div></div>`;
