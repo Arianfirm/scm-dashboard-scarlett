@@ -423,6 +423,8 @@ function renderKPI(){
   <div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>${qtyCol} (Bar)</div><div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>${orderCol} (Line)</div></div>
   <div class="chart-wrap"><canvas id="kpiChart"></canvas></div></div>`;
 
+  const serviceLevelCol=pctCols.find(c=>/service level/i.test(c));
+  const slExcludeCol=pctCols.find(c=>/sl[^\w]*excl|exclude.*cancel|exclude.*return|sl\s*excl/i.test(c));
   html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Semua Data per Week</div><div class="table-meta">${allWeeks.length} weeks</div></div><div style="overflow-x:auto"><table><thead><tr><th>Week</th>`;
   html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`;
   subCols.forEach(c=>html+=`<th style="text-align:right">${stripQtyLabel(c)}</th>`);
@@ -439,12 +441,12 @@ function renderKPI(){
     const wDelivered=wRows.reduce((s,r)=>s+toN(r[deliveredCol]),0);
     const wRetCan=wRows.reduce((s,r)=>s+toN(r[returnCol])+toN(r[cancelCol]),0);
     const wQtyExclude=wQty-wRetCan;
-    const slInclude=wQty>0?(wDelivered/wQty*100):0;
-    const slExclude=wQtyExclude>0?(wDelivered/wQtyExclude*100):0;
+    const slIncludeRaw=serviceLevelCol ? wRows.reduce((s,r)=>s+toN(r[serviceLevelCol]),0) : (wQty>0?(wDelivered/wQty*100):0);
+    const slExcludeRaw=slExcludeCol ? wRows.reduce((s,r)=>s+toN(r[slExcludeCol]),0) : (wQtyExclude>0?(wDelivered/wQtyExclude*100):0);
     html+=`<tr class="${isSelected?'highlighted':''}"><td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
     [orderCol,qtyCol,...subCols].forEach(c=>{html+=`<td class="num">${fmtN(wRows.reduce((s,r)=>s+toN(r[c]),0))}</td>`;});
     subCols.forEach(c=>{const v=wRows.reduce((s,r)=>s+toN(r[c]),0);html+=`<td class="num" style="color:var(--orange)">${fmtPct(wQty>0?(v/wQty*100):0)}</td>`;});
-    html+=`<td class="num" style="color:var(--orange);font-weight:600">${fmtPct(slInclude)}</td><td class="num" style="color:var(--green);font-weight:600">${fmtPct(slExclude)}</td>`;
+    html+=`<td class="num" style="color:var(--orange);font-weight:600">${fmtPct(slIncludeRaw)}</td><td class="num" style="color:var(--green);font-weight:600">${fmtPct(slExcludeRaw)}</td>`;
     html+=`</tr>`;
   });
   html+=`</tbody></table></div></div>`;
