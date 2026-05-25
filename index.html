@@ -149,9 +149,17 @@ td.sl-bad{color:var(--red);font-weight:700;}
 .cod-badge.ncod{background:#e8f5e9;color:#1D9E75;border:1px solid #a5d6a7;}
 .cod-split{display:flex;gap:6px;justify-content:center;align-items:center;}
 .trend-selector{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-.trend-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.12s;}
+.trend-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.12s;color:var(--text2);}
+.trend-btn[data-period="30"]{border-color:#5b3fa8;color:#5b3fa8;}
+.trend-btn[data-period="90"]{border-color:#e879a0;color:#e879a0;}
+.trend-btn[data-period="180"]{border-color:#1D9E75;color:#1D9E75;}
+.trend-btn[data-period="360"]{border-color:#e6944a;color:#e6944a;}
 .trend-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
-.trend-btn:hover:not(.active){border-color:var(--blue);color:var(--blue);}
+.trend-btn[data-period="30"].active{background:#5b3fa8;border-color:#5b3fa8;}
+.trend-btn[data-period="90"].active{background:#e879a0;border-color:#e879a0;}
+.trend-btn[data-period="180"].active{background:#1D9E75;border-color:#1D9E75;}
+.trend-btn[data-period="360"].active{background:#e6944a;border-color:#e6944a;}
+.trend-btn:hover:not(.active){border-color:currentColor;color:currentColor;}
 .chart-wrap.xtall{height:380px;}
 </style>
 </head>
@@ -264,10 +272,10 @@ td.sl-bad{color:var(--red);font-weight:700;}
       <div class="filter-item" style="flex:1;min-width:240px;align-items:flex-start;">
         <label>Periode</label>
         <div class="trend-selector" id="dailyPeriodButtons" style="flex-wrap:wrap;justify-content:flex-start;">
-          <button type="button" class="trend-btn" onclick="applyDailyPeriod(30,this)">30 Hari</button>
-          <button type="button" class="trend-btn" onclick="applyDailyPeriod(90,this)">90 Hari</button>
-          <button type="button" class="trend-btn" onclick="applyDailyPeriod(180,this)">180 Hari</button>
-          <button type="button" class="trend-btn" onclick="applyDailyPeriod(360,this)">360 Hari</button>
+          <button type="button" class="trend-btn" data-period="30" onclick="applyDailyPeriod(30,this)">30 Hari</button>
+          <button type="button" class="trend-btn" data-period="90" onclick="applyDailyPeriod(90,this)">90 Hari</button>
+          <button type="button" class="trend-btn" data-period="180" onclick="applyDailyPeriod(180,this)">180 Hari</button>
+          <button type="button" class="trend-btn" data-period="360" onclick="applyDailyPeriod(360,this)">360 Hari</button>
         </div>
       </div>
       <div class="filter-divider"></div>
