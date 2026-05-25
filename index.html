@@ -435,6 +435,25 @@ function renderKPI(){
     subCols.forEach(c=>{const v=wRows.reduce((s,r)=>s+toN(r[c]),0);html+=`<td class="num" style="color:var(--orange)">${fmtPct(wQty>0?(v/wQty*100):0)}</td>`;});
     html+=`</tr>`;
   });
+  
+  // Summary rows
+  const dispCol=findCol(rows,['qtydispatched','dispatched']);
+  const delCol=findCol(rows,['qtydelivered','delivered']);
+  const totalDisp=rows.reduce((s,r)=>s+toN(r[dispCol]),0);
+  const totalDel=rows.reduce((s,r)=>s+toN(r[delCol]),0);
+  const totalRetCancel=rows.reduce((s,r)=>s+toN(r[findCol(rows,['qtyreturn','return'])])+ toN(r[findCol(rows,['qtycancelled','cancelled'])]),0);
+  const slExcludeRetCancel=totalQty>0?((totalQty-totalRetCancel)/totalQty*100):0;
+  
+  html+=`<tr style="background:#f0f0f0;font-weight:700;border-top:2px solid var(--border)"><td style="color:var(--blue)">📦 Dispatch + Delivered</td><td colspan="2" style="text-align:right;color:var(--blue)">${fmtN(totalDisp+totalDel)}</td>`;
+  subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
+  subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
+  html+=`</tr>`;
+  
+  html+=`<tr style="background:#f0f0f0;font-weight:700"><td style="color:var(--green)">📊 SL exclude (Return & Cancel)</td><td colspan="2" style="text-align:right;color:var(--green)">${fmtPct(slExcludeRetCancel)}</td>`;
+  subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
+  subCols.forEach(c=>{html+=`<td class="num" style="color:var(--text2)">—</td>`;});
+  html+=`</tr>`;
+  
   html+=`</tbody></table></div></div>`;
   document.getElementById('kpiContent').innerHTML=html;
   document.getElementById('kpiStatus').textContent=`${allWeeks.length} weeks · Wk ${latestWk} latest`;
