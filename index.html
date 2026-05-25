@@ -452,23 +452,6 @@ function renderKPI(){
     <canvas id="sparkSL" style="height:36px!important;width:100%!important"></canvas></div></div>
   </div>`;
 
-  let html_kpimatrix=`<div class="kpi-matrix-card"><div class="kpi-matrix-header"><div class="kpi-matrix-title">📊 KPI Summary Matrix</div><span class="kpi-week-badge">📅 ${cardLabel}</span></div>
-  <table class="kpi-matrix-table"><thead><tr><th style="min-width:140px"></th><th class="col-order">Total</th>`;
-  subCols.forEach(c=>html_kpimatrix+=`<th>${stripQtyLabel(c)}</th>`);
-  html_kpimatrix+=`</tr></thead><tbody>`;
-  html_kpimatrix+=`<tr class="row-nilai"><td style="color:var(--blue);font-weight:700">🔢 Unique Order</td><td class="col-order">${fmtN(totalOrder)}</td>`;
-  subCols.forEach(c=>{
-    const uCol=findUniqueOrderForSub(c),v=uCol?sum(uCol):null;
-    if(v!==null&&v>0)html_kpimatrix+=`<td style="color:var(--blue);font-weight:600">${fmtN(v)}</td>`;
-    else{const sq=sum(c);if(sq>0&&totalQty>0)html_kpimatrix+=`<td style="color:var(--blue);font-weight:600;opacity:0.75">${fmtN(Math.round(sq/totalQty*totalOrder))}<sup style="font-size:8px">~</sup></td>`;else html_kpimatrix+=`<td style="color:#bbb">0</td>`;}
-  });
-  html_kpimatrix+=`</tr><tr class="row-nilai"><td style="color:var(--green);font-weight:700">📦 Total Qty</td><td class="col-qty">${fmtN(totalQty)}</td>`;
-  subCols.forEach(c=>html_kpimatrix+=`<td style="font-weight:600">${fmtN(sum(c))}</td>`);
-  html_kpimatrix+=`</tr><tr class="row-pct-qty"><td style="color:var(--text2);font-weight:600">📊 Service Level Qty</td><td style="color:#ccc">—</td>`;
-  subCols.forEach(c=>{const pct=totalQty>0?(sum(c)/totalQty*100):0;const color=/deliv/i.test(c)?'var(--green)':/cancel|return/i.test(c)?'var(--red)':'var(--orange)';html_kpimatrix+=`<td style="color:${color};font-weight:600">${fmtPct(pct)}</td>`;});
-  html_kpimatrix+=`</tr></tbody></table></div>`;
-
-  html+=html_kpimatrix;
   html+=`<div style="margin-bottom:6px;font-size:11px;font-weight:600;color:var(--text2);">📈 Service Level & Rate</div><div class="sl-grid">`;
   pctCols.forEach(c=>{const pct=toN(sum(c));const cls=pct>=95?'good':pct>=85?'warn':'bad';html+=`<div class="sl-card ${cls}"><div class="sl-label">${c}</div><div class="sl-value">${fmtPct(pct)}</div><div class="sl-sub">${cardLabel}</div></div>`;});
   html+=`</div>`;
