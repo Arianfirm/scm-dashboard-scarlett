@@ -87,6 +87,26 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .kpi-card-label{font-size:10px;color:var(--text2);font-weight:500;margin-bottom:5px;}
 .kpi-card-value{font-size:20px;font-weight:800;color:var(--text);}
 .kpi-card-sub{font-size:10px;color:var(--text2);margin-top:3px;}
+.exec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:18px;}
+.exec-card{background:rgba(15,11,42,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px 22px;color:#f8f5ff;position:relative;overflow:hidden;box-shadow:0 18px 42px rgba(15,11,42,0.26);}
+.exec-card::before{content:'';position:absolute;left:20px;bottom:0;width:72px;height:4px;border-radius:999px;background:var(--blue);box-shadow:0 0 20px rgba(91,63,168,0.24);}
+.exec-card::after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:0 0 120px rgba(255,255,255,0.02);}
+.exec-card-title{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#c9c0f3;margin-bottom:10px;}
+.exec-card-value{font-size:32px;font-weight:800;line-height:1.05;color:#fff;margin-bottom:8px;}
+.exec-card-sub{font-size:12px;color:#d3cff6;line-height:1.5;margin-bottom:10px;}
+.exec-card-note{font-size:13px;font-weight:700;line-height:1.3;margin-bottom:8px;}
+.exec-card-note.success{color:#5eead4;}
+.exec-card-note.danger{color:#fda4af;}
+.exec-card-note.warn{color:#fbbf24;}
+.exec-card-note.accent{color:#c084fc;}
+.exec-card-bottom{font-size:11px;color:#b8b0d4;opacity:0.9;}
+.exec-card.orange::before{background:rgba(232,148,74,0.95);box-shadow:0 0 20px rgba(232,148,74,0.24);}
+.exec-card.green::before{background:rgba(29,158,117,0.95);box-shadow:0 0 20px rgba(29,158,117,0.24);}
+.exec-card.red::before{background:rgba(224,91,91,0.95);box-shadow:0 0 20px rgba(224,91,91,0.24);}
+.exec-card.amber::before{background:rgba(234,179,8,0.95);box-shadow:0 0 20px rgba(234,179,8,0.24);}
+.exec-card.purple::before{background:rgba(124,58,237,0.95);box-shadow:0 0 20px rgba(124,58,237,0.24);}
+.exec-card .value-tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;}
+@media(max-width:760px){.exec-card{padding:16px;}.exec-card-value{font-size:28px;}}
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
 .chart-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
 .chart-sub{font-size:10.5px;color:var(--text2);margin-bottom:10px;}
@@ -618,6 +638,7 @@ function renderHeatmap(){
   fillSel('hmMP',allMPs,'Semua Marketplace');
   if(catCol&&allCats.length)fillSel('hmCat',allCats,'Semua Cat');
 
+
   // FIX: only fill week dropdowns once (or when weeks change), not on every render
   if(!hmWeeksInit){
     ['hmWkFrom','hmWkTo'].forEach((id,idx)=>{
@@ -641,6 +662,40 @@ function renderHeatmap(){
   const filteredMPs =fMP!=='all'?[fMP]:(mpCol?[...new Set(filtered.map(r=>r[mpCol]).filter(Boolean))].sort():[]);
   const displayWeeks= filteredWeeks.length ? filteredWeeks : allWeeks;
   const latestWk    = displayWeeks[displayWeeks.length-1];
+
+  const latestSlRows = slCol ? filtered.filter(r=>String(r[wkCol])===String(latestWk)) : [];
+  const avgSl = latestSlRows.length ? latestSlRows.reduce((sum,r)=>sum+toN(r[slCol]),0)/latestSlRows.length : 0;
+  const targetSL = 90;
+  const slGap = avgSl - targetSL;
+  const slTrend = slGap >= 0 ? `+${slGap.toFixed(1)}% above target` : `${slGap.toFixed(1)}% below target`;
+  const slNoteClass = slGap >= 0 ? 'success' : 'danger';
+
+  const prevWk = displayWeeks.length>1 ? displayWeeks[displayWeeks.length-2] : null;
+  const latestRows = filtered.filter(r=>String(r[wkCol])===String(latestWk));
+  const latestMap = {};
+  latestRows.forEach(r=>{
+    const key = r[mpCol] || 'Unknown';
+    if(!latestMap[key]) latestMap[key] = {mp:key,latest:0,prev:0};
+    latestMap[key].latest += getVal(r);
+  });
+  if(prevWk){
+    filtered.filter(r=>String(r[wkCol])===String(prevWk)).forEach(r=>{
+      const key = r[mpCol] || 'Unknown';
+      if(latestMap[key]) latestMap[key].prev += getVal(r);
+    });
+  }
+  const marketSummaries = Object.values(latestMap);
+  const bestMarket = marketSummaries.reduce((best,item)=>item.latest>best.latest?item:best,{mp:'—',latest:-Infinity,prev:0});
+  const worstMarket = marketSummaries.reduce((worst,item)=>item.latest<worst.latest?item:worst,{mp:'—',latest:Infinity,prev:0});
+  const belowTargetCount = slCol ? [...new Set(latestSlRows.filter(r=>toN(r[slCol])<targetSL).map(r=>r[mpCol]||'Unknown'))].length : 0;
+  const improvementCandidates = marketSummaries.map(item=>({
+    ...item,
+    delta: item.prev ? item.latest - item.prev : null
+  })).filter(item=>item.delta !== null && item.delta > 0);
+  const mostImproved = improvementCandidates.reduce((best,item)=>item.delta>best.delta?item:best,{mp:'—',latest:0,prev:0,delta:-Infinity});
+  const bestDeltaText = bestMarket.prev ? (bestMarket.latest - bestMarket.prev).toFixed(1) : null;
+  const worstDeltaText = worstMarket.prev ? (worstMarket.latest - worstMarket.prev).toFixed(1) : null;
+  const formatMetricValue = v => isQtyMetric ? (v>=1e6?(v/1e6).toFixed(1)+'jt':v>=1e3?(v/1e3).toFixed(1)+'rb':Math.round(v).toString()) : v.toFixed(1)+'%';
 
   // Build cell lookup from filtered data
   const cell={};
@@ -713,6 +768,38 @@ function renderHeatmap(){
     <div class="kpi-matrix-header">
       <div class="kpi-matrix-title">🟥 ${metricLabel} Heatmap — Week × Marketplace</div>
       <span class="kpi-week-badge">Wk ${displayWeeks[0]} → Wk ${latestWk} · ${displayWeeks.length} weeks</span>
+    </div>
+    <div class="exec-cards">
+      <div class="exec-card orange">
+        <div class="exec-card-title">AVG SL — ALL MP</div>
+        <div class="exec-card-value">${fmtPct(avgSl)}</div>
+        <div class="exec-card-note ${slNoteClass}">${slTrend}</div>
+        <div class="exec-card-bottom">Target: ${targetSL}% · Wk ${latestWk}</div>
+      </div>
+      <div class="exec-card green">
+        <div class="exec-card-title">🏆 BEST MP — WK CURRENT</div>
+        <div class="exec-card-value">${bestMarket.mp}</div>
+        <div class="exec-card-sub">${bestMarket.latest!==-Infinity?formatMetricValue(bestMarket.latest):'—'} ${metricLabel}</div>
+        <div class="exec-card-note success">${bestDeltaText?`▲ +${Math.abs(parseFloat(bestDeltaText)).toFixed(1)}% vs Wk ${prevWk}`:'No prior week'}</div>
+      </div>
+      <div class="exec-card red">
+        <div class="exec-card-title">⚠ WORST MP — WK CURRENT</div>
+        <div class="exec-card-value">${worstMarket.mp}</div>
+        <div class="exec-card-sub">${worstMarket.latest!==Infinity?formatMetricValue(worstMarket.latest):'—'} ${metricLabel}</div>
+        <div class="exec-card-note danger">${worstDeltaText?`▼ ${Math.abs(parseFloat(worstDeltaText)).toFixed(1)}% vs Wk ${prevWk}`:'No prior week'}</div>
+      </div>
+      <div class="exec-card amber">
+        <div class="exec-card-title">Critical Marketplace</div>
+        <div class="exec-card-value">${belowTargetCount} Marketplace</div>
+        <div class="exec-card-note warn">Below Target</div>
+        <div class="exec-card-bottom">SL &lt; ${targetSL}% in latest week</div>
+      </div>
+      <div class="exec-card purple">
+        <div class="exec-card-title">Most Improved MP</div>
+        <div class="exec-card-value">${mostImproved.mp}</div>
+        <div class="exec-card-sub">${mostImproved.delta>0?`▲ +${mostImproved.delta.toFixed(1)}%`:'—'}</div>
+        <div class="exec-card-note accent">vs Wk ${prevWk || 'n/a'}</div>
+      </div>
     </div>
     <div class="legend-row">
       <span>Legend:</span>
