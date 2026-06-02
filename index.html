@@ -738,23 +738,7 @@ function renderMOverview(){
   </div>
 
   <!-- ROW 3: INSIGHTS & TREND ANALYSIS -->
-  <div style="display:grid;grid-template-columns:1fr 1.2fr 1.8fr 1fr;gap:16px;margin-bottom:24px;">
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📊 Growth Analysis</div>
-      <div style="font-size:10px;color:var(--text2);line-height:1.8;">`;
-  
-  if(mos.length>1){
-    const bestGrowth=mos.slice(1).reduce((a,b)=>((b.qty-mos[mos.indexOf(b)-1].qty)/mos[mos.indexOf(b)-1].qty*100)>((a.qty-mos[mos.indexOf(a)-1].qty)/mos[mos.indexOf(a)-1].qty*100)?b:a);
-    const worstGrowth=mos.slice(1).reduce((a,b)=>((b.qty-mos[mos.indexOf(b)-1].qty)/mos[mos.indexOf(b)-1].qty*100)<((a.qty-mos[mos.indexOf(a)-1].qty)/mos[mos.indexOf(a)-1].qty*100)?b:a);
-    const growthValues=mos.slice(1).map((m,i)=>(m.qty-mos[i].qty)/mos[i].qty*100);
-    const avgGrowth=growthValues.length?+(growthValues.reduce((a,b)=>a+b,0)/growthValues.length).toFixed(2):0;
-    html+=`<strong>📈 Best Growth:</strong><br>${bestGrowth.lbl}<br><span style="color:#1D9E75;font-weight:700;">+${(((bestGrowth.qty-mos[mos.indexOf(bestGrowth)-1].qty)/mos[mos.indexOf(bestGrowth)-1].qty)*100).toFixed(1)}%</span><br><br>`;
-    html+=`<strong>📉 Worst Growth:</strong><br>${worstGrowth.lbl}<br><span style="color:#e05b5b;font-weight:700;">${(((worstGrowth.qty-mos[mos.indexOf(worstGrowth)-1].qty)/mos[mos.indexOf(worstGrowth)-1].qty)*100).toFixed(1)}%</span><br><br>`;
-    html+=`<strong>⚙️ Avg Growth:</strong><br><span style="color:${avgGrowth>=0?'#1D9E75':'#e05b5b'};font-weight:700;">${avgGrowth>=0?'+':''}${avgGrowth.toFixed(1)}%</span>`;
-  }else{
-    html+=`Minimal data untuk analisis pertumbuhan`;
-  }
-  html+=`</div></div>`;
+  <div style="display:grid;grid-template-columns:1.2fr 1.8fr 1fr;gap:16px;margin-bottom:24px;">`;
 
   html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
   <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Growth Qty MoM</div>
