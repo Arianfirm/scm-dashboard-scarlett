@@ -738,7 +738,7 @@ function renderMOverview(){
   </div>
 
   <!-- ROW 3: INSIGHTS & TREND ANALYSIS -->
-  <div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:16px;margin-bottom:24px;">
+  <div style="display:grid;grid-template-columns:1fr 1.2fr 1.8fr 1fr;gap:16px;margin-bottom:24px;">
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
       <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📊 Growth Analysis</div>
       <div style="font-size:10px;color:var(--text2);line-height:1.8;">`;
@@ -755,6 +755,12 @@ function renderMOverview(){
     html+=`Minimal data untuk analisis pertumbuhan`;
   }
   html+=`</div></div>`;
+
+  html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+  <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Growth Qty MoM</div>
+  <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Perubahan qty bulan ke bulan</div>
+  <div style="height:320px;position:relative;"><canvas id="moveWFChart"></canvas></div>
+</div>`;
 
   html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
     <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📈 Service Level Trend</div>
@@ -845,6 +851,97 @@ function renderMOverview(){
     data:{labels:mpCol?allMPs:[],datasets:[{data:mpqtys,backgroundColor:['#5b3fa8dd','#e879a0dd','#1D9E75dd','#e6944add','#e05b5bdd','#7c3aeddd'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:10},padding:8}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}% (${Math.round(v).toLocaleString('id-ID')})`}}}}},
     plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.05)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.70,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(((v/tot)*100).toFixed(0)+'%',x,y);ctx.restore();});}}]
+  });
+
+  killChart('moveWFChart');
+  const wfLabels = mos.map(m => m.lbl.split(' ')[0]);
+  const wfOffsets = [];
+  const wfValues  = [];
+  const wfColors  = [];
+  mos.forEach((m, i) => {
+    if (i === 0) {
+      wfOffsets.push(0);
+      wfValues.push(m.qty);
+      wfColors.push('#5b3fa8');
+    } else {
+      const delta = m.qty - mos[i-1].qty;
+      wfOffsets.push(Math.min(mos[i-1].qty, m.qty));
+      wfValues.push(Math.abs(delta));
+      wfColors.push(delta >= 0 ? '#1D9E75' : '#e05b5b');
+    }
+  });
+  charts['moveWFChart'] = new Chart(document.getElementById('moveWFChart'), {
+    type: 'bar',
+    data: {
+      labels: wfLabels,
+      datasets: [
+        {
+          label: 'offset',
+          data: wfOffsets,
+          backgroundColor: 'transparent',
+          borderWidth: 0,
+          stack: 'wf',
+          datalabels: { display: false }
+        },
+        {
+          label: 'Qty Change',
+          data: wfValues,
+          backgroundColor: wfColors,
+          borderColor: wfColors.map(c => c),
+          borderWidth: 1.5,
+          borderRadius: 4,
+          stack: 'wf',
+          datalabels: {
+            anchor: 'end',
+            align: 'end',
+            color: (ctx) => wfColors[ctx.dataIndex],
+            font: { weight: '700', size: 10 },
+            formatter: (v, ctx) => {
+              const i = ctx.dataIndex;
+              if (i === 0) return fmtLabel(mos[0].qty);
+              const delta = mos[i].qty - mos[i-1].qty;
+              return (delta >= 0 ? '+' : '-') + fmtLabel(Math.abs(delta));
+            },
+            display: true
+          }
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 28, right: 10 } },
+      plugins: {
+        legend: { display: false },
+        datalabels: {},
+        tooltip: {
+          callbacks: {
+            title: ctx => wfLabels[ctx[0].dataIndex],
+            label: ctx => {
+              if (ctx.datasetIndex === 0) return '';
+              const i = ctx.dataIndex;
+              if (i === 0) return `Total: ${fmtN(mos[0].qty)}`;
+              const delta = mos[i].qty - mos[i-1].qty;
+              return `Change: ${delta >= 0 ? '+' : ''}${fmtN(delta)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          title: { display: true, text: 'Bulan', color: '#6b5b8a', font: { size: 11, weight: '700' } },
+          ticks: { maxRotation: 45, font: { size: 9 } }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: { display: true, text: 'Qty', color: '#6b5b8a', font: { size: 11, weight: '700' } },
+          ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'jt' : v.toLocaleString('id-ID') },
+          grid: { color: '#e2daf2' }
+        }
+      }
+    }
   });
 
   killChart('moveSLChart');
