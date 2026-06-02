@@ -665,6 +665,20 @@ function renderHeatmap(){
 
   const latestSlRows = slCol ? filtered.filter(r=>String(r[wkCol])===String(latestWk)) : [];
   const avgSl = latestSlRows.length ? latestSlRows.reduce((sum,r)=>sum+toN(r[slCol]),0)/latestSlRows.length : 0;
+  const rankAvg={};
+  if(slCol){
+    filteredMPs.forEach(mp=>{
+      const slVals=displayWeeks.map(w=>{
+        const row=filtered.find(r=>r[mpCol]===mp&&String(r[wkCol])===String(w));
+        return row?toN(row[slCol]):0;
+      }).filter(v=>v>0);
+      rankAvg[mp]=slVals.length?slVals.reduce((a,b)=>a+b,0)/slVals.length:0;
+    });
+  }
+  const rankedMPs=Object.keys(rankAvg).sort((a,b)=>rankAvg[b]-rankAvg[a]);
+  const rankIndex={};
+  rankedMPs.forEach((mp,i)=>{rankIndex[mp]=i+1;});
+  const rankLabel=v=>{if(v===1)return'🥇 Rank 1';if(v===2)return'🥈 Rank 2';if(v===3)return'🥉 Rank 3';return v?`#${v}`:'-';};
   const targetSL = 90;
   const slGap = avgSl - targetSL;
   const slTrend = slGap >= 0 ? `+${slGap.toFixed(1)}% above target` : `${slGap.toFixed(1)}% below target`;
@@ -710,41 +724,63 @@ function renderHeatmap(){
   const maxV=isQtyMetric?Math.max(...Object.values(cell).map(c=>c.v),1):100;
 
   function cellColor(v){
-    if(!v||v===0)return{bg:'#f8f6ff',text:'#ccc5e8'};
+    if(!v||v===0)return{bg:'#f3f1f8',text:'#9c9aba'};
     if(isQtyMetric){
       const p=v/maxV;
-      if(p>=0.8)return{bg:'#1e3a8a',text:'#93c5fd'};
-      if(p>=0.5)return{bg:'#1d4ed8',text:'#bfdbfe'};
-      if(p>=0.2)return{bg:'#3b82f6',text:'#dbeafe'};
-      return        {bg:'#93c5fd',text:'#1e3a8a'};
+      if(p>=0.8)return{bg:'#1F8A70',text:'#effaf4'};
+      if(p>=0.5)return{bg:'#3F9F85',text:'#f4faf6'};
+      if(p>=0.2)return{bg:'#D3E7DA',text:'#1F3D33'};
+      return        {bg:'#EEF6F2',text:'#2A4A3E'};
     }
     if(isRateMetric){
-      if(v<=2) return{bg:'#064e3b',text:'#6ee7b7'};
-      if(v<=4) return{bg:'#065f46',text:'#34d399'};
-      if(v<=6) return{bg:'#78350f',text:'#fcd34d'};
-      if(v<=9) return{bg:'#92400e',text:'#fbbf24'};
-      if(v<=12)return{bg:'#7f1d1d',text:'#fca5a5'};
-      return       {bg:'#991b1b',text:'#f87171'};
+      if(v<=2) return{bg:'#1F8A70',text:'#effaf4'};
+      if(v<=4) return{bg:'#57A389',text:'#f5fbf7'};
+      if(v<=6) return{bg:'#D99A2B',text:'#2F2A13'};
+      if(v<=9) return{bg:'#C28528',text:'#2B230F'};
+      if(v<=12)return{bg:'#C44536',text:'#fff4f2'};
+      return       {bg:'#9E2A2F',text:'#fff3f4'};
     }
-    if(v>=97)return{bg:'#064e3b',text:'#6ee7b7'};
-    if(v>=95)return{bg:'#065f46',text:'#34d399'};
-    if(v>=93)return{bg:'#047857',text:'#6ee7b7'};
-    if(v>=90)return{bg:'#78350f',text:'#fcd34d'};
-    if(v>=87)return{bg:'#92400e',text:'#fbbf24'};
-    if(v>=85)return{bg:'#7f1d1d',text:'#fca5a5'};
-    return       {bg:'#991b1b',text:'#f87171'};
+    if(v>=97)return{bg:'#1F8A70',text:'#effaf4'};
+    if(v>=95)return{bg:'#2F967A',text:'#f3fbf7'};
+    if(v>=93)return{bg:'#48AB89',text:'#f5fbf8'};
+    if(v>=90)return{bg:'#D99A2B',text:'#2F2A13'};
+    if(v>=87)return{bg:'#C07A23',text:'#2D260F'};
+    if(v>=85)return{bg:'#C44536',text:'#fff4f2'};
+    return       {bg:'#9E2A2F',text:'#fff3f4'};
   }
   function fmtV(v){return isQtyMetric?fmtQ(v):v.toFixed(1)+'%';}
   function fmtQ(v){if(v>=1e6)return(v/1e6).toFixed(1)+'jt';if(v>=1e3)return(v/1e3).toFixed(1)+'rb';return Math.round(v).toString();}
 
   let html=`
   <style>
+  #page-heatmap{background:linear-gradient(180deg,#F8F7FC 0%,#F2F0F8 100%);}
+  .exec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:20px;}
+  .exec-card{background:#221C4A;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:26px;position:relative;overflow:hidden;box-shadow:0 18px 40px rgba(34,28,74,0.12);min-height:176px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;}
+  .exec-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;border-radius:0 0 8px 0;background:transparent;}
+  .exec-card.green::before{background:#00D68F;}
+  .exec-card.red::before{background:#FF6B6B;}
+  .exec-card.amber::before{background:#FFC107;}
+  .exec-card.purple::before{background:#8B5CF6;}
+  .exec-card-title{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#E7E3FF;margin-bottom:12px;}
+  .exec-card-value{font-size:34px;font-weight:800;line-height:1.05;color:#FFFFFF;margin-bottom:10px;}
+  .exec-card-sub{font-size:14px;font-weight:600;color:#D8D2FF;line-height:1.25;margin-bottom:10px;}
+  .exec-card-note{font-size:13px;font-weight:700;line-height:1.3;}
+  .exec-card-note.success{color:#98FFDE;}
+  .exec-card-note.danger{color:#FF9CA8;}
+  .exec-card-note.warn{color:#FFE08C;}
+  .exec-card-note.accent{color:#C8B0FF;}
+  .exec-card-bottom{font-size:11px;color:#A9A3C9;opacity:0.95;}
   .hm-wrap{overflow-x:auto;}
-  .hm-tbl{border-collapse:separate;border-spacing:0;font-size:11.5px;min-width:600px;}
-  .hm-th{padding:6px 10px;text-align:center;color:var(--text2);font-size:10px;font-weight:600;white-space:nowrap;background:var(--card);border-bottom:2px solid var(--border);}
-  .hm-th:first-child{text-align:left;min-width:130px;border-right:2px solid var(--border);position:sticky;left:0;background:var(--card);z-index:2;}
+  .hm-tbl{border-collapse:separate;border-spacing:0;font-size:12px;min-width:700px;}
+  .hm-th{padding:8px 12px;text-align:center;color:#6F6C8C;font-size:11px;font-weight:700;white-space:nowrap;background:#F8F7FC;border-bottom:2px solid #E5E1F0;}
+  .hm-th.rank-col{position:sticky;left:0;z-index:3;background:#F8F7FC;text-align:left;min-width:72px;border-right:2px solid #E5E1F0;}
+  .hm-th.marketplace-col{position:sticky;left:72px;z-index:2;text-align:left;min-width:170px;border-right:2px solid #E5E1F0;}
   .hm-th.latest{color:var(--blue);font-weight:700;}
-  .hm-rl{padding:10px 12px 10px 8px;font-weight:600;font-size:12px;border-right:2px solid var(--border);border-bottom:1px solid var(--border);background:#faf9ff;position:sticky;left:0;z-index:1;white-space:nowrap;}
+  .hm-rank{padding:12px 10px 12px 14px;font-weight:700;font-size:12px;background:#F8F7FC;color:#3C3B5F;position:sticky;left:0;z-index:2;border-right:2px solid #E5E1F0;}
+  .hm-rl{padding:12px 12px 12px 14px;font-weight:600;font-size:12px;border-right:2px solid #E5E1F0;border-bottom:1px solid #E5E1F0;background:#F8F7FC;position:sticky;left:72px;z-index:1;white-space:nowrap;color:#2F2D4B;}
+  .hm-rl .rl-sub{display:block;font-size:10px;color:#7C7A96;font-family:monospace;margin-top:4px;}
+  .hm-cell{padding:0;border-bottom:1px solid rgba(97,92,148,0.12);border-right:1px solid rgba(97,92,148,0.1);cursor:pointer;transition:transform 0.15s,filter 0.15s;min-width:86px;position:relative;}
+  .hm-cell:hover{filter:brightness(1.05);transform:translateY(-1px);}
   .hm-rl .rl-sub{display:block;font-size:9px;color:var(--text2);font-family:monospace;margin-top:2px;}
   .hm-cell{padding:0;border-bottom:1px solid rgba(0,0,0,0.1);border-right:1px solid rgba(0,0,0,0.08);cursor:pointer;transition:filter 0.12s;min-width:72px;position:relative;}
   .hm-cell:hover{filter:brightness(1.2);z-index:1;}
@@ -757,16 +793,25 @@ function renderHeatmap(){
   .hm-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a0a2e;}
   .tt-r{display:flex;justify-content:space-between;gap:14px;margin-bottom:2px;font-size:10px;}
   .tt-k{color:#8b82b0;}.tt-v{font-weight:600;}
-  .hm-tot-row .hm-rl{color:var(--blue);border-top:2px solid var(--border);font-weight:700;}
-  .hm-tot-row .hm-cell{border-top:2px solid var(--border);}
-  .hm-avg-cell{text-align:center;padding:0;border-left:2px solid var(--border);border-bottom:1px solid var(--border);}
-  .legend-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:10px;color:var(--text2);}
+  .hm-tot-row .hm-rank{background:#F8F7FC;color:#3C3B5F;}
+  .hm-tot-row .hm-rl{color:#2F2D4B;border-top:2px solid #E5E1F0;font-weight:700;}
+  .hm-tot-row .hm-cell{border-top:2px solid rgba(97,92,148,0.18);}
+  .hm-avg-cell{text-align:center;padding:0;border-left:2px solid #E5E1F0;border-bottom:1px solid rgba(97,92,148,0.12);}
+  .legend-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:10px;color:#7C7A96;}
+  .hm-subtitle{font-size:12px;color:#7C7A96;margin-top:4px;line-height:1.4;}
+  #page-heatmap .filter-bar{padding:14px 18px;gap:14px;align-items:center;}
+  #page-heatmap .filter-item{margin-bottom:0;}
+  #page-heatmap .filter-bar-label{margin-right:12px;}
+  #page-heatmap .btn-reset{margin-left:auto;}
   .leg-swatch{display:flex;gap:2px;align-items:center;}
   .leg-box{width:16px;height:12px;border-radius:2px;}
   </style>
   <div class="kpi-matrix-card">
     <div class="kpi-matrix-header">
-      <div class="kpi-matrix-title">🟥 ${metricLabel} Heatmap — Week × Marketplace</div>
+      <div>
+        <div class="kpi-matrix-title">🟥 ${metricLabel} Heatmap — Week × Marketplace</div>
+        <div class="hm-subtitle">Performance Distribution by Week</div>
+      </div>
       <span class="kpi-week-badge">Wk ${displayWeeks[0]} → Wk ${latestWk} · ${displayWeeks.length} weeks</span>
     </div>
     <div class="exec-cards">
@@ -815,7 +860,8 @@ function renderHeatmap(){
       <span>▲▼ = WoW delta · angka bawah = total qty</span>
     </div>
     <div class="hm-wrap"><table class="hm-tbl"><thead><tr>
-      <th class="hm-th">Marketplace</th>`;
+      <th class="hm-th rank-col">Rank</th>
+      <th class="hm-th marketplace-col">Marketplace</th>`;
 
   displayWeeks.forEach(w=>{
     const isLast=String(w)===String(latestWk);
@@ -830,7 +876,8 @@ function renderHeatmap(){
     const avg=nonZero.length?(nonZero.reduce((a,b)=>a+b,0)/nonZero.length):0;
     const totQty=qtys.reduce((a,b)=>a+b,0);
     const {bg:aBg,text:aTxt}=cellColor(avg);
-    html+=`<tr><td class="hm-rl">${mp}<span class="rl-sub">avg ${isQtyMetric?fmtQ(avg):avg.toFixed(1)+'%'} · ${fmtQ(totQty)}</span></td>`;
+    const rank = rankIndex[mp]||'-';
+    html+=`<tr><td class="hm-rank">${rankLabel(rank)}</td><td class="hm-rl marketplace-col">${mp}<span class="rl-sub">avg ${isQtyMetric?fmtQ(avg):avg.toFixed(1)+'%'} · ${fmtQ(totQty)}</span></td>`;
     vals.forEach((v,i)=>{
       const prev=i>0?vals[i-1]:null;
       const d=(prev!==null&&v>0&&prev>0)?(v-prev):null;
@@ -859,7 +906,7 @@ function renderHeatmap(){
   });
 
   // TOTAL ROW — FIX: use filteredMPs for aggregate
-  html+=`<tr class="hm-tot-row"><td class="hm-rl" style="color:var(--blue)">ALL MP<span class="rl-sub">weighted avg</span></td>`;
+  html+=`<tr class="hm-tot-row"><td class="hm-rank">—</td><td class="hm-rl marketplace-col" style="color:var(--blue)">ALL MP<span class="rl-sub">weighted avg</span></td>`;
   const totVals=displayWeeks.map(w=>{
     const rowVals=filteredMPs.map(mp=>cell[`${mp}__${w}`]?.v||0).filter(v=>v>0);
     return rowVals.length?(rowVals.reduce((a,b)=>a+b,0)/rowVals.length):0;
