@@ -966,6 +966,7 @@ function renderMOverview(){
   const retQCol =findCol(rows,['qtyreturn','qty return']);
   const canQCol =findCol(rows,['qtycancelled','qty cancelled']);
   const delCol  =findCol(rows,['qtydelivered','delivered']);
+  const disCol2 =findCol(rows,['qtydispatched','dispatched']);
 
   const allMPs  =[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort();
   const allYears=[...new Set(rows.map(r=>r[yearCol]).filter(Boolean))].sort();
@@ -989,7 +990,7 @@ function renderMOverview(){
     mMap[key].canS +=canPCol?toN(r[canPCol]):0;
     mMap[key].retQ +=retQCol?toN(r[retQCol]):0;
     mMap[key].canQ +=canQCol?toN(r[canQCol]):0;
-    mMap[key].delQ +=delCol?toN(r[delCol]):0;
+    mMap[key].delQ +=(delCol?toN(r[delCol]):0)+(disCol2?toN(r[disCol2]):0);
     mMap[key].n++;
   });
   const mos=Object.values(mMap).sort((a,b)=>a.key.localeCompare(b.key));
@@ -1013,7 +1014,7 @@ function renderMOverview(){
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;">
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #5b3fa8;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📦 Total Qty</div><div style="font-size:24px;font-weight:800;color:#5b3fa8;margin-bottom:4px;">${fmtN(totQty)}</div><div style="font-size:10px;color:var(--text2);">${mos.length} bulan</div></div>
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🔢 Total Order</div><div style="font-size:24px;font-weight:800;color:#1D9E75;margin-bottom:4px;">${fmtN(totOrd)}</div><div style="font-size:10px;color:var(--text2);">Unique orders</div></div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e6944a;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">✅ Total Delivery</div><div style="font-size:24px;font-weight:800;color:#e6944a;margin-bottom:4px;">${fmtN(totDel)}</div><div style="font-size:10px;color:var(--text2);">Terpenuhi</div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e6944a;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🚚 Total Terkirim</div><div style="font-size:24px;font-weight:800;color:#e6944a;margin-bottom:4px;">${fmtN(totDel)}</div><div style="font-size:10px;color:var(--text2);">Delivered + Dispatched</div></div>
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🎯 Service Level %</div><div style="font-size:24px;font-weight:800;color:${avgSL>=95?'#1D9E75':avgSL>=85?'#e6944a':'#e05b5b'};margin-bottom:4px;">${fmtPct(avgSL)}</div><div style="font-size:10px;color:var(--text2);">Rata-rata</div></div>
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e05b5b;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">❌ Total Loss</div><div style="font-size:24px;font-weight:800;color:#e05b5b;margin-bottom:4px;">${fmtN(totLoss)}</div><div style="font-size:10px;color:var(--text2);">Return + Cancel</div></div>
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e879a0;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📈 Growth MoM %</div><div style="font-size:24px;font-weight:800;color:${growthMom>=0?'#1D9E75':'#e05b5b'};margin-bottom:4px;">${growthMom>=0?'▲':'▼'} ${Math.abs(growthMom).toFixed(1)}%</div><div style="font-size:10px;color:var(--text2);">Bulan terakhir</div></div>
