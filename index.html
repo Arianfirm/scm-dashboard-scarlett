@@ -17,8 +17,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;}
-
-/* SIDEBAR */
 .sidebar{width:210px;background:var(--sidebar);padding:18px 12px;flex-shrink:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;}
 .logo{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px;}
 .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#e879a0,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;box-shadow:0 4px 12px rgba(232,121,160,0.4);}
@@ -32,16 +30,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .nav-item:hover:not(.active){background:rgba(255,255,255,0.06);color:#fff;}
 .nav-icon{font-size:15px;width:20px;text-align:center;}
 .sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);font-size:10px;color:var(--sidebar-text);text-align:center;line-height:1.7;}
-
-/* MAIN */
 .main{margin-left:210px;flex:1;padding:24px;min-width:0;}
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
 .page-title{font-size:20px;font-weight:800;color:var(--text);}
 .page-sub{font-size:12px;color:var(--text2);margin-top:2px;}
 .live-badge{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--text2);font-weight:500;white-space:nowrap;}
 .live-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;}
-
-/* FILTER BAR */
 .filter-bar{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .filter-bar-label{font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;margin-right:4px;}
 .filter-item{display:flex;align-items:center;gap:6px;}
@@ -51,17 +45,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .filter-divider{width:1px;height:20px;background:var(--border);margin:0 2px;}
 .btn-reset{font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-weight:500;}
 .btn-reset:hover{border-color:var(--blue);color:var(--blue);}
-
-/* PAGE */
 .page{display:none;}
 .page.active{display:block;}
-
-/* LOADING */
 .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--text2);}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* KPI MATRIX */
 .kpi-matrix-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px;overflow-x:auto;}
 .kpi-matrix-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
 .kpi-matrix-title{font-size:13px;font-weight:700;color:var(--text);}
@@ -80,8 +68,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .row-pct-qty td:first-child{color:var(--text);}
 .col-order{background:#f0f7ff!important;color:var(--blue)!important;font-weight:700!important;}
 .col-qty{background:#f0fff8!important;color:#1D9E75!important;font-weight:700!important;}
-
-/* SERVICE LEVEL CARDS */
 .sl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
 .sl-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;}
 .sl-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
@@ -92,8 +78,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .sl-label{font-size:10px;color:var(--text2);font-weight:500;margin-bottom:4px;}
 .sl-value{font-size:18px;font-weight:800;color:var(--text);}
 .sl-sub{font-size:10px;color:var(--text2);margin-top:3px;}
-
-/* SUMMARY KPI CARDS (untuk Daily & Monthly) */
 .kpi-cards-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;}
 .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--blue);}
@@ -103,8 +87,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .kpi-card-label{font-size:10px;color:var(--text2);font-weight:500;margin-bottom:5px;}
 .kpi-card-value{font-size:20px;font-weight:800;color:var(--text);}
 .kpi-card-sub{font-size:10px;color:var(--text2);margin-top:3px;}
-
-/* CHART */
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
 .chart-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
 .chart-sub{font-size:10.5px;color:var(--text2);margin-bottom:10px;}
@@ -115,14 +97,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .chart-wrap.tall{height:320px;}
 .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 @media(max-width:900px){.chart-row{grid-template-columns:1fr;}}
-
-/* METRIC TABS */
 .metric-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
 .metric-tab{padding:4px 11px;border-radius:5px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.12s;}
 .metric-tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
 .metric-tab:hover:not(.active){border-color:var(--blue);color:var(--blue);}
-
-/* TABLE */
 .table-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;overflow-x:auto;}
 .table-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
 .table-title{font-size:12.5px;font-weight:700;color:var(--text);}
@@ -142,12 +120,9 @@ td.sl-bad{color:var(--red);font-weight:700;}
 .wk{display:inline-block;background:#f0eef8;color:var(--blue);font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid #ddd6f8;}
 .wk.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
 .error-state{background:#fff5f5;border:1px solid #fecdd3;border-radius:10px;padding:14px 18px;color:var(--red);font-size:12.5px;margin-bottom:14px;}
-
-/* COD BREAKDOWN */
 .cod-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
 .cod-badge.cod{background:#fff3e0;color:#e6944a;border:1px solid #f9c96a;}
 .cod-badge.ncod{background:#e8f5e9;color:#1D9E75;border:1px solid #a5d6a7;}
-.cod-split{display:flex;gap:6px;justify-content:center;align-items:center;}
 .trend-selector{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
 .trend-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.12s;color:var(--text2);}
 .trend-btn[data-period="30"]{border-color:#5b3fa8;color:#5b3fa8;}
@@ -263,23 +238,52 @@ td.sl-bad{color:var(--red);font-weight:700;}
   <!-- WOW HEATMAP -->
   <div class="page" id="page-heatmap">
     <div class="page-header">
-      <div><div class="page-title">🟥 WoW Heatmap</div><div class="page-sub">Service Level % per Marketplace per Week</div></div>
+      <div><div class="page-title">🟥 WoW Heatmap</div><div class="page-sub">Performa per Marketplace per Week — pattern langsung terlihat</div></div>
       <div class="live-badge"><div class="dot"></div><span id="hmStatus">Memuat...</span></div>
     </div>
     <div class="filter-bar">
       <span class="filter-bar-label">🔽 Filter:</span>
-      <div class="filter-item"><label>Metric</label>
-        <select class="filter-select" id="hmMetric" onchange="renderHeatmap()">
-          <option value="sl">SL %</option>
-          <option value="slexcl">SL Excl %</option>
-          <option value="ret">Return %</option>
-          <option value="can">Cancel %</option>
-        </select>
+      <div class="filter-item"><label>Marketplace</label>
+        <select class="filter-select" id="hmMP" onchange="renderHeatmap()"><option value="all">Semua Marketplace</option></select>
+      </div>
+      <div class="filter-item"><label>Week</label>
+        <select class="filter-select" id="hmWkFrom" onchange="renderHeatmap()" style="min-width:82px"><option value="all">Dari awal</option></select>
+        <span style="margin:0 4px;color:var(--text2);font-size:11px">–</span>
+        <select class="filter-select" id="hmWkTo" onchange="renderHeatmap()" style="min-width:82px"><option value="all">Akhir</option></select>
+      </div>
+      <div class="filter-item" style="align-items:center;gap:6px;">
+        <label>Metric</label>
+        <div id="hmMetricBtns" style="display:flex;gap:4px;flex-wrap:wrap;">
+          <button type="button" class="metric-tab active" onclick="hmSetMetric('sl',this)">SL %</button>
+          <button type="button" class="metric-tab" onclick="hmSetMetric('slexcl',this)">SL Excl %</button>
+          <button type="button" class="metric-tab" onclick="hmSetMetric('ret',this)">Return %</button>
+          <button type="button" class="metric-tab" onclick="hmSetMetric('can',this)">Cancel %</button>
+          <button type="button" class="metric-tab" onclick="hmSetMetric('qty',this)">Total Qty</button>
+        </div>
+      </div>
+      <div class="filter-item"><label>Category</label>
+        <select class="filter-select" id="hmCat" onchange="renderHeatmap()"><option value="all">Semua Cat</option></select>
       </div>
       <div class="filter-divider"></div>
-      <button class="btn-reset" onclick="document.getElementById('hmMetric').value='sl';renderHeatmap()">↺ Reset</button>
+      <button class="btn-reset" onclick="resetHeatmapFilter()">↺ Reset</button>
     </div>
     <div id="hmContent"><div class="loading-state"><div class="spinner"></div><div>Memuat Heatmap...</div></div></div>
+  </div>
+
+  <!-- MONTHLY OVERVIEW -->
+  <div class="page" id="page-moverview">
+    <div class="page-header">
+      <div><div class="page-title">📅 Monthly Overview</div><div class="page-sub">Ringkasan volume & kualitas per bulan</div></div>
+      <div class="live-badge"><div class="dot"></div><span id="moveStatus">Memuat...</span></div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-bar-label">🔽 Filter:</span>
+      <div class="filter-item"><label>Marketplace</label><select class="filter-select" id="moveMP" onchange="renderMOverview()"><option value="all">Semua</option></select></div>
+      <div class="filter-item"><label>Tahun</label><select class="filter-select" id="moveYear" onchange="renderMOverview()"><option value="all">Semua</option></select></div>
+      <div class="filter-divider"></div>
+      <button class="btn-reset" onclick="document.getElementById('moveMP').value='all';document.getElementById('moveYear').value='all';renderMOverview()">↺ Reset</button>
+    </div>
+    <div id="moveContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data...</div></div></div>
   </div>
 
   <!-- DAILY TREND -->
@@ -308,22 +312,6 @@ td.sl-bad{color:var(--red);font-weight:700;}
     <div id="dailyContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Daily...</div></div></div>
   </div>
 
-  <!-- MONTHLY OVERVIEW -->
-  <div class="page" id="page-moverview">
-    <div class="page-header">
-      <div><div class="page-title">📅 Monthly Overview</div><div class="page-sub">Ringkasan volume & kualitas per bulan</div></div>
-      <div class="live-badge"><div class="dot"></div><span id="moveStatus">Memuat...</span></div>
-    </div>
-    <div class="filter-bar">
-      <span class="filter-bar-label">🔽 Filter:</span>
-      <div class="filter-item"><label>Marketplace</label><select class="filter-select" id="moveMP" onchange="renderMOverview()"><option value="all">Semua</option></select></div>
-      <div class="filter-item"><label>Tahun</label><select class="filter-select" id="moveYear" onchange="renderMOverview()"><option value="all">Semua</option></select></div>
-      <div class="filter-divider"></div>
-      <button class="btn-reset" onclick="document.getElementById('moveMP').value='all';document.getElementById('moveYear').value='all';renderMOverview()">↺ Reset</button>
-    </div>
-    <div id="moveContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data...</div></div></div>
-  </div>
-
   <!-- MONTHLY TREND -->
   <div class="page" id="page-monthly">
     <div class="page-header">
@@ -339,7 +327,6 @@ td.sl-bad{color:var(--red);font-weight:700;}
     </div>
     <div id="monthlyContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Monthly...</div></div></div>
   </div>
-
 
   <!-- COD TREND -->
   <div class="page" id="page-cod">
@@ -363,40 +350,28 @@ td.sl-bad{color:var(--red);font-weight:700;}
 </main>
 
 <script>
-// Register datalabels plugin
 Chart.register(ChartDataLabels);
 
-// Helper format label ringkas untuk chart
-const fmtLabel=v=>{
-  if(!v||v===0)return "";
-  if(v>=1e6)return (v/1e6).toFixed(1)+"jt";
-  if(v>=1e3)return (v/1e3).toFixed(0)+"rb";
-  return Math.round(v).toLocaleString("id-ID");
-};
+const fmtLabel=v=>{if(!v||v===0)return"";if(v>=1e6)return(v/1e6).toFixed(1)+"jt";if(v>=1e3)return(v/1e3).toFixed(0)+"rb";return Math.round(v).toLocaleString("id-ID");};
 const fmtLabelPct=v=>v>0?v.toFixed(1)+"%":"";
 
-// ─── CSV URLS ────────────────────────────────────────────────────────────────
-const CSV_KPI     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1726885858&single=true&output=csv';
-const CSV_MP      = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1508996446&single=true&output=csv';
-const CSV_PROD    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=747219576&single=true&output=csv';
-const CSV_CAT     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=971208042&single=true&output=csv';
-const CSV_DAILY   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=2067098956&single=true&output=csv';
-const CSV_MONTHLY = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=2093562578&single=true&output=csv';
-const CSV_COD      = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=739674568&single=true&output=csv';
-const CSV_COD_DAILY = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=80228433&single=true&output=csv';
+const CSV_KPI     ='https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1726885858&single=true&output=csv';
+const CSV_MP      ='https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=1508996446&single=true&output=csv';
+const CSV_PROD    ='https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=747219576&single=true&output=csv';
+const CSV_CAT     ='https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=971208042&single=true&output=csv';
+const CSV_DAILY   ='https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=2067098956&single=true&output=csv';
+const CSV_MONTHLY ='https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=2093562578&single=true&output=csv';
+const CSV_COD     ='https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=739674568&single=true&output=csv';
+const CSV_COD_DAILY='https://docs.google.com/spreadsheets/d/e/2PACX-1vS2NdMlschNnkdEjXjN_OO4vkbb6mdmhqBb7j0iSn77LTumByCFeNYoJcdA7fxhdp1rwGhkhCdO56Sw/pub?gid=80228433&single=true&output=csv';
 
 let D={kpi:[],mp:[],prod:[],cat:[],daily:[],monthly:[],cod:[],cod_daily:[]};
 let charts={};
-let mpMetric=null,prodMetric=null,catMetric=null;
+let mpMetric=null,prodMetric=null,catMetric=null,hmMetric='sl';
+let hmWeeksInit=false; // FIX: prevent hmWkFrom/To fillSel from resetting on every render
 const COLORS=['#5b3fa8','#e879a0','#1D9E75','#e6944a','#e05b5b','#7c3aed','#0891b2','#ca8a04','#be185d','#15803d'];
 
-// ─── UTILS ───────────────────────────────────────────────────────────────────
 const toN=v=>{if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));return isNaN(n)?0:n;};
-const fmtN=v=>{
-  if(v>=1e9)return 'Rp '+(v/1e9).toFixed(1)+'M';
-  if(v>=1e6)return 'Rp '+(v/1e6).toFixed(1)+'jt';
-  return Math.round(v).toLocaleString('id-ID');
-};
+const fmtN=v=>{if(v>=1e9)return'Rp '+(v/1e9).toFixed(1)+'M';if(v>=1e6)return'Rp '+(v/1e6).toFixed(1)+'jt';return Math.round(v).toLocaleString('id-ID');};
 const fmtPct=(v,d=2)=>v.toFixed(d)+'%';
 const fmt=(v,col='')=>{if(/%/.test(col))return toN(v).toFixed(2)+'%';return fmtN(toN(v));};
 const slClass=v=>v>=95?'sl-good':v>=85?'sl-warn':'sl-bad';
@@ -404,18 +379,11 @@ const slClass=v=>v>=95?'sl-good':v>=85?'sl-warn':'sl-bad';
 function findCol(data,kws){
   if(!data||!data.length)return null;
   const cols=Object.keys(data[0]);
-  for(const kw of kws){
-    const f=cols.find(c=>c.toLowerCase().replace(/[\s_-]/g,'').includes(kw.toLowerCase().replace(/[\s_-]/g,'')));
-    if(f)return f;
-  }
+  for(const kw of kws){const f=cols.find(c=>c.toLowerCase().replace(/[\s_-]/g,'').includes(kw.toLowerCase().replace(/[\s_-]/g,'')));if(f)return f;}
   return null;
 }
 function allCols(data){if(!data||!data.length)return[];return Object.keys(data[0]);}
-function fetchCSV(url){
-  return new Promise((res,rej)=>{
-    Papa.parse(url,{download:true,header:true,skipEmptyLines:true,complete:r=>res(r.data),error:e=>rej(e)});
-  });
-}
+function fetchCSV(url){return new Promise((res,rej)=>{Papa.parse(url,{download:true,header:true,skipEmptyLines:true,complete:r=>res(r.data),error:e=>rej(e)});});}
 function fillSel(id,vals,label){
   const el=document.getElementById(id);if(!el)return;
   const prev=el.value;
@@ -439,11 +407,7 @@ function renderKPI(){
   const qtyCol=findCol(rows,['totalqty','totalquantity'])||qtyCols.find(c=>/totalqty/i.test(c.replace(/[\s_-]/g,'')))||qtyCols[1]||qtyCols[0];
   const rawSub=qtyCols.filter(c=>c!==orderCol&&c!==qtyCol);
   const subCols=[...rawSub.filter(c=>/deliv/i.test(c)),...rawSub.filter(c=>/dispatch/i.test(c)),...rawSub.filter(c=>/cancel/i.test(c)),...rawSub.filter(c=>/return|retur/i.test(c)),...rawSub.filter(c=>!/deliv|dispatch|cancel|return|retur/i.test(c))].filter((c,i,a)=>a.indexOf(c)===i);
-  function findUniqueOrderForSub(subColName){
-    const keyword=subColName.replace(/qty|quantity|jumlah/gi,'').trim().split(/\s+/).filter(w=>w.length>2)[0]||'';
-    if(!keyword)return null;
-    return cols.find(c=>c!==orderCol&&c!==qtyCol&&c!==subColName&&!/%/.test(c)&&new RegExp(keyword,'i').test(c)&&/order/i.test(c))||null;
-  }
+  function findUniqueOrderForSub(s){const kw=s.replace(/qty|quantity|jumlah/gi,'').trim().split(/\s+/).filter(w=>w.length>2)[0]||'';if(!kw)return null;return cols.find(c=>c!==orderCol&&c!==qtyCol&&c!==s&&!/%/.test(c)&&new RegExp(kw,'i').test(c)&&/order/i.test(c))||null;}
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
   fillSel('kpiWeek',allWeeks,'Semua Week');
   const fWk=gv('kpiWeek');
@@ -459,35 +423,20 @@ function renderKPI(){
   subCols.forEach(c=>html+=`<th>${stripQtyLabel(c)}</th>`);
   html+=`</tr></thead><tbody>`;
   html+=`<tr class="row-nilai"><td style="color:var(--blue);font-weight:700">🔢 Unique Order</td><td class="col-order">${fmtN(totalOrder)}</td>`;
-  subCols.forEach(c=>{
-    const uCol=findUniqueOrderForSub(c),v=uCol?sum(uCol):null;
-    if(v!==null&&v>0)html+=`<td style="color:var(--blue);font-weight:600">${fmtN(v)}</td>`;
-    else{const sq=sum(c);if(sq>0&&totalQty>0)html+=`<td style="color:var(--blue);font-weight:600;opacity:0.75">${fmtN(Math.round(sq/totalQty*totalOrder))}<sup style="font-size:8px">~</sup></td>`;else html+=`<td style="color:#bbb">0</td>`;}
-  });
+  subCols.forEach(c=>{const uCol=findUniqueOrderForSub(c),v=uCol?sum(uCol):null;if(v!==null&&v>0)html+=`<td style="color:var(--blue);font-weight:600">${fmtN(v)}</td>`;else{const sq=sum(c);if(sq>0&&totalQty>0)html+=`<td style="color:var(--blue);font-weight:600;opacity:0.75">${fmtN(Math.round(sq/totalQty*totalOrder))}<sup style="font-size:8px">~</sup></td>`;else html+=`<td style="color:#bbb">0</td>`;}});
   html+=`</tr><tr class="row-nilai"><td style="color:var(--green);font-weight:700">📦 Total Qty</td><td class="col-qty">${fmtN(totalQty)}</td>`;
   subCols.forEach(c=>html+=`<td style="font-weight:600">${fmtN(sum(c))}</td>`);
   html+=`</tr><tr class="row-pct-qty"><td style="color:var(--text2);font-weight:600">📊 Service Level Qty</td><td style="color:#ccc">—</td>`;
   subCols.forEach(c=>{const pct=totalQty>0?(sum(c)/totalQty*100):0;const color=/deliv/i.test(c)?'var(--green)':/cancel|return/i.test(c)?'var(--red)':'var(--orange)';html+=`<td style="color:${color};font-weight:600">${fmtPct(pct)}</td>`;});
   html+=`</tr></tbody></table></div>`;
-
-  if(pctCols.length){
-    html+=`<div style="margin-bottom:6px;font-size:11px;font-weight:600;color:var(--text2);">📈 Service Level & Rate</div><div class="sl-grid">`;
-    pctCols.forEach(c=>{const pct=toN(sum(c));const cls=pct>=95?'good':pct>=85?'warn':'bad';html+=`<div class="sl-card ${cls}"><div class="sl-label">${c}</div><div class="sl-value">${fmtPct(pct)}</div><div class="sl-sub">${cardLabel}</div></div>`;});
-    html+=`</div>`;
-  }
-
-  html+=`<div class="chart-card"><div class="chart-title">📈 Trend Mingguan</div><div class="chart-sub">Bar = ${qtyCol} | Line = ${orderCol}</div>
-  <div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>${qtyCol} (Bar)</div><div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>${orderCol} (Line)</div></div>
-  <div class="chart-wrap"><canvas id="kpiChart"></canvas></div></div>`;
-
+  if(pctCols.length){html+=`<div style="margin-bottom:6px;font-size:11px;font-weight:600;color:var(--text2);">📈 Service Level & Rate</div><div class="sl-grid">`;pctCols.forEach(c=>{const pct=toN(sum(c));const cls=pct>=95?'good':pct>=85?'warn':'bad';html+=`<div class="sl-card ${cls}"><div class="sl-label">${c}</div><div class="sl-value">${fmtPct(pct)}</div><div class="sl-sub">${cardLabel}</div></div>`;});html+=`</div>`;}
+  html+=`<div class="chart-card"><div class="chart-title">📈 Trend Mingguan</div><div class="chart-sub">Bar = ${qtyCol} | Line = ${orderCol}</div><div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>${qtyCol} (Bar)</div><div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>${orderCol} (Line)</div></div><div class="chart-wrap"><canvas id="kpiChart"></canvas></div></div>`;
   const serviceLevelCol=pctCols.find(c=>/service level/i.test(c));
   const slExcludeCol=pctCols.find(c=>/sl[^\w]*excl|exclude.*cancel|exclude.*return|sl\s*excl/i.test(c));
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Semua Data per Week</div><div class="table-meta">${allWeeks.length} weeks</div></div><div style="overflow-x:auto"><table><thead><tr><th>Week</th>`;
-  html+=`<th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`;
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Semua Data per Week</div><div class="table-meta">${allWeeks.length} weeks</div></div><div style="overflow-x:auto"><table><thead><tr><th>Week</th><th style="text-align:right;color:var(--blue)">${orderCol}</th><th style="text-align:right;color:var(--green)">${qtyCol}</th>`;
   subCols.forEach(c=>html+=`<th style="text-align:right">${stripQtyLabel(c)}</th>`);
   subCols.forEach(c=>html+=`<th style="text-align:right;color:var(--orange)">SL%: ${stripQtyLabel(c)}</th>`);
-  html+=`<th style="text-align:right;color:#8a44ff;font-weight:700">Service Level %</th><th style="text-align:right;color:var(--green);font-weight:700">SL Excl Cancel Return %</th>`;
-  html+=`</tr></thead><tbody>`;
+  html+=`<th style="text-align:right;color:#8a44ff;font-weight:700">Service Level %</th><th style="text-align:right;color:var(--green);font-weight:700">SL Excl Cancel Return %</th></tr></thead><tbody>`;
   const deliveredCol=findCol(rows,['qtydelivered','delivered']);
   const returnCol=findCol(rows,['qtyreturn','return']);
   const cancelCol=findCol(rows,['qtycancelled','cancelled']);
@@ -498,31 +447,24 @@ function renderKPI(){
     const wDelivered=wRows.reduce((s,r)=>s+toN(r[deliveredCol]),0);
     const wRetCan=wRows.reduce((s,r)=>s+toN(r[returnCol])+toN(r[cancelCol]),0);
     const wQtyExclude=wQty-wRetCan;
-    const slIncludeRaw=serviceLevelCol ? wRows.reduce((s,r)=>s+toN(r[serviceLevelCol]),0) : (wQty>0?(wDelivered/wQty*100):0);
-    const slExcludeRaw=slExcludeCol ? wRows.reduce((s,r)=>s+toN(r[slExcludeCol]),0) : (wQtyExclude>0?(wDelivered/wQtyExclude*100):0);
+    const slIncludeRaw=serviceLevelCol?wRows.reduce((s,r)=>s+toN(r[serviceLevelCol]),0):(wQty>0?(wDelivered/wQty*100):0);
+    const slExcludeRaw=slExcludeCol?wRows.reduce((s,r)=>s+toN(r[slExcludeCol]),0):(wQtyExclude>0?(wDelivered/wQtyExclude*100):0);
     html+=`<tr class="${isSelected?'highlighted':''}"><td><span class="wk ${isSelected?'selected':''}">${isSelected?'▶ ':''} Wk ${wk}</span></td>`;
     [orderCol,qtyCol,...subCols].forEach(c=>{html+=`<td class="num">${fmtN(wRows.reduce((s,r)=>s+toN(r[c]),0))}</td>`;});
     subCols.forEach(c=>{const v=wRows.reduce((s,r)=>s+toN(r[c]),0);html+=`<td class="num" style="color:var(--orange)">${fmtPct(wQty>0?(v/wQty*100):0)}</td>`;});
-    html+=`<td class="num" style="color:#8a44ff;font-weight:600">${fmtPct(slIncludeRaw)}</td><td class="num" style="color:var(--green);font-weight:600">${fmtPct(slExcludeRaw)}</td>`;
-    html+=`</tr>`;
+    html+=`<td class="num" style="color:#8a44ff;font-weight:600">${fmtPct(slIncludeRaw)}</td><td class="num" style="color:var(--green);font-weight:600">${fmtPct(slExcludeRaw)}</td></tr>`;
   });
   html+=`</tbody></table></div></div>`;
   document.getElementById('kpiContent').innerHTML=html;
   document.getElementById('kpiStatus').textContent=`${allWeeks.length} weeks · Wk ${latestWk} latest`;
-
   const qtyVals=allWeeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[qtyCol]),0));
   const orderVals=allWeeks.map(wk=>rows.filter(r=>String(r[wkCol])===String(wk)).reduce((s,r)=>s+toN(r[orderCol]),0));
   killChart('kpiChart');
   const ctx=document.getElementById('kpiChart');if(!ctx)return;
   charts['kpiChart']=new Chart(ctx,{data:{labels:allWeeks.map(w=>'Wk '+w),datasets:[
-    {type:'bar',label:qtyCol,data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:4,yAxisID:'yQty',order:2,
-      datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
-    {type:'line',label:orderCol,data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.35,fill:false,yAxisID:'yOrder',order:1,
-      datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},
-    tooltip:{callbacks:{label:c=>{return ` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},
-    datalabels:{}},
-  scales:{x:{display:true,title:{display:true,text:'Week',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},yQty:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:11,weight:'700'}},ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},yOrder:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:11,weight:'700'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
+    {type:'bar',label:qtyCol,data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:4,yAxisID:'yQty',order:2,datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'line',label:orderCol,data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.35,fill:false,yAxisID:'yOrder',order:1,datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},datalabels:{}},scales:{x:{display:true,title:{display:true,text:'Week',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},yQty:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:11,weight:'700'}},ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},yOrder:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:11,weight:'700'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
 }
 
 // ─── MARKETPLACE ─────────────────────────────────────────────────────────────
@@ -595,7 +537,7 @@ function renderProduct(){
   document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
   killChart('prodBar');
   const top10=skus.slice(0,10);
-  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:top10.map(()=>'#8a44ffbb'),borderColor:'#8a44ff',borderWidth:1.5,borderRadius:5,datalabels:{anchor:'end',align:'end',color:'#3f136a',font:{weight:'700',size:11},formatter:(v)=>fmtN(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{}},scales:{x:{beginAtZero:true,title:{display:true,text:prodMetric,color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>fmtN(v)}},y:{title:{display:true,text:'SKU / Product',color:'#6b5b8a',font:{size:11,weight:'700'}}}}}});
+  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:top10.map(()=>'#8a44ffbb'),borderColor:'#8a44ff',borderWidth:1.5,borderRadius:5,datalabels:{anchor:'end',align:'end',color:'#3f136a',font:{weight:'700',size:11},formatter:v=>fmtN(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{}},scales:{x:{beginAtZero:true,title:{display:true,text:prodMetric,color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>fmtN(v)}},y:{title:{display:true,text:'SKU / Product',color:'#6b5b8a',font:{size:11,weight:'700'}}}}}});
 }
 function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
 
@@ -629,17 +571,237 @@ function renderCategory(){
   document.getElementById('catStatus').textContent=`${sc.length} kategori · ${sw.length} weeks`;
   const pieData=sc.map(cat=>filtered.filter(r=>r[catCol]===cat).reduce((s,r)=>s+toN(r[catMetric]),0));
   killChart('catPie');
-  charts['catPie']=new Chart(document.getElementById('catPie'),{type:'doughnut',data:{labels:sc,datasets:[{data:pieData,backgroundColor:COLORS.map(c=>c+'dd'),borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return `${pct}%`;}}}}},plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.04)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.72,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 11px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.25)';ctx.shadowBlur=4;ctx.fillText(((v/tot)*100).toFixed(1)+'%',x,y);ctx.restore();});}}]});
+  charts['catPie']=new Chart(document.getElementById('catPie'),{type:'doughnut',data:{labels:sc,datasets:[{data:pieData,backgroundColor:COLORS.map(c=>c+'dd'),borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}%`;}}}}},plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.04)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.72,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 11px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.25)';ctx.shadowBlur=4;ctx.fillText(((v/tot)*100).toFixed(1)+'%',x,y);ctx.restore();});}}]});
   killChart('catLine');
   charts['catLine']=new Chart(document.getElementById('catLine'),{type:'line',data:{labels:sw.map(w=>'Wk '+w),datasets:sc.map((cat,i)=>({label:cat,data:sw.map(w=>filtered.filter(r=>r[catCol]===cat&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[catMetric]),0)),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',tension:0.3,fill:false,pointRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{display:true,title:{display:true,text:'Week',color:'#6b5b8a',font:{size:11,weight:'700'}}},y:{beginAtZero:true,title:{display:true,text:catMetric,color:'#6b5b8a',font:{size:11,weight:'700'}}}}}});
 }
 function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCategory();}
 
+// ─── WOW HEATMAP ─────────────────────────────────────────────────────────────
+function hmSetMetric(m,el){
+  hmMetric=m;
+  document.querySelectorAll('#hmMetricBtns .metric-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderHeatmap();
+}
+function resetHeatmapFilter(){
+  ['hmMP','hmCat'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='all';});
+  // FIX: reset week dropdowns properly
+  ['hmWkFrom','hmWkTo'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='all';});
+  hmMetric='sl';
+  document.querySelectorAll('#hmMetricBtns .metric-tab').forEach((t,i)=>{t.classList.toggle('active',i===0);});
+  renderHeatmap();
+}
+function renderHeatmap(){
+  const rows=D.mp;
+  if(!rows.length){document.getElementById('hmContent').innerHTML='<div class="error-state">Data belum tersedia. Pastikan data sudah termuat.</div>';return;}
+
+  const wkCol  =findCol(rows,['week','minggu','wk']);
+  const mpCol  =findCol(rows,['marketplace','platform','channel','mp','toko']);
+  const catCol =findCol(rows,['category','kategori','cat']);
+  const slCol  =findCol(rows,['servicelevel','sl%']);
+  const slExCol=findCol(rows,['slexcl','sl excl']);
+  const retCol =findCol(rows,['return%','returnrate']);
+  const canCol =findCol(rows,['cancelled%','cancelrate']);
+  const qtyCol =findCol(rows,['totalqty','qty']);
+  const ordCol =findCol(rows,['totalorder','order']);
+
+  const isQtyMetric  = hmMetric==='qty';
+  const isRateMetric = hmMetric==='ret'||hmMetric==='can';
+  const metricLabel  = {sl:'SL %',slexcl:'SL Excl %',ret:'Return %',can:'Cancel %',qty:'Total Qty'}[hmMetric]||'SL %';
+  const getVal=r=>({sl:toN(r[slCol]),slexcl:toN(r[slExCol]),ret:toN(r[retCol]),can:toN(r[canCol]),qty:toN(r[qtyCol])}[hmMetric]||0);
+
+  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const allMPs  =mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
+  const allCats =catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
+
+  // FIX: only populate hmMP and hmCat on first load, not on every render
+  fillSel('hmMP',allMPs,'Semua Marketplace');
+  if(catCol&&allCats.length)fillSel('hmCat',allCats,'Semua Cat');
+
+  // FIX: only fill week dropdowns once (or when weeks change), not on every render
+  if(!hmWeeksInit){
+    ['hmWkFrom','hmWkTo'].forEach((id,idx)=>{
+      const el=document.getElementById(id);if(!el)return;
+      el.innerHTML=`<option value="all">${idx===0?'Dari awal':'Akhir'}</option>`;
+      allWeeks.forEach(w=>{const o=document.createElement('option');o.value=String(w);o.textContent='Wk '+w;el.appendChild(o);});
+    });
+    hmWeeksInit=true;
+  }
+
+  const fMP=gv('hmMP'),fWkFrom=gv('hmWkFrom'),fWkTo=gv('hmWkTo'),fCat=gv('hmCat');
+  let filtered=rows;
+  if(fMP!=='all'&&mpCol)   filtered=filtered.filter(r=>r[mpCol]===fMP);
+  if(fWkFrom!=='all')      filtered=filtered.filter(r=>toN(r[wkCol])>=toN(fWkFrom));
+  if(fWkTo!=='all')        filtered=filtered.filter(r=>toN(r[wkCol])<=toN(fWkTo));
+  if(fCat!=='all'&&catCol) filtered=filtered.filter(r=>r[catCol]===fCat);
+
+  const filteredWeeks=[...new Set(filtered.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  // FIX: use allMPs for heatmap rows (so we see all MP even if some have no data in filtered range)
+  // But use filteredMPs for total row calculation
+  const filteredMPs =fMP!=='all'?[fMP]:(mpCol?[...new Set(filtered.map(r=>r[mpCol]).filter(Boolean))].sort():[]);
+  const displayWeeks= filteredWeeks.length ? filteredWeeks : allWeeks;
+  const latestWk    = displayWeeks[displayWeeks.length-1];
+
+  // Build cell lookup from filtered data
+  const cell={};
+  filtered.forEach(r=>{
+    const k=`${r[mpCol]}__${r[wkCol]}`;
+    if(!cell[k])cell[k]={v:0,qty:0,ord:0};
+    cell[k].v  +=getVal(r);
+    cell[k].qty+=toN(r[qtyCol]);
+    cell[k].ord+=toN(r[ordCol]);
+  });
+
+  const maxV=isQtyMetric?Math.max(...Object.values(cell).map(c=>c.v),1):100;
+
+  function cellColor(v){
+    if(!v||v===0)return{bg:'#f8f6ff',text:'#ccc5e8'};
+    if(isQtyMetric){
+      const p=v/maxV;
+      if(p>=0.8)return{bg:'#1e3a8a',text:'#93c5fd'};
+      if(p>=0.5)return{bg:'#1d4ed8',text:'#bfdbfe'};
+      if(p>=0.2)return{bg:'#3b82f6',text:'#dbeafe'};
+      return        {bg:'#93c5fd',text:'#1e3a8a'};
+    }
+    if(isRateMetric){
+      if(v<=2) return{bg:'#064e3b',text:'#6ee7b7'};
+      if(v<=4) return{bg:'#065f46',text:'#34d399'};
+      if(v<=6) return{bg:'#78350f',text:'#fcd34d'};
+      if(v<=9) return{bg:'#92400e',text:'#fbbf24'};
+      if(v<=12)return{bg:'#7f1d1d',text:'#fca5a5'};
+      return       {bg:'#991b1b',text:'#f87171'};
+    }
+    if(v>=97)return{bg:'#064e3b',text:'#6ee7b7'};
+    if(v>=95)return{bg:'#065f46',text:'#34d399'};
+    if(v>=93)return{bg:'#047857',text:'#6ee7b7'};
+    if(v>=90)return{bg:'#78350f',text:'#fcd34d'};
+    if(v>=87)return{bg:'#92400e',text:'#fbbf24'};
+    if(v>=85)return{bg:'#7f1d1d',text:'#fca5a5'};
+    return       {bg:'#991b1b',text:'#f87171'};
+  }
+  function fmtV(v){return isQtyMetric?fmtQ(v):v.toFixed(1)+'%';}
+  function fmtQ(v){if(v>=1e6)return(v/1e6).toFixed(1)+'jt';if(v>=1e3)return(v/1e3).toFixed(1)+'rb';return Math.round(v).toString();}
+
+  let html=`
+  <style>
+  .hm-wrap{overflow-x:auto;}
+  .hm-tbl{border-collapse:separate;border-spacing:0;font-size:11.5px;min-width:600px;}
+  .hm-th{padding:6px 10px;text-align:center;color:var(--text2);font-size:10px;font-weight:600;white-space:nowrap;background:var(--card);border-bottom:2px solid var(--border);}
+  .hm-th:first-child{text-align:left;min-width:130px;border-right:2px solid var(--border);position:sticky;left:0;background:var(--card);z-index:2;}
+  .hm-th.latest{color:var(--blue);font-weight:700;}
+  .hm-rl{padding:10px 12px 10px 8px;font-weight:600;font-size:12px;border-right:2px solid var(--border);border-bottom:1px solid var(--border);background:#faf9ff;position:sticky;left:0;z-index:1;white-space:nowrap;}
+  .hm-rl .rl-sub{display:block;font-size:9px;color:var(--text2);font-family:monospace;margin-top:2px;}
+  .hm-cell{padding:0;border-bottom:1px solid rgba(0,0,0,0.1);border-right:1px solid rgba(0,0,0,0.08);cursor:pointer;transition:filter 0.12s;min-width:72px;position:relative;}
+  .hm-cell:hover{filter:brightness(1.2);z-index:1;}
+  .hm-cell:hover .hm-tip{opacity:1;}
+  .hm-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:7px 5px;height:60px;}
+  .hm-v{font-size:12px;font-weight:700;font-family:monospace;line-height:1;}
+  .hm-d{font-size:9px;font-weight:600;font-family:monospace;line-height:1;opacity:0.9;}
+  .hm-q{font-size:9px;opacity:0.65;line-height:1;}
+  .hm-tip{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:#1a0a2e;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:11px;color:#f0ecff;white-space:nowrap;z-index:10;opacity:0;transition:opacity 0.15s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.4);min-width:150px;}
+  .hm-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a0a2e;}
+  .tt-r{display:flex;justify-content:space-between;gap:14px;margin-bottom:2px;font-size:10px;}
+  .tt-k{color:#8b82b0;}.tt-v{font-weight:600;}
+  .hm-tot-row .hm-rl{color:var(--blue);border-top:2px solid var(--border);font-weight:700;}
+  .hm-tot-row .hm-cell{border-top:2px solid var(--border);}
+  .hm-avg-cell{text-align:center;padding:0;border-left:2px solid var(--border);border-bottom:1px solid var(--border);}
+  .legend-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:10px;color:var(--text2);}
+  .leg-swatch{display:flex;gap:2px;align-items:center;}
+  .leg-box{width:16px;height:12px;border-radius:2px;}
+  </style>
+  <div class="kpi-matrix-card">
+    <div class="kpi-matrix-header">
+      <div class="kpi-matrix-title">🟥 ${metricLabel} Heatmap — Week × Marketplace</div>
+      <span class="kpi-week-badge">Wk ${displayWeeks[0]} → Wk ${latestWk} · ${displayWeeks.length} weeks</span>
+    </div>
+    <div class="legend-row">
+      <span>Legend:</span>
+      <div class="leg-swatch"><div class="leg-box" style="background:#064e3b"></div><div class="leg-box" style="background:#065f46"></div><div class="leg-box" style="background:#047857"></div></div>
+      <span>${isRateMetric?'Low (good)':isQtyMetric?'High volume':'≥93% (good)'}</span>
+      &nbsp;
+      <div class="leg-swatch"><div class="leg-box" style="background:#78350f"></div><div class="leg-box" style="background:#92400e"></div></div>
+      <span>${isRateMetric?'Medium (warn)':isQtyMetric?'Med volume':'85–93% (warn)'}</span>
+      &nbsp;
+      <div class="leg-swatch"><div class="leg-box" style="background:#7f1d1d"></div><div class="leg-box" style="background:#991b1b"></div></div>
+      <span>${isRateMetric?'High (critical)':isQtyMetric?'Low volume':'<85% (critical)'}</span>
+      &nbsp;&nbsp;
+      <span>▲▼ = WoW delta · angka bawah = total qty</span>
+    </div>
+    <div class="hm-wrap"><table class="hm-tbl"><thead><tr>
+      <th class="hm-th">Marketplace</th>`;
+
+  displayWeeks.forEach(w=>{
+    const isLast=String(w)===String(latestWk);
+    html+=`<th class="hm-th ${isLast?'latest':''}">${isLast?'★ ':''}Wk ${w}</th>`;
+  });
+  html+=`<th class="hm-th" style="border-left:2px solid var(--border);color:var(--blue)">Avg</th></tr></thead><tbody>`;
+
+  filteredMPs.forEach(mp=>{
+    const vals=displayWeeks.map(w=>cell[`${mp}__${w}`]?.v||0);
+    const qtys=displayWeeks.map(w=>cell[`${mp}__${w}`]?.qty||0);
+    const nonZero=vals.filter(v=>v>0);
+    const avg=nonZero.length?(nonZero.reduce((a,b)=>a+b,0)/nonZero.length):0;
+    const totQty=qtys.reduce((a,b)=>a+b,0);
+    const {bg:aBg,text:aTxt}=cellColor(avg);
+    html+=`<tr><td class="hm-rl">${mp}<span class="rl-sub">avg ${isQtyMetric?fmtQ(avg):avg.toFixed(1)+'%'} · ${fmtQ(totQty)}</span></td>`;
+    vals.forEach((v,i)=>{
+      const prev=i>0?vals[i-1]:null;
+      const d=(prev!==null&&v>0&&prev>0)?(v-prev):null;
+      const {bg,text}=cellColor(v);
+      const dStr=d!==null?(d>=0?`▲ +${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`:`▼ ${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`):'';
+      const dColor=d!==null?((!isRateMetric&&d>=0)||(isRateMetric&&d<=0)?'#6ee7b7':'#fca5a5'):'transparent';
+      const isLast=String(displayWeeks[i])===String(latestWk);
+      const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
+      const status=isRateMetric?(v<=4?'✅ Good':v<=9?'⚠ Warning':'🚨 Critical'):(v>=95?'✅ Good':v>=85?'⚠ Warning':'🚨 Critical');
+      html+=`<td class="hm-cell" style="background:${bg};${outline}">
+        <div class="hm-inner">
+          <div class="hm-v" style="color:${text}">${v>0?fmtV(v):'—'}</div>
+          <div class="hm-d" style="color:${dColor}">${dStr}</div>
+          <div class="hm-q" style="color:${text}">${qtys[i]>0?fmtQ(qtys[i]):'—'}</div>
+        </div>
+        <div class="hm-tip">
+          <div style="font-weight:700;margin-bottom:6px;color:#a78bfa">${mp} · Wk ${displayWeeks[i]}</div>
+          <div class="tt-r"><span class="tt-k">${metricLabel}</span><span class="tt-v" style="color:${text}">${v>0?fmtV(v):'—'}</span></div>
+          <div class="tt-r"><span class="tt-k">WoW</span><span class="tt-v" style="color:${dColor}">${dStr||'—'}</span></div>
+          <div class="tt-r"><span class="tt-k">Total Qty</span><span class="tt-v">${qtys[i].toLocaleString('id-ID')}</span></div>
+          ${!isQtyMetric?`<div class="tt-r"><span class="tt-k">Status</span><span class="tt-v" style="color:${text}">${v>0?status:'—'}</span></div>`:''}
+        </div>
+      </td>`;
+    });
+    html+=`<td class="hm-avg-cell" style="background:${aBg}"><div class="hm-inner"><div class="hm-v" style="color:${aTxt}">${avg>0?fmtV(avg):'—'}</div></div></td></tr>`;
+  });
+
+  // TOTAL ROW — FIX: use filteredMPs for aggregate
+  html+=`<tr class="hm-tot-row"><td class="hm-rl" style="color:var(--blue)">ALL MP<span class="rl-sub">weighted avg</span></td>`;
+  const totVals=displayWeeks.map(w=>{
+    const rowVals=filteredMPs.map(mp=>cell[`${mp}__${w}`]?.v||0).filter(v=>v>0);
+    return rowVals.length?(rowVals.reduce((a,b)=>a+b,0)/rowVals.length):0;
+  });
+  const totQtys=displayWeeks.map(w=>filteredMPs.reduce((s,mp)=>s+(cell[`${mp}__${w}`]?.qty||0),0));
+  const grandNZ=totVals.filter(v=>v>0);
+  const grandAvg=grandNZ.length?(grandNZ.reduce((a,b)=>a+b,0)/grandNZ.length):0;
+  const {bg:gBg,text:gTxt}=cellColor(grandAvg);
+  totVals.forEach((v,i)=>{
+    const prev=i>0?totVals[i-1]:null;
+    const d=(prev!==null&&v>0&&prev>0)?(v-prev):null;
+    const {bg,text}=cellColor(v);
+    const dStr=d!==null?(d>=0?`▲ +${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`:`▼ ${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`):'';
+    const dColor=d!==null?((!isRateMetric&&d>=0)||(isRateMetric&&d<=0)?'#6ee7b7':'#fca5a5'):'transparent';
+    const isLast=String(displayWeeks[i])===String(latestWk);
+    const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
+    html+=`<td class="hm-cell" style="background:${bg};${outline}"><div class="hm-inner"><div class="hm-v" style="color:${text};font-size:13px">${v>0?fmtV(v):'—'}</div><div class="hm-d" style="color:${dColor}">${dStr}</div><div class="hm-q" style="color:${text}">${totQtys[i]>0?fmtQ(totQtys[i]):'—'}</div></div></td>`;
+  });
+  html+=`<td class="hm-avg-cell" style="background:${gBg}"><div class="hm-inner"><div class="hm-v" style="color:${gTxt};font-size:13px">${grandAvg>0?fmtV(grandAvg):'—'}</div></div></td></tr></tbody></table></div></div>`;
+
+  document.getElementById('hmContent').innerHTML=html;
+  document.getElementById('hmStatus').textContent=`${filteredMPs.length} marketplace · ${displayWeeks.length} weeks · ${metricLabel}`;
+}
+
 // ─── MONTHLY OVERVIEW ────────────────────────────────────────────────────────
 function renderMOverview(){
   const rows=D.monthly;
   if(!rows.length){document.getElementById('moveContent').innerHTML='<div class="error-state">Data Monthly belum tersedia.</div>';return;}
-
   const yearCol =findCol(rows,['year','tahun']);
   const monthCol=findCol(rows,['month','bulan']);
   const mnCol   =findCol(rows,['monthname','monthnam']);
@@ -658,8 +820,7 @@ function renderMOverview(){
   const allYears=[...new Set(rows.map(r=>r[yearCol]).filter(Boolean))].sort();
   fillSel('moveMP',allMPs,'Semua');
   fillSel('moveYear',allYears,'Semua');
-
-  const fMP  =gv('moveMP'), fYear=gv('moveYear');
+  const fMP=gv('moveMP'),fYear=gv('moveYear');
   let filtered=rows;
   if(fMP!=='all'&&mpCol)    filtered=filtered.filter(r=>r[mpCol]===fMP);
   if(fYear!=='all'&&yearCol)filtered=filtered.filter(r=>String(r[yearCol])===String(fYear));
@@ -682,75 +843,37 @@ function renderMOverview(){
   });
   const mos=Object.values(mMap).sort((a,b)=>a.key.localeCompare(b.key));
   const labels=mos.map(m=>m.lbl);
-  const ordV  =mos.map(m=>m.ord);
-  const qtyV  =mos.map(m=>m.qty);
-  const slV   =mos.map(m=>m.n?+(m.slS/m.n).toFixed(2):0);
-  const slExV =mos.map(m=>m.n?+(m.slExS/m.n).toFixed(2):0);
-  const retV  =mos.map(m=>m.n?+(m.retS/m.n).toFixed(2):0);
-  const canV  =mos.map(m=>m.n?+(m.canS/m.n).toFixed(2):0);
-
+  const ordV=mos.map(m=>m.ord);
+  const qtyV=mos.map(m=>m.qty);
+  const slV =mos.map(m=>m.n?+(m.slS/m.n).toFixed(2):0);
   const totQty=mos.reduce((s,m)=>s+m.qty,0);
   const totOrd=mos.reduce((s,m)=>s+m.ord,0);
   const totDel=mos.reduce((s,m)=>s+m.delQ,0);
   const totLoss=mos.reduce((s,m)=>s+m.retQ+m.canQ,0);
   const avgQtyPerMonth=mos.length?Math.round(totQty/mos.length):0;
-  const avgSL =slV.length?+(slV.reduce((a,b)=>a+b,0)/slV.length).toFixed(2):0;
-  const avgSLEx=slExV.length?+(slExV.reduce((a,b)=>a+b,0)/slExV.length).toFixed(2):0;
-  const avgRet=retV.length?+(retV.reduce((a,b)=>a+b,0)/retV.length).toFixed(2):0;
-  const avgCan=canV.length?+(canV.reduce((a,b)=>a+b,0)/canV.length).toFixed(2):0;
-  const peakM =mos.length?mos.reduce((a,b)=>b.qty>a.qty?b:a):null;
+  const avgSL=slV.length?+(slV.reduce((a,b)=>a+b,0)/slV.length).toFixed(2):0;
+  const peakM=mos.length?mos.reduce((a,b)=>b.qty>a.qty?b:a):null;
   const growthMom=mos.length>1?((mos[mos.length-1].qty-mos[mos.length-2].qty)/mos[mos.length-2].qty*100):0;
 
+  // FIX: use filtered MPs for contribution chart
+  const mpForChart=fMP!=='all'?[fMP]:allMPs;
+
   let html=`
-  <!-- ROW 1: EXECUTIVE KPI CARDS -->
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;">
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #5b3fa8;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📦 Total Qty</div>
-      <div style="font-size:24px;font-weight:800;color:#5b3fa8;margin-bottom:4px;">${fmtN(totQty)}</div>
-      <div style="font-size:10px;color:var(--text2);">${mos.length} bulan</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🔢 Total Order</div>
-      <div style="font-size:24px;font-weight:800;color:#1D9E75;margin-bottom:4px;">${fmtN(totOrd)}</div>
-      <div style="font-size:10px;color:var(--text2);">Unique orders</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e6944a;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">✅ Total Delivery</div>
-      <div style="font-size:24px;font-weight:800;color:#e6944a;margin-bottom:4px;">${fmtN(totDel)}</div>
-      <div style="font-size:10px;color:var(--text2);">Terpenuhi</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🎯 Service Level %</div>
-      <div style="font-size:24px;font-weight:800;color:${avgSL>=95?'#1D9E75':avgSL>=85?'#e6944a':'#e05b5b'};margin-bottom:4px;">${fmtPct(avgSL)}</div>
-      <div style="font-size:10px;color:var(--text2);">Rata-rata</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e05b5b;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">❌ Total Loss</div>
-      <div style="font-size:24px;font-weight:800;color:#e05b5b;margin-bottom:4px;">${fmtN(totLoss)}</div>
-      <div style="font-size:10px;color:var(--text2);">Return + Cancel</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e879a0;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📈 Growth MoM %</div>
-      <div style="font-size:24px;font-weight:800;color:${growthMom>=0?'#1D9E75':'#e05b5b'};margin-bottom:4px;">${growthMom>=0?'▲':'▼'} ${Math.abs(growthMom).toFixed(1)}%</div>
-      <div style="font-size:10px;color:var(--text2);">Bulan terakhir</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #5b3fa8;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🏆 Best Month</div>
-      <div style="font-size:24px;font-weight:800;color:#5b3fa8;margin-bottom:4px;">${peakM?fmtN(peakM.qty):'-'}</div>
-      <div style="font-size:10px;color:var(--text2);">${peakM?peakM.lbl:'-'}</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📊 Avg Qty/Month</div>
-      <div style="font-size:24px;font-weight:800;color:#1D9E75;margin-bottom:4px;">${fmtN(avgQtyPerMonth)}</div>
-      <div style="font-size:10px;color:var(--text2);">Rata-rata per bulan</div>
-    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #5b3fa8;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📦 Total Qty</div><div style="font-size:24px;font-weight:800;color:#5b3fa8;margin-bottom:4px;">${fmtN(totQty)}</div><div style="font-size:10px;color:var(--text2);">${mos.length} bulan</div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🔢 Total Order</div><div style="font-size:24px;font-weight:800;color:#1D9E75;margin-bottom:4px;">${fmtN(totOrd)}</div><div style="font-size:10px;color:var(--text2);">Unique orders</div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e6944a;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">✅ Total Delivery</div><div style="font-size:24px;font-weight:800;color:#e6944a;margin-bottom:4px;">${fmtN(totDel)}</div><div style="font-size:10px;color:var(--text2);">Terpenuhi</div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🎯 Service Level %</div><div style="font-size:24px;font-weight:800;color:${avgSL>=95?'#1D9E75':avgSL>=85?'#e6944a':'#e05b5b'};margin-bottom:4px;">${fmtPct(avgSL)}</div><div style="font-size:10px;color:var(--text2);">Rata-rata</div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e05b5b;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">❌ Total Loss</div><div style="font-size:24px;font-weight:800;color:#e05b5b;margin-bottom:4px;">${fmtN(totLoss)}</div><div style="font-size:10px;color:var(--text2);">Return + Cancel</div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e879a0;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📈 Growth MoM %</div><div style="font-size:24px;font-weight:800;color:${growthMom>=0?'#1D9E75':'#e05b5b'};margin-bottom:4px;">${growthMom>=0?'▲':'▼'} ${Math.abs(growthMom).toFixed(1)}%</div><div style="font-size:10px;color:var(--text2);">Bulan terakhir</div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #5b3fa8;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🏆 Best Month</div><div style="font-size:24px;font-weight:800;color:#5b3fa8;margin-bottom:4px;">${peakM?fmtN(peakM.qty):'-'}</div><div style="font-size:10px;color:var(--text2);">${peakM?peakM.lbl:'-'}</div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📊 Avg Qty/Month</div><div style="font-size:24px;font-weight:800;color:#1D9E75;margin-bottom:4px;">${fmtN(avgQtyPerMonth)}</div><div style="font-size:10px;color:var(--text2);">Rata-rata per bulan</div></div>
   </div>
 
-  <!-- ROW 2: PERFORMANCE TREND + MARKETPLACE CONTRIBUTION -->
   <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;">
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
       <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">📈 Monthly Performance Trend</div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Trend performa bulanan dengan dual axis analysis</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Qty (bar) · Order (line) · SL% (line)</div>
       <div style="height:320px;position:relative;"><canvas id="moveVolChart"></canvas></div>
     </div>
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
@@ -760,40 +883,36 @@ function renderMOverview(){
     </div>
   </div>
 
-  <!-- ROW 3: INSIGHTS & TREND ANALYSIS -->
-  <div style="display:grid;grid-template-columns:1.2fr 1.8fr 1fr;gap:16px;margin-bottom:24px;">`;
-
-  html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-  <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Growth Qty MoM</div>
-  <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Perubahan qty bulan ke bulan</div>
-  <div style="height:320px;position:relative;"><canvas id="moveWFChart"></canvas></div>
-</div>`;
-
-  html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📈 Service Level Trend</div>
-    <div style="height:320px;position:relative;"><canvas id="moveSLChart"></canvas></div>
-  </div>`;
-
-  html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">💡 Executive Insight</div>
-    <div style="font-size:10px;color:var(--text2);line-height:1.8;">
-      <div>• <strong>Peak:</strong> ${peakM?peakM.lbl:'—'}</div>
-      <div>• <strong>SL Avg:</strong> ${fmtPct(avgSL)}${avgSL>=95?' ✓':avgSL>=85?' ⚠':'❌'}</div>
-      <div>• <strong>Loss Rate:</strong> ${totQty>0?(totLoss/totQty*100).toFixed(2):'0'}%</div>
-      <div>• <strong>Trend:</strong> ${growthMom>=0?'📈 Naik':'📉 Turun'}</div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:9px;">Data: ${mos.length} bulan</div>
+  <div style="display:grid;grid-template-columns:1.2fr 1.8fr 1fr;gap:16px;margin-bottom:24px;">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Growth Qty MoM</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Perubahan qty bulan ke bulan</div>
+      <div style="height:320px;position:relative;"><canvas id="moveWFChart"></canvas></div>
     </div>
-  </div></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📈 Service Level Trend</div>
+      <div style="height:320px;position:relative;"><canvas id="moveSLChart"></canvas></div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">💡 Executive Insight</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.8;">
+        <div>• <strong>Peak:</strong> ${peakM?peakM.lbl:'—'}</div>
+        <div>• <strong>SL Avg:</strong> ${fmtPct(avgSL)}${avgSL>=95?' ✓':avgSL>=85?' ⚠':'❌'}</div>
+        <div>• <strong>Loss Rate:</strong> ${totQty>0?(totLoss/totQty*100).toFixed(2):'0'}%</div>
+        <div>• <strong>Trend:</strong> ${growthMom>=0?'📈 Naik':'📉 Turun'}</div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:9px;">Data: ${mos.length} bulan</div>
+      </div>
+    </div>
+  </div>
 
-  <!-- ROW 4: DETAIL TABLE -->
   <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div><div style="font-size:13px;font-weight:700;color:var(--text);">📋 Detail Monthly Performance</div></div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">📋 Detail Monthly Performance</div>
       <div style="font-size:11px;color:var(--text2);">${mos.length} bulan</div>
     </div>
     <div style="overflow-x:auto;border-radius:8px;">
       <table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead style="background:#f8f6ff;position:sticky;top:0;">
+        <thead style="background:#f8f6ff;">
           <tr>
             <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;white-space:nowrap;">Bulan</th>
             <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;white-space:nowrap;">Order</th>
@@ -804,18 +923,15 @@ function renderMOverview(){
             <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;white-space:nowrap;">SL %</th>
             <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:#5b3fa8;font-weight:600;white-space:nowrap;">Growth</th>
           </tr>
-        </thead>
-        <tbody>`;
-
+        </thead><tbody>`;
   mos.forEach((m,i)=>{
     const prev=mos[i-1];
     const growth=prev&&prev.qty>0?((m.qty-prev.qty)/prev.qty*100):null;
     const gStr=growth===null?'—':(growth>=0?'▲ ':'▼ ')+Math.abs(growth).toFixed(1)+'%';
     const gCol=growth===null?'var(--text2)':growth>=0?'var(--green)':'var(--red)';
     const sl=m.n?+(m.slS/m.n).toFixed(2):0;
-    const bgColor=i%2===0?'#faf9ff':'#fff';
-    html+=`<tr style="background:${bgColor};border-bottom:1px solid var(--border);">
-      <td style="padding:10px 12px;text-align:left;font-weight:600;color:var(--text);">${m.lbl}</td>
+    html+=`<tr style="background:${i%2===0?'#faf9ff':'#fff'};border-bottom:1px solid var(--border);">
+      <td style="padding:10px 12px;font-weight:600;color:var(--text);">${m.lbl}</td>
       <td style="padding:10px 12px;text-align:right;color:var(--blue);font-weight:600;">${fmtN(m.ord)}</td>
       <td style="padding:10px 12px;text-align:right;color:var(--green);font-weight:700;">${fmtN(m.qty)}</td>
       <td style="padding:10px 12px;text-align:right;color:var(--green);">${fmtN(m.delQ)}</td>
@@ -833,13 +949,10 @@ function renderMOverview(){
   killChart('moveVolChart');
   charts['moveVolChart']=new Chart(document.getElementById('moveVolChart'),{
     data:{labels,datasets:[
-      {type:'bar',label:'Total Qty',data:qtyV,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:5,yAxisID:'yQty',order:2,
-        datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'line',label:'Total Order',data:ordV,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrd',order:1,
-        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'line',label:'Service Level %',data:slV,borderColor:'#1D9E75',backgroundColor:'#1D9E7515',borderWidth:2,pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:false,yAxisID:'ySL',order:1,
-        datalabels:{anchor:'bottom',align:'bottom',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]
-    },
+      {type:'bar',label:'Total Qty',data:qtyV,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:5,yAxisID:'yQty',order:2,datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'line',label:'Total Order',data:ordV,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrd',order:1,datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'line',label:'Service Level %',data:slV,borderColor:'#1D9E75',backgroundColor:'#1D9E7515',borderWidth:2,pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:false,yAxisID:'ySL',order:1,datalabels:{anchor:'bottom',align:'bottom',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
+    ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:10},padding:10}},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.dataset.yAxisID==='ySL'?c.parsed.y.toFixed(2)+'%':Math.round(c.parsed.y).toLocaleString('id-ID')}`}},datalabels:{}},
       scales:{
@@ -851,383 +964,162 @@ function renderMOverview(){
     }
   });
 
+  // FIX: moveContribChart — plugins[] correctly inside config object, using mpForChart
   killChart('moveContribChart');
-  const mpqtys=mpCol?allMPs.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0)):[];
+  const mpqtys=mpCol?mpForChart.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0)):[];
   charts['moveContribChart']=new Chart(document.getElementById('moveContribChart'),{
     type:'doughnut',
-    data:{labels:mpCol?allMPs:[],datasets:[{data:mpqtys,backgroundColor:['#5b3fa8dd','#e879a0dd','#1D9E75dd','#e6944add','#e05b5bdd','#7c3aeddd'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
+    data:{labels:mpCol?mpForChart:[],datasets:[{data:mpqtys,backgroundColor:['#5b3fa8dd','#e879a0dd','#1D9E75dd','#e6944add','#e05b5bdd','#7c3aeddd'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:10},padding:8}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}% (${Math.round(v).toLocaleString('id-ID')})`}}}}},
-    plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.05)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.70,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(((v/tot)*100).toFixed(0)+'%',x,y);ctx.restore();});}}]
+    plugins:[{id:'piePercent',afterDraw(chart){
+      const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);
+      chart.getDatasetMeta(0).data.forEach((arc,i)=>{
+        const v=ds.data[i];if(v/tot<0.05)return;
+        const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.70,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;
+        ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(((v/tot)*100).toFixed(0)+'%',x,y);ctx.restore();
+      });
+    }}]
   });
 
+  // Waterfall Chart
   killChart('moveWFChart');
-  const wfLabels = mos.map(m => m.lbl.split(' ')[0]);
-  const wfOffsets = [];
-  const wfValues  = [];
-  const wfColors  = [];
-  mos.forEach((m, i) => {
-    if (i === 0) {
-      wfOffsets.push(0);
-      wfValues.push(m.qty);
-      wfColors.push('#5b3fa8');
-    } else {
-      const delta = m.qty - mos[i-1].qty;
-      wfOffsets.push(Math.min(mos[i-1].qty, m.qty));
-      wfValues.push(Math.abs(delta));
-      wfColors.push(delta >= 0 ? '#1D9E75' : '#e05b5b');
-    }
+  const wfLabels=mos.map(m=>m.lbl.split(' ')[0]);
+  const wfOffsets=[],wfValues=[],wfColors=[];
+  mos.forEach((m,i)=>{
+    if(i===0){wfOffsets.push(0);wfValues.push(m.qty);wfColors.push('#5b3fa8');}
+    else{const delta=m.qty-mos[i-1].qty;wfOffsets.push(Math.min(mos[i-1].qty,m.qty));wfValues.push(Math.abs(delta));wfColors.push(delta>=0?'#1D9E75':'#e05b5b');}
   });
-  charts['moveWFChart'] = new Chart(document.getElementById('moveWFChart'), {
-    type: 'bar',
-    data: {
-      labels: wfLabels,
-      datasets: [
-        {
-          label: 'offset',
-          data: wfOffsets,
-          backgroundColor: 'transparent',
-          borderWidth: 0,
-          stack: 'wf',
-          datalabels: { display: false }
-        },
-        {
-          label: 'Qty Change',
-          data: wfValues,
-          backgroundColor: wfColors,
-          borderColor: wfColors.map(c => c),
-          borderWidth: 1.5,
-          borderRadius: 4,
-          stack: 'wf',
-          datalabels: {
-            anchor: 'end',
-            align: 'end',
-            color: (ctx) => wfColors[ctx.dataIndex],
-            font: { weight: '700', size: 10 },
-            formatter: (v, ctx) => {
-              const i = ctx.dataIndex;
-              if (i === 0) return fmtLabel(mos[0].qty);
-              const delta = mos[i].qty - mos[i-1].qty;
-              return (delta >= 0 ? '+' : '-') + fmtLabel(Math.abs(delta));
-            },
-            display: true
-          }
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: { top: 28, right: 10 } },
-      plugins: {
-        legend: { display: false },
-        datalabels: {},
-        tooltip: {
-          callbacks: {
-            title: ctx => wfLabels[ctx[0].dataIndex],
-            label: ctx => {
-              if (ctx.datasetIndex === 0) return '';
-              const i = ctx.dataIndex;
-              if (i === 0) return `Total: ${fmtN(mos[0].qty)}`;
-              const delta = mos[i].qty - mos[i-1].qty;
-              return `Change: ${delta >= 0 ? '+' : ''}${fmtN(delta)}`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          stacked: true,
-          title: { display: true, text: 'Bulan', color: '#6b5b8a', font: { size: 11, weight: '700' } },
-          ticks: { maxRotation: 45, font: { size: 9 } }
-        },
-        y: {
-          stacked: true,
-          beginAtZero: true,
-          title: { display: true, text: 'Qty', color: '#6b5b8a', font: { size: 11, weight: '700' } },
-          ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'jt' : v.toLocaleString('id-ID') },
-          grid: { color: '#e2daf2' }
-        }
-      }
+  charts['moveWFChart']=new Chart(document.getElementById('moveWFChart'),{
+    type:'bar',
+    data:{labels:wfLabels,datasets:[
+      {label:'offset',data:wfOffsets,backgroundColor:'transparent',borderWidth:0,stack:'wf',datalabels:{display:false}},
+      {label:'Qty Change',data:wfValues,backgroundColor:wfColors,borderColor:wfColors,borderWidth:1.5,borderRadius:4,stack:'wf',
+        datalabels:{anchor:'end',align:'end',color:(ctx)=>wfColors[ctx.dataIndex],font:{weight:'700',size:10},
+          formatter:(v,ctx)=>{const i=ctx.dataIndex;if(i===0)return fmtLabel(mos[0].qty);const delta=mos[i].qty-mos[i-1].qty;return(delta>=0?'+':'-')+fmtLabel(Math.abs(delta));},display:true}}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:28,right:10}},
+      plugins:{legend:{display:false},datalabels:{},
+        tooltip:{callbacks:{title:ctx=>wfLabels[ctx[0].dataIndex],label:ctx=>{if(ctx.datasetIndex===0)return'';const i=ctx.dataIndex;if(i===0)return`Total: ${fmtN(mos[0].qty)}`;const d=mos[i].qty-mos[i-1].qty;return`Change: ${d>=0?'+':''}${fmtN(d)}`;}}},
+      scales:{x:{stacked:true,title:{display:true,text:'Bulan',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},
+        y:{stacked:true,beginAtZero:true,title:{display:true,text:'Qty',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}}}}
     }
   });
 
   killChart('moveSLChart');
   charts['moveSLChart']=new Chart(document.getElementById('moveSLChart'),{
     type:'line',
-    data:{labels,datasets:[{
-      label:'Service Level %',data:slV,
-      borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,
-      pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,
-      tension:0.3,fill:true,
-      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:10},
-        formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
-        datalabels:{}},
-      scales:{
-        x:{display:true,title:{display:true,text:'Bulan',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},
-        y:{display:true,beginAtZero:false,min:50,max:100,title:{display:true,text:'Service Level %',color:'#1D9E75',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}
-      }
-    }
+    data:{labels,datasets:[{label:'Service Level %',data:slV,borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:true,datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:10},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},datalabels:{}},
+      scales:{x:{display:true,title:{display:true,text:'Bulan',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},y:{display:true,beginAtZero:false,min:50,max:100,title:{display:true,text:'Service Level %',color:'#1D9E75',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}}}
   });
 }
 
 // ─── DAILY TREND ──────────────────────────────────────────────────────────────
-function updateDailyPeriodButtons(days){
-  document.querySelectorAll('#dailyPeriodButtons .trend-btn').forEach(btn=>{
-    btn.classList.toggle('active',btn.textContent.trim()===`${days} Hari`);
-  });
-}
-
-function clearDailyPeriod(){
-  document.querySelectorAll('#dailyPeriodButtons .trend-btn').forEach(btn=>btn.classList.remove('active'));
-}
-
+function updateDailyPeriodButtons(days){document.querySelectorAll('#dailyPeriodButtons .trend-btn').forEach(btn=>{btn.classList.toggle('active',btn.textContent.trim()===`${days} Hari`);});}
+function clearDailyPeriod(){document.querySelectorAll('#dailyPeriodButtons .trend-btn').forEach(btn=>btn.classList.remove('active'));}
 function applyDailyPeriod(days){
-  const rows=D.daily;
-  if(!rows.length)return;
+  const rows=D.daily;if(!rows.length)return;
   const dateCol=findCol(rows,['date','tanggal']);
   const dates=[...new Set(rows.map(r=>r[dateCol]).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   if(!dates.length)return;
-  const latest=dates[dates.length-1];
-  const end=new Date(latest);
-  if(Number.isNaN(end.getTime()))return;
-  const start=new Date(end);
-  start.setDate(end.getDate()-days+1);
-  const fromValue=start.toISOString().slice(0,10);
-  const toValue=end.toISOString().slice(0,10);
-  const minDate=dates[0];
-  document.getElementById('dailyFrom').value=fromValue < minDate ? minDate : fromValue;
+  const latest=dates[dates.length-1];const end=new Date(latest);if(Number.isNaN(end.getTime()))return;
+  const start=new Date(end);start.setDate(end.getDate()-days+1);
+  const fromValue=start.toISOString().slice(0,10);const toValue=end.toISOString().slice(0,10);const minDate=dates[0];
+  document.getElementById('dailyFrom').value=fromValue<minDate?minDate:fromValue;
   document.getElementById('dailyTo').value=toValue;
-  updateDailyPeriodButtons(days);
-  renderDaily();
+  updateDailyPeriodButtons(days);renderDaily();
 }
-
-function resetDailyFilter(){
-  document.getElementById('dailyMP').value='all';
-  document.getElementById('dailyFrom').value='';
-  document.getElementById('dailyTo').value='';
-  clearDailyPeriod();
-  renderDaily();
-}
+function resetDailyFilter(){document.getElementById('dailyMP').value='all';document.getElementById('dailyFrom').value='';document.getElementById('dailyTo').value='';clearDailyPeriod();renderDaily();}
 
 function renderDaily(){
   const rows=D.daily;
   if(!rows.length){document.getElementById('dailyContent').innerHTML='<div class="error-state">Data Daily Trend belum tersedia.</div>';return;}
-
-  const dateCol = findCol(rows,['date','tanggal']);
-  const mpCol   = findCol(rows,['marketplace','platform','mp','toko']);
-  const ordCol  = findCol(rows,['totalorder','order']);
-  const qtyCol  = findCol(rows,['totalqty','qty']);
-  const slCol   = findCol(rows,['servicelevel','sl%','sl']);
-
+  const dateCol=findCol(rows,['date','tanggal']);
+  const mpCol  =findCol(rows,['marketplace','platform','mp','toko']);
+  const ordCol =findCol(rows,['totalorder','order']);
+  const qtyCol =findCol(rows,['totalqty','qty']);
+  const slCol  =findCol(rows,['servicelevel','sl%','sl']);
+  const delCol =findCol(rows,['qtydelivered','delivered']);
+  const disCol =findCol(rows,['qtydispatched','dispatched']);
+  const canCol =findCol(rows,['qtycancelled','cancelled']);
+  const retCol =findCol(rows,['qtyreturn','return']);
   const allMPs=[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort();
   fillSel('dailyMP',allMPs,'Semua');
-
-  const fMP   = gv('dailyMP');
-  const fFrom = gv('dailyFrom');
-  const fTo   = gv('dailyTo');
-
+  const fMP=gv('dailyMP'),fFrom=gv('dailyFrom'),fTo=gv('dailyTo');
   let filtered=rows;
-  if(fMP!=='all'&&mpCol) filtered=filtered.filter(r=>r[mpCol]===fMP);
-  if(fFrom) filtered=filtered.filter(r=>r[dateCol]>=fFrom);
-  if(fTo)   filtered=filtered.filter(r=>r[dateCol]<=fTo);
-
-  // Agregat per tanggal (semua MP dijumlah jika filter semua)
+  if(fMP!=='all'&&mpCol)filtered=filtered.filter(r=>r[mpCol]===fMP);
+  if(fFrom)filtered=filtered.filter(r=>r[dateCol]>=fFrom);
+  if(fTo)  filtered=filtered.filter(r=>r[dateCol]<=fTo);
   const dateMap={};
-  filtered.forEach(r=>{
-    const d=r[dateCol];
-    if(!d)return;
-    if(!dateMap[d])dateMap[d]={date:d,order:0,qty:0,slSum:0,slCount:0};
-    dateMap[d].order += toN(r[ordCol]);
-    dateMap[d].qty   += toN(r[qtyCol]);
-    dateMap[d].slSum += toN(r[slCol]);
-    dateMap[d].slCount++;
-  });
+  filtered.forEach(r=>{const d=r[dateCol];if(!d)return;if(!dateMap[d])dateMap[d]={date:d,order:0,qty:0,slSum:0,slCount:0};dateMap[d].order+=toN(r[ordCol]);dateMap[d].qty+=toN(r[qtyCol]);dateMap[d].slSum+=toN(r[slCol]);dateMap[d].slCount++;});
   const days=Object.values(dateMap).sort((a,b)=>a.date.localeCompare(b.date));
   const labels=days.map(d=>d.date);
   const orderVals=days.map(d=>d.order);
   const qtyVals=days.map(d=>d.qty);
   const slVals=days.map(d=>d.slCount>0?+(d.slSum/d.slCount).toFixed(2):0);
-
-  // Summary cards
   const totOrder=filtered.reduce((s,r)=>s+toN(r[ordCol]),0);
   const totQty=filtered.reduce((s,r)=>s+toN(r[qtyCol]),0);
   const avgSL=slVals.length?+(slVals.reduce((a,b)=>a+b,0)/slVals.length).toFixed(2):0;
   const peakDay=days.length?days.reduce((a,b)=>b.qty>a.qty?b:a):null;
-
   let html=`<div class="kpi-cards-row">
-    <div class="kpi-card"><div class="kpi-card-label">📦 Total Qty (filtered)</div><div class="kpi-card-value">${fmtN(totQty)}</div><div class="kpi-card-sub">${days.length} hari data</div></div>
-    <div class="kpi-card green"><div class="kpi-card-label">🔢 Total Order (filtered)</div><div class="kpi-card-value">${fmtN(totOrder)}</div><div class="kpi-card-sub">Unique orders</div></div>
+    <div class="kpi-card"><div class="kpi-card-label">📦 Total Qty</div><div class="kpi-card-value">${fmtN(totQty)}</div><div class="kpi-card-sub">${days.length} hari data</div></div>
+    <div class="kpi-card green"><div class="kpi-card-label">🔢 Total Order</div><div class="kpi-card-value">${fmtN(totOrder)}</div><div class="kpi-card-sub">Unique orders</div></div>
     <div class="kpi-card orange"><div class="kpi-card-label">📊 Avg Service Level</div><div class="kpi-card-value">${fmtPct(avgSL)}</div><div class="kpi-card-sub">Rata-rata harian</div></div>
     <div class="kpi-card pink"><div class="kpi-card-label">🏆 Peak Day</div><div class="kpi-card-value">${peakDay?fmtN(peakDay.qty):'—'}</div><div class="kpi-card-sub">${peakDay?peakDay.date:'—'}</div></div>
   </div>`;
-
-  // Chart: Qty & Order per hari (bar+line)
-  html+=`<div class="chart-card">
-    <div class="chart-title">📅 Tren Harian — Qty & Order</div>
-    <div class="chart-sub">${fMP!=='all'?fMP:'Semua Marketplace'} · ${days.length} hari</div>
-    <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>Total Qty (Bar)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>Total Order (Line)</div>
-    </div>
-    <div class="chart-wrap tall"><canvas id="dailyQtyChart"></canvas></div>
-  </div>`;
-
-  // Chart: Service Level per hari
-  html+=`<div class="chart-card">
-    <div class="chart-title">📈 Service Level % Harian</div>
-    <div class="chart-sub">Rata-rata SL% per hari</div>
-    <div class="chart-wrap"><canvas id="dailySLChart"></canvas></div>
-  </div>`;
-
-  // Chart: per marketplace (jika semua)
-  if(fMP==='all'&&allMPs.length>1){
-    html+=`<div class="chart-card">
-      <div class="chart-title">🛒 Daily Qty per Marketplace</div>
-      <div class="chart-sub">Breakdown per marketplace harian</div>
-      <div class="chart-wrap tall"><canvas id="dailyMPChart"></canvas></div>
-    </div>`;
-  }
-
-  // Tabel detail
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Detail Harian</div><div class="table-meta">${filtered.length} baris · ${days.length} hari</div></div>
-  <div style="overflow-x:auto"><table><thead><tr>
-    <th>Tanggal</th><th>Marketplace</th>
-    <th style="text-align:right;color:var(--blue)">Order (Uniq)</th>
-    <th style="text-align:right;color:var(--green)">Total Qty</th>
-    <th style="text-align:right">Delivered</th>
-    <th style="text-align:right">Dispatched</th>
-    <th style="text-align:right">Cancelled</th>
-    <th style="text-align:right">Return</th>
-    <th style="text-align:right">SL%</th>
-  </tr></thead><tbody>`;
-  const delCol=findCol(rows,['qtydelivered','delivered']);
-  const disCol=findCol(rows,['qtydispatched','dispatched']);
-  const canCol=findCol(rows,['qtycancelled','cancelled']);
-  const retCol=findCol(rows,['qtyreturn','return']);
-  filtered.sort((a,b)=>String(a[dateCol]).localeCompare(String(b[dateCol]))).forEach(r=>{
+  html+=`<div class="chart-card"><div class="chart-title">📅 Tren Harian — Qty & Order</div><div class="chart-sub">${fMP!=='all'?fMP:'Semua Marketplace'} · ${days.length} hari</div><div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>Total Qty (Bar)</div><div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>Total Order (Line)</div></div><div class="chart-wrap tall"><canvas id="dailyQtyChart"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">📈 Service Level % Harian</div><div class="chart-sub">Rata-rata SL% per hari</div><div class="chart-wrap"><canvas id="dailySLChart"></canvas></div></div>`;
+  if(fMP==='all'&&allMPs.length>1)html+=`<div class="chart-card"><div class="chart-title">🛒 Daily Qty per Marketplace</div><div class="chart-sub">Breakdown per marketplace harian</div><div class="chart-wrap tall"><canvas id="dailyMPChart"></canvas></div></div>`;
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Detail Harian</div><div class="table-meta">${filtered.length} baris · ${days.length} hari</div></div><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Marketplace</th><th style="text-align:right;color:var(--blue)">Order</th><th style="text-align:right;color:var(--green)">Total Qty</th><th style="text-align:right">Delivered</th><th style="text-align:right">Dispatched</th><th style="text-align:right">Cancelled</th><th style="text-align:right">Return</th><th style="text-align:right">SL%</th></tr></thead><tbody>`;
+  [...filtered].sort((a,b)=>String(a[dateCol]).localeCompare(String(b[dateCol]))).forEach(r=>{
     const sl=toN(r[slCol]);
-    html+=`<tr>
-      <td style="font-weight:600">${r[dateCol]||'—'}</td>
-      <td>${r[mpCol]||'—'}</td>
-      <td class="num">${fmtN(toN(r[ordCol]))}</td>
-      <td class="num">${fmtN(toN(r[qtyCol]))}</td>
-      <td class="num">${delCol?fmtN(toN(r[delCol])):'—'}</td>
-      <td class="num">${disCol?fmtN(toN(r[disCol])):'—'}</td>
-      <td class="num">${canCol?fmtN(toN(r[canCol])):'—'}</td>
-      <td class="num">${retCol?fmtN(toN(r[retCol])):'—'}</td>
-      <td class="num ${slClass(sl)}">${fmtPct(sl)}</td>
-    </tr>`;
+    html+=`<tr><td style="font-weight:600">${r[dateCol]||'—'}</td><td>${r[mpCol]||'—'}</td><td class="num">${fmtN(toN(r[ordCol]))}</td><td class="num">${fmtN(toN(r[qtyCol]))}</td><td class="num">${delCol?fmtN(toN(r[delCol])):'—'}</td><td class="num">${disCol?fmtN(toN(r[disCol])):'—'}</td><td class="num">${canCol?fmtN(toN(r[canCol])):'—'}</td><td class="num">${retCol?fmtN(toN(r[retCol])):'—'}</td><td class="num ${slClass(sl)}">${fmtPct(sl)}</td></tr>`;
   });
   html+='</tbody></table></div></div>';
-
   document.getElementById('dailyContent').innerHTML=html;
   document.getElementById('dailyStatus').textContent=`${days.length} hari · ${allMPs.length} marketplace`;
-
-  // Draw charts
   killChart('dailyQtyChart');
-  charts['dailyQtyChart']=new Chart(document.getElementById('dailyQtyChart'),{
-    data:{labels,datasets:[
-      {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1,borderRadius:3,yAxisID:'yQty',order:2,
-        datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:9},
-          formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e879a0',tension:0.3,fill:false,yAxisID:'yOrder',order:1,
-        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:9},
-          formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},
-        datalabels:{}},
-      scales:{
-        x:{display:true,title:{display:true,text:'Date',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},
-        yQty:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:11,weight:'700'}},ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},
-        yOrder:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:11,weight:'700'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}
-      }
-    }
-  });
-
+  charts['dailyQtyChart']=new Chart(document.getElementById('dailyQtyChart'),{data:{labels,datasets:[
+    {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1,borderRadius:3,yAxisID:'yQty',order:2,datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:9},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e879a0',tension:0.3,fill:false,yAxisID:'yOrder',order:1,datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:9},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},datalabels:{}},scales:{x:{display:true,title:{display:true,text:'Date',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},yQty:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:11,weight:'700'}},ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},yOrder:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:11,weight:'700'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
   killChart('dailySLChart');
-  charts['dailySLChart']=new Chart(document.getElementById('dailySLChart'),{
-    type:'line',
-    data:{labels,datasets:[{
-      label:'Service Level %',data:slVals,
-      borderColor:'#1D9E75',backgroundColor:'#1D9E7520',borderWidth:2.5,
-      pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:true,
-      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:9},
-        formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
-        datalabels:{}},
-      scales:{
-        x:{display:true,title:{display:true,text:'Date',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},
-        y:{display:true,beginAtZero:false,min:50,max:100,title:{display:true,text:'Service Level %',color:'#1D9E75',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}
-      }
-    }
-  });
-
-  if(fMP==='all'&&allMPs.length>1){
-    killChart('dailyMPChart');
-    charts['dailyMPChart']=new Chart(document.getElementById('dailyMPChart'),{
-      type:'line',
-      data:{labels,datasets:allMPs.map((mp,i)=>({
-        label:mp,
-        data:labels.map(d=>{const r=filtered.find(x=>x[dateCol]===d&&x[mpCol]===mp);return r?toN(r[qtyCol]):0;}),
-        borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',
-        borderWidth:2,pointRadius:3,tension:0.3,fill:false
-      }))},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
-        scales:{x:{display:true,title:{display:true,text:'Date',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},y:{display:true,beginAtZero:true,title:{display:true,text:'Qty',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')}}}
-      }
-    });
-  }
+  charts['dailySLChart']=new Chart(document.getElementById('dailySLChart'),{type:'line',data:{labels,datasets:[{label:'Service Level %',data:slVals,borderColor:'#1D9E75',backgroundColor:'#1D9E7520',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:true,datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},datalabels:{}},scales:{x:{display:true,title:{display:true,text:'Date',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},y:{display:true,beginAtZero:false,min:50,max:100,title:{display:true,text:'Service Level %',color:'#1D9E75',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}}}});
+  if(fMP==='all'&&allMPs.length>1){killChart('dailyMPChart');charts['dailyMPChart']=new Chart(document.getElementById('dailyMPChart'),{type:'line',data:{labels,datasets:allMPs.map((mp,i)=>({label:mp,data:labels.map(d=>{const r=filtered.find(x=>x[dateCol]===d&&x[mpCol]===mp);return r?toN(r[qtyCol]):0;}),borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',borderWidth:2,pointRadius:3,tension:0.3,fill:false}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{display:true,title:{display:true,text:'Date',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},y:{display:true,beginAtZero:true,title:{display:true,text:'Qty',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')}}}}})}
 }
 
 // ─── MONTHLY TREND ────────────────────────────────────────────────────────────
 function renderMonthly(){
   const rows=D.monthly;
   if(!rows.length){document.getElementById('monthlyContent').innerHTML='<div class="error-state">Data Monthly Trend belum tersedia.</div>';return;}
-
-  const yearCol  = findCol(rows,['year','tahun']);
-  const monthCol = findCol(rows,['month','bulan']);
-  const mnameCol = findCol(rows,['monthname','monthnam']);
-  const mpCol    = findCol(rows,['marketplace','platform','mp','toko']);
-  const ordCol   = findCol(rows,['totalorder','order']);
-  const qtyCol   = findCol(rows,['totalqty','qty']);
-  const slCol    = findCol(rows,['servicelevel','sl%','sl']);
-
-  const allMPs   = [...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort();
-  const allYears = [...new Set(rows.map(r=>r[yearCol]).filter(Boolean))].sort();
-  fillSel('monthlyMP',allMPs,'Semua');
-  fillSel('monthlyYear',allYears,'Semua');
-
-  const fMP   = gv('monthlyMP');
-  const fYear = gv('monthlyYear');
-
+  const yearCol =findCol(rows,['year','tahun']);
+  const monthCol=findCol(rows,['month','bulan']);
+  const mnameCol=findCol(rows,['monthname','monthnam']);
+  const mpCol   =findCol(rows,['marketplace','platform','mp','toko']);
+  const ordCol  =findCol(rows,['totalorder','order']);
+  const qtyCol  =findCol(rows,['totalqty','qty']);
+  const slCol   =findCol(rows,['servicelevel','sl%','sl']);
+  // FIX: findCol moved OUTSIDE forEach loop
+  const delC=findCol(rows,['qtydelivered','delivered']);
+  const disC=findCol(rows,['qtydispatched','dispatched']);
+  const canC=findCol(rows,['qtycancelled','cancelled']);
+  const retC=findCol(rows,['qtyreturn','return']);
+  const allMPs=[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort();
+  const allYears=[...new Set(rows.map(r=>r[yearCol]).filter(Boolean))].sort();
+  fillSel('monthlyMP',allMPs,'Semua');fillSel('monthlyYear',allYears,'Semua');
+  const fMP=gv('monthlyMP'),fYear=gv('monthlyYear');
   let filtered=rows;
   if(fMP!=='all'&&mpCol)   filtered=filtered.filter(r=>r[mpCol]===fMP);
-  if(fYear!=='all'&&yearCol) filtered=filtered.filter(r=>String(r[yearCol])===String(fYear));
-
-  // Agregat per bulan (year+month)
+  if(fYear!=='all'&&yearCol)filtered=filtered.filter(r=>String(r[yearCol])===String(fYear));
   const monthMap={};
   filtered.forEach(r=>{
     const key=`${r[yearCol]}-${String(r[monthCol]).padStart(2,'0')}`;
     const label=mnameCol?`${r[mnameCol]} ${r[yearCol]}`:`${r[monthCol]}/${r[yearCol]}`;
     if(!monthMap[key])monthMap[key]={key,label,order:0,qty:0,slSum:0,slCount:0,del:0,dis:0,can:0,ret:0};
-    monthMap[key].order += toN(r[ordCol]);
-    monthMap[key].qty   += toN(r[qtyCol]);
-    monthMap[key].slSum += toN(r[slCol]);
+    monthMap[key].order+=toN(r[ordCol]);
+    monthMap[key].qty  +=toN(r[qtyCol]);
+    monthMap[key].slSum+=toN(r[slCol]);
     monthMap[key].slCount++;
-    const delC=findCol(rows,['qtydelivered','delivered']);
-    const disC=findCol(rows,['qtydispatched','dispatched']);
-    const canC=findCol(rows,['qtycancelled','cancelled']);
-    const retC=findCol(rows,['qtyreturn','return']);
     if(delC)monthMap[key].del+=toN(r[delC]);
     if(disC)monthMap[key].dis+=toN(r[disC]);
     if(canC)monthMap[key].can+=toN(r[canC]);
@@ -1238,292 +1130,91 @@ function renderMonthly(){
   const qtyVals=months.map(m=>m.qty);
   const orderVals=months.map(m=>m.order);
   const slVals=months.map(m=>m.slCount>0?+(m.slSum/m.slCount).toFixed(2):0);
-
-  // Summary cards
   const totQty=months.reduce((s,m)=>s+m.qty,0);
   const totOrder=months.reduce((s,m)=>s+m.order,0);
   const avgSL=slVals.length?+(slVals.reduce((a,b)=>a+b,0)/slVals.length).toFixed(2):0;
   const peakMonth=months.length?months.reduce((a,b)=>b.qty>a.qty?b:a):null;
-
   let html=`<div class="kpi-cards-row">
     <div class="kpi-card"><div class="kpi-card-label">📦 Total Qty</div><div class="kpi-card-value">${fmtN(totQty)}</div><div class="kpi-card-sub">${months.length} bulan data</div></div>
     <div class="kpi-card green"><div class="kpi-card-label">🔢 Total Order</div><div class="kpi-card-value">${fmtN(totOrder)}</div><div class="kpi-card-sub">Unique orders</div></div>
     <div class="kpi-card orange"><div class="kpi-card-label">📊 Avg Service Level</div><div class="kpi-card-value">${fmtPct(avgSL)}</div><div class="kpi-card-sub">Rata-rata bulanan</div></div>
     <div class="kpi-card pink"><div class="kpi-card-label">🏆 Peak Month</div><div class="kpi-card-value">${peakMonth?fmtN(peakMonth.qty):'—'}</div><div class="kpi-card-sub">${peakMonth?peakMonth.label:'—'}</div></div>
   </div>`;
-
-  // Chart: Qty & Order per bulan
-  html+=`<div class="chart-card">
-    <div class="chart-title">📆 Tren Bulanan — Qty & Order</div>
-    <div class="chart-sub">${fMP!=='all'?fMP:'Semua Marketplace'} · ${months.length} bulan</div>
-    <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>Total Qty (Bar)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>Total Order (Line)</div>
-    </div>
-    <div class="chart-wrap"><canvas id="monthlyQtyChart"></canvas></div>
-  </div>`;
-
-  // Chart: SL per bulan
-  html+=`<div class="chart-row">
-    <div class="chart-card"><div class="chart-title">📈 Service Level % Bulanan</div><div class="chart-wrap"><canvas id="monthlySLChart"></canvas></div></div>`;
-
-  // Pie komposisi status
+  html+=`<div class="chart-card"><div class="chart-title">📆 Tren Bulanan — Qty & Order</div><div class="chart-sub">${fMP!=='all'?fMP:'Semua Marketplace'} · ${months.length} bulan</div><div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>Total Qty (Bar)</div><div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>Total Order (Line)</div></div><div class="chart-wrap"><canvas id="monthlyQtyChart"></canvas></div></div>`;
+  html+=`<div class="chart-row"><div class="chart-card"><div class="chart-title">📈 Service Level % Bulanan</div><div class="chart-wrap"><canvas id="monthlySLChart"></canvas></div></div>`;
   if(months.length){
-    const totDel=months.reduce((s,m)=>s+m.del,0);
-    const totDis=months.reduce((s,m)=>s+m.dis,0);
-    const totCan=months.reduce((s,m)=>s+m.can,0);
-    const totRet=months.reduce((s,m)=>s+m.ret,0);
-    html+=`<div class="chart-card"><div class="chart-title">🍩 Komposisi Status</div><div class="chart-wrap"><canvas id="monthlyPieChart"></canvas></div></div>`;
-    html+=`</div>`; // close chart-row
-
-    // akan di-draw setelah innerHTML set
-    setTimeout(()=>{
-      killChart('monthlyPieChart');
-      charts['monthlyPieChart']=new Chart(document.getElementById('monthlyPieChart'),{
-        type:'doughnut',
-        data:{labels:['Delivered','Dispatched','Cancelled','Return'],datasets:[{data:[totDel,totDis,totCan,totRet],backgroundColor:['#1D9E75dd','#5b3fa8dd','#e05b5bdd','#e6944add'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return `${pct}%`;}}}}},
-        plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.04)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.72,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 11px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.25)';ctx.shadowBlur=4;ctx.fillText(((v/tot)*100).toFixed(1)+'%',x,y);ctx.restore();});}}]
-      });
-    },100);
-  } else {
-    html+=`</div>`;
-  }
-
-  // Chart per marketplace (jika semua)
-  if(fMP==='all'&&allMPs.length>1){
-    html+=`<div class="chart-card">
-      <div class="chart-title">🛒 Monthly Qty per Marketplace</div>
-      <div class="chart-sub">Perbandingan tren bulanan antar marketplace</div>
-      <div class="chart-wrap"><canvas id="monthlyMPChart"></canvas></div>
-    </div>`;
-  }
-
-  // Tabel detail bulanan
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Detail Bulanan per Marketplace</div><div class="table-meta">${filtered.length} baris</div></div>
-  <div style="overflow-x:auto"><table><thead><tr>
-    <th>Bulan</th><th>Marketplace</th>
-    <th style="text-align:right;color:var(--blue)">Order (Uniq)</th>
-    <th style="text-align:right;color:var(--green)">Total Qty</th>
-    <th style="text-align:right">Delivered</th>
-    <th style="text-align:right">Dispatched</th>
-    <th style="text-align:right">Cancelled</th>
-    <th style="text-align:right">Return</th>
-    <th style="text-align:right">SL%</th>
-  </tr></thead><tbody>`;
+    const totDel=months.reduce((s,m)=>s+m.del,0),totDis=months.reduce((s,m)=>s+m.dis,0),totCan=months.reduce((s,m)=>s+m.can,0),totRet=months.reduce((s,m)=>s+m.ret,0);
+    html+=`<div class="chart-card"><div class="chart-title">🍩 Komposisi Status</div><div class="chart-wrap"><canvas id="monthlyPieChart"></canvas></div></div></div>`;
+    setTimeout(()=>{killChart('monthlyPieChart');charts['monthlyPieChart']=new Chart(document.getElementById('monthlyPieChart'),{type:'doughnut',data:{labels:['Delivered','Dispatched','Cancelled','Return'],datasets:[{data:[totDel,totDis,totCan,totRet],backgroundColor:['#1D9E75dd','#5b3fa8dd','#e05b5bdd','#e6944add'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}%`;}}}}},plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.04)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.72,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 11px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.25)';ctx.shadowBlur=4;ctx.fillText(((v/tot)*100).toFixed(1)+'%',x,y);ctx.restore();});}}]});},100);
+  }else html+=`</div>`;
+  if(fMP==='all'&&allMPs.length>1)html+=`<div class="chart-card"><div class="chart-title">🛒 Monthly Qty per Marketplace</div><div class="chart-sub">Perbandingan tren bulanan antar marketplace</div><div class="chart-wrap"><canvas id="monthlyMPChart"></canvas></div></div>`;
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Detail Bulanan per Marketplace</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Bulan</th><th>Marketplace</th><th style="text-align:right;color:var(--blue)">Order</th><th style="text-align:right;color:var(--green)">Total Qty</th><th style="text-align:right">Delivered</th><th style="text-align:right">Dispatched</th><th style="text-align:right">Cancelled</th><th style="text-align:right">Return</th><th style="text-align:right">SL%</th></tr></thead><tbody>`;
+  // FIX: findCol already done above, not inside loop
   const delC2=findCol(rows,['qtydelivered','delivered']);
   const disC2=findCol(rows,['qtydispatched','dispatched']);
   const canC2=findCol(rows,['qtycancelled','cancelled']);
   const retC2=findCol(rows,['qtyreturn','return']);
-  [...filtered].sort((a,b)=>{
-    const ka=`${a[yearCol]}-${String(a[monthCol]).padStart(2,'0')}`;
-    const kb=`${b[yearCol]}-${String(b[monthCol]).padStart(2,'0')}`;
-    return ka.localeCompare(kb);
-  }).forEach(r=>{
-    const sl=toN(r[slCol]);
-    const mLabel=mnameCol?`${r[mnameCol]} ${r[yearCol]}`:`${r[monthCol]}/${r[yearCol]}`;
-    html+=`<tr>
-      <td style="font-weight:600">${mLabel}</td>
-      <td>${r[mpCol]||'—'}</td>
-      <td class="num">${fmtN(toN(r[ordCol]))}</td>
-      <td class="num">${fmtN(toN(r[qtyCol]))}</td>
-      <td class="num">${delC2?fmtN(toN(r[delC2])):'—'}</td>
-      <td class="num">${disC2?fmtN(toN(r[disC2])):'—'}</td>
-      <td class="num">${canC2?fmtN(toN(r[canC2])):'—'}</td>
-      <td class="num">${retC2?fmtN(toN(r[retC2])):'—'}</td>
-      <td class="num ${slClass(sl)}">${fmtPct(sl)}</td>
-    </tr>`;
+  [...filtered].sort((a,b)=>{const ka=`${a[yearCol]}-${String(a[monthCol]).padStart(2,'0')}`;const kb=`${b[yearCol]}-${String(b[monthCol]).padStart(2,'0')}`;return ka.localeCompare(kb);}).forEach(r=>{
+    const sl=toN(r[slCol]);const mLabel=mnameCol?`${r[mnameCol]} ${r[yearCol]}`:`${r[monthCol]}/${r[yearCol]}`;
+    html+=`<tr><td style="font-weight:600">${mLabel}</td><td>${r[mpCol]||'—'}</td><td class="num">${fmtN(toN(r[ordCol]))}</td><td class="num">${fmtN(toN(r[qtyCol]))}</td><td class="num">${delC2?fmtN(toN(r[delC2])):'—'}</td><td class="num">${disC2?fmtN(toN(r[disC2])):'—'}</td><td class="num">${canC2?fmtN(toN(r[canC2])):'—'}</td><td class="num">${retC2?fmtN(toN(r[retC2])):'—'}</td><td class="num ${slClass(sl)}">${fmtPct(sl)}</td></tr>`;
   });
   html+='</tbody></table></div></div>';
-
   document.getElementById('monthlyContent').innerHTML=html;
   document.getElementById('monthlyStatus').textContent=`${months.length} bulan · ${allMPs.length} marketplace`;
-
-  // Draw charts
   killChart('monthlyQtyChart');
-  charts['monthlyQtyChart']=new Chart(document.getElementById('monthlyQtyChart'),{
-    data:{labels,datasets:[
-      {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:5,yAxisID:'yQty',order:2,
-        datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},
-          formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrder',order:1,
-        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},
-          formatter:(v)=>fmtLabel(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},
-        datalabels:{}},
-      scales:{
-        x:{display:true,title:{display:true,text:'Month',color:'#6b5b8a',font:{size:11,weight:'700'}}},
-        yQty:{
-          type:'linear',
-          position:'left',
-          beginAtZero:true,
-          title:{
-            display:true,
-            text:'Total Qty',
-            color:'#5b3fa8',
-            font:{size:11,weight:'700'}
-          },
-          ticks:{
-            color:'#5b3fa8',
-            callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')
-          },
-          grid:{color:'#e2daf2'}
-        },
-        yOrder:{
-          type:'linear',
-          position:'right',
-          beginAtZero:true,
-          title:{
-            display:true,
-            text:'Total Order',
-            color:'#e879a0',
-            font:{size:11,weight:'700'}
-          },
-          ticks:{
-            color:'#e879a0',
-            callback:v=>v.toLocaleString('id-ID')
-          },
-          grid:{drawOnChartArea:false}
-        }
-      }
-    }
-  });
-
+  charts['monthlyQtyChart']=new Chart(document.getElementById('monthlyQtyChart'),{data:{labels,datasets:[
+    {type:'bar',label:'Total Qty',data:qtyVals,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:5,yAxisID:'yQty',order:2,datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'line',label:'Total Order',data:orderVals,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrder',order:1,datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},datalabels:{}},scales:{x:{display:true,title:{display:true,text:'Month',color:'#6b5b8a',font:{size:11,weight:'700'}}},yQty:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:11,weight:'700'}},ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},yOrder:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:11,weight:'700'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
   killChart('monthlySLChart');
-  charts['monthlySLChart']=new Chart(document.getElementById('monthlySLChart'),{
-    type:'line',
-    data:{labels,datasets:[{label:'SL%',data:slVals,borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:true,
-      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:11},
-        formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
-        datalabels:{}},
-      scales:{x:{display:true,title:{display:true,text:'Month',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},y:{display:true,beginAtZero:false,min:50,max:100,title:{display:true,text:'Service Level %',color:'#1D9E75',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}}
-    }
-  });
-
-  if(fMP==='all'&&allMPs.length>1){
-    killChart('monthlyMPChart');
-    charts['monthlyMPChart']=new Chart(document.getElementById('monthlyMPChart'),{
-      type:'bar',
-      data:{labels,datasets:allMPs.map((mp,i)=>({
-        label:mp,
-        data:months.map(m=>{
-          const monthKey=m.key;
-          const match=filtered.filter(r=>{
-            const k=`${r[yearCol]}-${String(r[monthCol]).padStart(2,'0')}`;
-            return k===monthKey&&r[mpCol]===mp;
-          });
-          return match.reduce((s,r)=>s+toN(r[qtyCol]),0);
-        }),
-        backgroundColor:COLORS[i%COLORS.length]+'bb',borderColor:COLORS[i%COLORS.length],borderWidth:1.5,borderRadius:4
-      }))},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
-        scales:{x:{display:true,title:{display:true,text:'Month',color:'#6b5b8a',font:{size:11,weight:'700'}},stacked:false},y:{display:true,beginAtZero:true,title:{display:true,text:'Qty',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')}}}
-      }
-    });
-  }
+  charts['monthlySLChart']=new Chart(document.getElementById('monthlySLChart'),{type:'line',data:{labels,datasets:[{label:'SL%',data:slVals,borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:true,datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:11},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},datalabels:{}},scales:{x:{display:true,title:{display:true,text:'Month',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},y:{display:true,beginAtZero:false,min:50,max:100,title:{display:true,text:'Service Level %',color:'#1D9E75',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}}}});
+  if(fMP==='all'&&allMPs.length>1){killChart('monthlyMPChart');charts['monthlyMPChart']=new Chart(document.getElementById('monthlyMPChart'),{type:'bar',data:{labels,datasets:allMPs.map((mp,i)=>({label:mp,data:months.map(m=>{const mk=m.key;return filtered.filter(r=>{const k=`${r[yearCol]}-${String(r[monthCol]).padStart(2,'0')}`;return k===mk&&r[mpCol]===mp;}).reduce((s,r)=>s+toN(r[qtyCol]),0);}),backgroundColor:COLORS[i%COLORS.length]+'bb',borderColor:COLORS[i%COLORS.length],borderWidth:1.5,borderRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{display:true,title:{display:true,text:'Month',color:'#6b5b8a',font:{size:11,weight:'700'}},stacked:false},y:{display:true,beginAtZero:true,title:{display:true,text:'Qty',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')}}}}});}
 }
-
 
 // ─── COD vs NON-COD TREND ────────────────────────────────────────────────────
-function resetCODFilter(){
-  document.getElementById('codMP').value   = 'all';
-  document.getElementById('codWeek').value = 'all';
-  document.getElementById('codFrom').value = '';
-  document.getElementById('codTo').value   = '';
-  renderCOD();
-}
+function resetCODFilter(){document.getElementById('codMP').value='all';document.getElementById('codWeek').value='all';document.getElementById('codFrom').value='';document.getElementById('codTo').value='';renderCOD();}
 
 function renderCOD(){
-  const fMP   = gv('codMP');
-  const fWk   = gv('codWeek');
-  const fFrom = gv('codFrom');
-  const fTo   = gv('codTo');
-
-  // Tentukan mode: pakai date range → COD_Daily, else → COD_Trend (weekly)
-  const useDateRange = fFrom !== '' || fTo !== '';
-  const rows = useDateRange ? D.cod_daily : D.cod;
-
-  if(!rows || !rows.length){
-    document.getElementById('codContent').innerHTML =
-      '<div class="error-state">Data COD belum tersedia.</div>';
-    return;
-  }
-
-  // Deteksi kolom
-  const isDaily  = useDateRange;
-  const dateCol  = isDaily ? findCol(rows,['date','tanggal']) : null;
-  const wkCol    = !isDaily ? findCol(rows,['week','minggu','wk']) : null;
-  const mpCol    = findCol(rows,['marketplace','platform','mp']);
-  const payCol   = findCol(rows,['paytype','pay type','payment']);
-  const ordCol   = findCol(rows,['totalorder','order']);
-  const qtyCol   = findCol(rows,['totalqty','qty']);
-  const retCol   = findCol(rows,['qtyreturn','return']);
-  const canCol   = findCol(rows,['qtycancelled','cancelled']);
-  const retRCol  = findCol(rows,['returnrate','return rate','return%']);
-  const canRCol  = findCol(rows,['cancelrate','cancel rate','cancel%']);
-  const slCol    = findCol(rows,['servicelevel','sl%','sl']);
-
-  // Populate filter options
-  const allMPs   = [...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort();
-  const allWeeks = !isDaily
-    ? [...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b))
-    : [];
-  fillSel('codMP',   allMPs,   'Semua');
-  if(!isDaily) fillSel('codWeek', allWeeks, 'Semua Week');
-
-  // Filter data
-  let filtered = rows;
-  if(fMP !== 'all' && mpCol) filtered = filtered.filter(r=>r[mpCol]===fMP);
-  if(!isDaily && fWk !== 'all' && wkCol)
-    filtered = filtered.filter(r=>String(r[wkCol])===String(fWk));
-  if(isDaily && fFrom) filtered = filtered.filter(r=>r[dateCol]>=fFrom);
-  if(isDaily && fTo)   filtered = filtered.filter(r=>r[dateCol]<=fTo);
-
-  // Mode label
-  const modeLabel = isDaily
-    ? `📅 Date Range: ${fFrom||'awal'} s/d ${fTo||'akhir'}`
-    : `📆 Weekly${fWk!=='all'?' · Wk '+fWk:''}`;
-
-  // Summary COD vs Non-COD
-  const cod  = filtered.filter(r=>r[payCol]==='COD');
-  const ncod = filtered.filter(r=>r[payCol]==='Non-COD');
-  const sumF = (arr,col)=>arr.reduce((s,r)=>s+toN(r[col]),0);
-
-  const codQty=sumF(cod,qtyCol), ncodQty=sumF(ncod,qtyCol);
-  const codRet=sumF(cod,retCol), ncodRet=sumF(ncod,retCol);
-  const codCan=sumF(cod,canCol), ncodCan=sumF(ncod,canCol);
-  const codOrd=sumF(cod,ordCol), ncodOrd=sumF(ncod,ordCol);
-  const codRetR  = codQty  ? (codRet /codQty *100).toFixed(2):'0.00';
-  const ncodRetR = ncodQty ? (ncodRet/ncodQty*100).toFixed(2):'0.00';
-  const codCanR  = codQty  ? (codCan /codQty *100).toFixed(2):'0.00';
-  const ncodCanR = ncodQty ? (ncodCan/ncodQty*100).toFixed(2):'0.00';
-
-  let html = `
-  <!-- Mode badge -->
-  <div style="margin-bottom:12px;">
-    <span style="background:#f0eef8;color:var(--blue);font-size:11px;font-weight:600;
-      padding:4px 12px;border-radius:8px;border:1px solid #ddd6f8;">
-      ${modeLabel}
-    </span>
-    ${isDaily?'<span style="margin-left:8px;font-size:11px;color:var(--text2)">Filter tanggal aktif — menggunakan data harian</span>':''}
-  </div>
-
-  <!-- Summary cards -->
+  const fMP=gv('codMP'),fWk=gv('codWeek'),fFrom=gv('codFrom'),fTo=gv('codTo');
+  const useDateRange=fFrom!==''||fTo!=='';
+  const rows=useDateRange?D.cod_daily:D.cod;
+  if(!rows||!rows.length){document.getElementById('codContent').innerHTML='<div class="error-state">Data COD belum tersedia.</div>';return;}
+  const isDaily=useDateRange;
+  const dateCol=isDaily?findCol(rows,['date','tanggal']):null;
+  const wkCol  =!isDaily?findCol(rows,['week','minggu','wk']):null;
+  const mpCol  =findCol(rows,['marketplace','platform','mp']);
+  const payCol =findCol(rows,['paytype','pay type','payment']);
+  const ordCol =findCol(rows,['totalorder','order']);
+  const qtyCol =findCol(rows,['totalqty','qty']);
+  const retCol =findCol(rows,['qtyreturn','return']);
+  const canCol =findCol(rows,['qtycancelled','cancelled']);
+  const retRCol=findCol(rows,['returnrate','return rate','return%']);
+  const canRCol=findCol(rows,['cancelrate','cancel rate','cancel%']);
+  const slCol  =findCol(rows,['servicelevel','sl%','sl']);
+  const allMPs=[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort();
+  const allWeeks=!isDaily?[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b)):[];
+  fillSel('codMP',allMPs,'Semua');
+  if(!isDaily)fillSel('codWeek',allWeeks,'Semua Week');
+  let filtered=rows;
+  if(fMP!=='all'&&mpCol)filtered=filtered.filter(r=>r[mpCol]===fMP);
+  if(!isDaily&&fWk!=='all'&&wkCol)filtered=filtered.filter(r=>String(r[wkCol])===String(fWk));
+  if(isDaily&&fFrom)filtered=filtered.filter(r=>r[dateCol]>=fFrom);
+  if(isDaily&&fTo)  filtered=filtered.filter(r=>r[dateCol]<=fTo);
+  const modeLabel=isDaily?`📅 Date Range: ${fFrom||'awal'} s/d ${fTo||'akhir'}`:`📆 Weekly${fWk!=='all'?' · Wk '+fWk:''}`;
+  const cod=filtered.filter(r=>r[payCol]==='COD'),ncod=filtered.filter(r=>r[payCol]==='Non-COD');
+  const sumF=(arr,col)=>arr.reduce((s,r)=>s+toN(r[col]),0);
+  const codQty=sumF(cod,qtyCol),ncodQty=sumF(ncod,qtyCol);
+  const codRet=sumF(cod,retCol),ncodRet=sumF(ncod,retCol);
+  const codCan=sumF(cod,canCol),ncodCan=sumF(ncod,canCol);
+  const codOrd=sumF(cod,ordCol),ncodOrd=sumF(ncod,ordCol);
+  const codRetR=codQty?(codRet/codQty*100).toFixed(2):'0.00';
+  const ncodRetR=ncodQty?(ncodRet/ncodQty*100).toFixed(2):'0.00';
+  const codCanR=codQty?(codCan/codQty*100).toFixed(2):'0.00';
+  const ncodCanR=ncodQty?(ncodCan/ncodQty*100).toFixed(2):'0.00';
+  let html=`<div style="margin-bottom:12px;"><span style="background:#f0eef8;color:var(--blue);font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #ddd6f8;">${modeLabel}</span>${isDaily?'<span style="margin-left:8px;font-size:11px;color:var(--text2)">Filter tanggal aktif — menggunakan data harian</span>':''}</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;border-top:4px solid #e6944a;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-        <span style="font-size:18px">💵</span>
-        <span style="font-weight:700;font-size:14px;color:#e6944a">COD</span>
-        <span style="font-size:11px;color:var(--text2)">(Cash on Delivery)</span>
-      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:18px">💵</span><span style="font-weight:700;font-size:14px;color:#e6944a">COD</span><span style="font-size:11px;color:var(--text2)">(Cash on Delivery)</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
         <div><div style="font-size:10px;color:var(--text2)">Total Qty</div><div style="font-weight:800;font-size:16px">${fmtN(codQty)}</div></div>
         <div><div style="font-size:10px;color:var(--text2)">Total Order</div><div style="font-weight:800;font-size:16px">${fmtN(codOrd)}</div></div>
@@ -1534,11 +1225,7 @@ function renderCOD(){
       </div>
     </div>
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;border-top:4px solid #1D9E75;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-        <span style="font-size:18px">💳</span>
-        <span style="font-weight:700;font-size:14px;color:#1D9E75">Non-COD</span>
-        <span style="font-size:11px;color:var(--text2)">(Transfer / QRIS / dll)</span>
-      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:18px">💳</span><span style="font-weight:700;font-size:14px;color:#1D9E75">Non-COD</span><span style="font-size:11px;color:var(--text2)">(Transfer / QRIS / dll)</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
         <div><div style="font-size:10px;color:var(--text2)">Total Qty</div><div style="font-weight:800;font-size:16px">${fmtN(ncodQty)}</div></div>
         <div><div style="font-size:10px;color:var(--text2)">Total Order</div><div style="font-weight:800;font-size:16px">${fmtN(ncodOrd)}</div></div>
@@ -1549,416 +1236,50 @@ function renderCOD(){
       </div>
     </div>
   </div>`;
-
-  // Chart labels & data — x-axis: date atau week
-  const xKeys = isDaily
-    ? [...new Set(filtered.map(r=>r[dateCol]).filter(Boolean))].sort()
-    : [...new Set(filtered.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  const xLabels = isDaily ? xKeys : xKeys.map(w=>'Wk '+w);
-  const xCol = isDaily ? dateCol : wkCol;
-
-  const getRateArr = (payType, statusCol, qtyCol) =>
-    xKeys.map(x=>{
-      const r = filtered.filter(f=>
-        String(f[xCol])===String(x) && f[payCol]===payType
-      );
-      const q = r.reduce((s,f)=>s+toN(f[qtyCol]),0);
-      const v = r.reduce((s,f)=>s+toN(f[statusCol]),0);
-      return q ? +(v/q*100).toFixed(2) : 0;
-    });
-
-  const retCOD_x  = getRateArr('COD',      retCol, qtyCol);
-  const retNCOD_x = getRateArr('Non-COD',  retCol, qtyCol);
-  const canCOD_x  = getRateArr('COD',      canCol, qtyCol);
-  const canNCOD_x = getRateArr('Non-COD',  canCol, qtyCol);
-
-  html += `<div class="chart-row">
-    <div class="chart-card">
-      <div class="chart-title">📈 Return Rate % — COD vs Non-COD</div>
-      <div class="chart-sub">${isDaily?'Per Hari':'Per Week'} · ${fMP!=='all'?fMP:'Semua Marketplace'}</div>
-      <div class="chart-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Return COD %</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Return Non-COD %</div>
-      </div>
-      <div class="chart-wrap"><canvas id="codReturnChart"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">📉 Cancel Rate % — COD vs Non-COD</div>
-      <div class="chart-sub">${isDaily?'Per Hari':'Per Week'} · ${fMP!=='all'?fMP:'Semua Marketplace'}</div>
-      <div class="chart-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#e05b5b"></div>Cancel COD %</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Cancel Non-COD %</div>
-      </div>
-      <div class="chart-wrap"><canvas id="codCancelChart"></canvas></div>
-    </div>
+  const xKeys=isDaily?[...new Set(filtered.map(r=>r[dateCol]).filter(Boolean))].sort():[...new Set(filtered.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const xLabels=isDaily?xKeys:xKeys.map(w=>'Wk '+w);
+  const xCol=isDaily?dateCol:wkCol;
+  const getRateArr=(pay,sCol,qCol)=>xKeys.map(x=>{const r=filtered.filter(f=>String(f[xCol])===String(x)&&f[payCol]===pay);const q=r.reduce((s,f)=>s+toN(f[qCol]),0);const v=r.reduce((s,f)=>s+toN(f[sCol]),0);return q?+(v/q*100).toFixed(2):0;});
+  const retCOD_x=getRateArr('COD',retCol,qtyCol),retNCOD_x=getRateArr('Non-COD',retCol,qtyCol);
+  const canCOD_x=getRateArr('COD',canCol,qtyCol),canNCOD_x=getRateArr('Non-COD',canCol,qtyCol);
+  html+=`<div class="chart-row">
+    <div class="chart-card"><div class="chart-title">📈 Return Rate % — COD vs Non-COD</div><div class="chart-sub">${isDaily?'Per Hari':'Per Week'} · ${fMP!=='all'?fMP:'Semua Marketplace'}</div><div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Return COD %</div><div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Return Non-COD %</div></div><div class="chart-wrap"><canvas id="codReturnChart"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">📉 Cancel Rate % — COD vs Non-COD</div><div class="chart-sub">${isDaily?'Per Hari':'Per Week'} · ${fMP!=='all'?fMP:'Semua Marketplace'}</div><div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#e05b5b"></div>Cancel COD %</div><div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Cancel Non-COD %</div></div><div class="chart-wrap"><canvas id="codCancelChart"></canvas></div></div>
   </div>`;
-
-  // Combined chart per marketplace
-  const mps = fMP==='all'
-    ? [...new Set(filtered.map(r=>r[mpCol]).filter(Boolean))].sort()
-    : [fMP];
-
-  const qtyRetCOD_mp  = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='COD').reduce((s,r)=>s+toN(r[retCol]),0));
-  const qtyRetNCOD_mp = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='Non-COD').reduce((s,r)=>s+toN(r[retCol]),0));
-  const qtyCanCOD_mp  = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='COD').reduce((s,r)=>s+toN(r[canCol]),0));
-  const qtyCanNCOD_mp = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='Non-COD').reduce((s,r)=>s+toN(r[canCol]),0));
-  const qtyTot_mp     = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0));
-  const ordTot_mp     = mps.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[ordCol]),0));
-
-  html += `<div class="chart-card">
-    <div class="chart-title">🛒 Qty & Order per Marketplace — COD vs Non-COD</div>
-    <div class="chart-sub">Bar = Qty Return + Cancel | Line = Total Qty & Order</div>
-    <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Return COD</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e6944a80"></div>Return Non-COD</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e05b5b"></div>Cancel COD</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e05b5b80"></div>Cancel Non-COD</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8;border-radius:50%"></div>Total Qty</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>Total Order</div>
-    </div>
-    <div class="chart-wrap xtall"><canvas id="codMPChart"></canvas></div>
-  </div>`;
-
-  // Tabel detail
-  const sortCol = isDaily ? dateCol : wkCol;
-  html += `<div class="table-card">
-    <div class="table-header">
-      <div class="table-title">📋 Detail ${isDaily?'Harian':'Mingguan'} — COD vs Non-COD</div>
-      <div class="table-meta">${filtered.length} baris</div>
-    </div>
-    <div style="overflow-x:auto"><table><thead><tr>
-      <th>${isDaily?'Tanggal':'Week'}</th><th>Marketplace</th><th>Pay Type</th>
-      <th style="text-align:right;color:var(--blue)">Order</th>
-      <th style="text-align:right;color:var(--green)">Total Qty</th>
-      <th style="text-align:right">Qty Return</th>
-      <th style="text-align:right">Qty Cancel</th>
-      <th style="text-align:right;color:var(--red)">Return %</th>
-      <th style="text-align:right;color:var(--orange)">Cancel %</th>
-      <th style="text-align:right;color:var(--green)">SL %</th>
-    </tr></thead><tbody>`;
-
-  [...filtered].sort((a,b)=>{
-    const ka=String(a[sortCol]), kb=String(b[sortCol]);
-    if(ka!==kb) return ka.localeCompare(kb);
-    if(a[mpCol]<b[mpCol]) return -1;
-    if(a[mpCol]>b[mpCol]) return 1;
-    return a[payCol]==='COD'?-1:1;
-  }).forEach(r=>{
+  const mps=fMP==='all'?[...new Set(filtered.map(r=>r[mpCol]).filter(Boolean))].sort():[fMP];
+  const qtyRetCOD_mp=mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='COD').reduce((s,r)=>s+toN(r[retCol]),0));
+  const qtyRetNCOD_mp=mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='Non-COD').reduce((s,r)=>s+toN(r[retCol]),0));
+  const qtyCanCOD_mp=mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='COD').reduce((s,r)=>s+toN(r[canCol]),0));
+  const qtyCanNCOD_mp=mps.map(mp=>filtered.filter(r=>r[mpCol]===mp&&r[payCol]==='Non-COD').reduce((s,r)=>s+toN(r[canCol]),0));
+  const qtyTot_mp=mps.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0));
+  const ordTot_mp=mps.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[ordCol]),0));
+  html+=`<div class="chart-card"><div class="chart-title">🛒 Qty & Order per Marketplace — COD vs Non-COD</div><div class="chart-sub">Bar = Qty Return + Cancel | Line = Total Qty & Order</div><div class="chart-wrap xtall"><canvas id="codMPChart"></canvas></div></div>`;
+  const sortCol=isDaily?dateCol:wkCol;
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Detail ${isDaily?'Harian':'Mingguan'} — COD vs Non-COD</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>${isDaily?'Tanggal':'Week'}</th><th>Marketplace</th><th>Pay Type</th><th style="text-align:right;color:var(--blue)">Order</th><th style="text-align:right;color:var(--green)">Total Qty</th><th style="text-align:right">Qty Return</th><th style="text-align:right">Qty Cancel</th><th style="text-align:right;color:var(--red)">Return %</th><th style="text-align:right;color:var(--orange)">Cancel %</th><th style="text-align:right;color:var(--green)">SL %</th></tr></thead><tbody>`;
+  [...filtered].sort((a,b)=>{const ka=String(a[sortCol]),kb=String(b[sortCol]);if(ka!==kb)return ka.localeCompare(kb);if(a[mpCol]<b[mpCol])return-1;if(a[mpCol]>b[mpCol])return 1;return a[payCol]==='COD'?-1:1;}).forEach(r=>{
     const qty=toN(r[qtyCol]);
+    // FIX: fallback calculation for retRCol/canRCol if column not found
     const rr=retRCol?toN(r[retRCol]):(qty?toN(r[retCol])/qty*100:0);
     const cr=canRCol?toN(r[canRCol]):(qty?toN(r[canCol])/qty*100:0);
     const sl=toN(r[slCol]||0);
     const isCod=r[payCol]==='COD';
-    const xVal = isDaily ? r[dateCol] : 'Wk '+r[wkCol];
-    html+=`<tr>
-      <td style="font-weight:600">${xVal||'—'}</td>
-      <td>${r[mpCol]||'—'}</td>
-      <td><span class="cod-badge ${isCod?'cod':'ncod'}">${r[payCol]||'—'}</span></td>
-      <td class="num">${fmtN(toN(r[ordCol]))}</td>
-      <td class="num">${fmtN(toN(r[qtyCol]))}</td>
-      <td class="num" style="color:var(--red)">${fmtN(toN(r[retCol]))}</td>
-      <td class="num" style="color:var(--orange)">${fmtN(toN(r[canCol]))}</td>
-      <td class="num ${slClass(100-rr)}" style="color:var(--red)">${rr.toFixed(2)}%</td>
-      <td class="num" style="color:var(--orange)">${cr.toFixed(2)}%</td>
-      <td class="num ${slClass(sl)}">${sl.toFixed(2)}%</td>
-    </tr>`;
+    const xVal=isDaily?r[dateCol]:'Wk '+r[wkCol];
+    html+=`<tr><td style="font-weight:600">${xVal||'—'}</td><td>${r[mpCol]||'—'}</td><td><span class="cod-badge ${isCod?'cod':'ncod'}">${r[payCol]||'—'}</span></td><td class="num">${fmtN(toN(r[ordCol]))}</td><td class="num">${fmtN(toN(r[qtyCol]))}</td><td class="num" style="color:var(--red)">${fmtN(toN(r[retCol]))}</td><td class="num" style="color:var(--orange)">${fmtN(toN(r[canCol]))}</td><td class="num ${slClass(100-rr)}" style="color:var(--red)">${rr.toFixed(2)}%</td><td class="num" style="color:var(--orange)">${cr.toFixed(2)}%</td><td class="num ${slClass(sl)}">${sl.toFixed(2)}%</td></tr>`;
   });
-  html += '</tbody></table></div></div>';
-
-  document.getElementById('codContent').innerHTML = html;
-  document.getElementById('codStatus').textContent =
-    `${isDaily?xKeys.length+' hari':xKeys.length+' weeks'} · ${allMPs.length} marketplace`;
-
-  // ── Draw Charts ──
-  const lineOpts = {
-    responsive:true, maintainAspectRatio:false,
-    layout:{padding:{top:28,right:12,left:8,bottom:20}},
-    interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:false},datalabels:{},
-      tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}}},
-    scales:{
-      x:{display:true,title:{display:true,text:isDaily?'Date':'Week',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},
-      y:{display:true,beginAtZero:true,title:{display:true,text:'Rate %',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}
-    }
-  };
-
-  killChart('codReturnChart');
-  charts['codReturnChart']=new Chart(document.getElementById('codReturnChart'),{
-    type:'line',
-    data:{labels:xLabels,datasets:[
-      {label:'Return COD %',data:retCOD_x,borderColor:'#e6944a',backgroundColor:'#e6944a20',
-        borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#e6944a',tension:0.3,fill:false,
-        datalabels:{anchor:'top',align:'top',color:'#e6944a',font:{weight:'700',size:9},
-          formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {label:'Return Non-COD %',data:retNCOD_x,borderColor:'#1D9E75',backgroundColor:'#1D9E7520',
-        borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:false,
-        datalabels:{anchor:'bottom',align:'bottom',color:'#1D9E75',font:{weight:'700',size:9},
-          formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
-    ]},options:lineOpts
-  });
-
-  killChart('codCancelChart');
-  charts['codCancelChart']=new Chart(document.getElementById('codCancelChart'),{
-    type:'line',
-    data:{labels:xLabels,datasets:[
-      {label:'Cancel COD %',data:canCOD_x,borderColor:'#e05b5b',backgroundColor:'#e05b5b20',
-        borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#e05b5b',tension:0.3,fill:false,
-        datalabels:{anchor:'top',align:'top',color:'#e05b5b',font:{weight:'700',size:9},
-          formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {label:'Cancel Non-COD %',data:canNCOD_x,borderColor:'#7c3aed',backgroundColor:'#7c3aed20',
-        borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#7c3aed',tension:0.3,fill:false,
-        datalabels:{anchor:'bottom',align:'bottom',color:'#7c3aed',font:{weight:'700',size:9},
-          formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
-    ]},options:lineOpts
-  });
-
-  killChart('codMPChart');
-  charts['codMPChart']=new Chart(document.getElementById('codMPChart'),{
-    data:{labels:mps,datasets:[
-      {type:'bar',label:'Return COD',data:qtyRetCOD_mp,backgroundColor:'#e6944add',
-        borderColor:'#e6944a',borderWidth:1,borderRadius:3,stack:'return',yAxisID:'yQty',order:3,
-        datalabels:{anchor:'center',align:'center',color:'#fff',font:{weight:'700',size:9},
-          formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'bar',label:'Return Non-COD',data:qtyRetNCOD_mp,backgroundColor:'#e6944a77',
-        borderColor:'#e6944a',borderWidth:1,stack:'return',yAxisID:'yQty',order:3,
-        datalabels:{anchor:'center',align:'center',color:'#e6944a',font:{weight:'700',size:9},
-          formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'bar',label:'Cancel COD',data:qtyCanCOD_mp,backgroundColor:'#e05b5bdd',
-        borderColor:'#e05b5b',borderWidth:1,borderRadius:3,stack:'cancel',yAxisID:'yQty',order:3,
-        datalabels:{anchor:'center',align:'center',color:'#fff',font:{weight:'700',size:9},
-          formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'bar',label:'Cancel Non-COD',data:qtyCanNCOD_mp,backgroundColor:'#e05b5b77',
-        borderColor:'#e05b5b',borderWidth:1,stack:'cancel',yAxisID:'yQty',order:3,
-        datalabels:{anchor:'center',align:'center',color:'#e05b5b',font:{weight:'700',size:9},
-          formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'line',label:'Total Qty',data:qtyTot_mp,borderColor:'#5b3fa8',
-        backgroundColor:'#5b3fa820',borderWidth:2.5,pointRadius:5,
-        pointBackgroundColor:'#5b3fa8',pointBorderColor:'#fff',pointBorderWidth:2,
-        tension:0.3,fill:false,yAxisID:'yOrd',order:1,
-        datalabels:{anchor:'top',align:'top',color:'#5b3fa8',font:{weight:'700',size:9},
-          formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {type:'line',label:'Total Order',data:ordTot_mp,borderColor:'#e879a0',
-        backgroundColor:'#e879a020',borderWidth:2,pointRadius:4,
-        pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,
-        tension:0.3,fill:false,yAxisID:'yOrd2',order:2,
-        datalabels:{anchor:'bottom',align:'bottom',color:'#e879a0',font:{weight:'700',size:9},
-          formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
-    ]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      layout:{padding:{top:32,right:20,left:10,bottom:10}},
-      interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
-        datalabels:{},
-        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},
-      scales:{
-        x:{display:true,title:{display:true,text:'Marketplace',color:'#6b5b8a',font:{size:11,weight:'700'}}},
-        yQty:{type:'linear',position:'left',beginAtZero:true,stacked:true,
-          title:{display:true,text:'Qty Return/Cancel',color:'#e05b5b',font:{size:9,weight:'600'}},
-          ticks:{color:'#e05b5b',callback:v=>fmtLabel(v)},grid:{color:'#e2daf2'}},
-        yOrd:{type:'linear',position:'right',beginAtZero:true,
-          title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:9,weight:'600'}},
-          ticks:{color:'#5b3fa8',callback:v=>fmtLabel(v)},grid:{drawOnChartArea:false}},
-        yOrd2:{type:'linear',position:'right',beginAtZero:true,offset:true,
-          title:{display:true,text:'Total Order',color:'#e879a0',font:{size:9,weight:'600'}},
-          ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}
-      }
-    }
-  });
-}
-
-// ─── WOW HEATMAP ─────────────────────────────────────────────────────────────
-function renderHeatmap(){
-  const rows=D.mp;
-  if(!rows.length){document.getElementById('hmContent').innerHTML='<div class="error-state">Data belum tersedia. Buka halaman Marketplace dulu sekali.</div>';return;}
-
-  const wkCol=findCol(rows,['week','minggu','wk']);
-  const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
-  const slCol=findCol(rows,['servicelevel','sl%']);
-  const slExCol=findCol(rows,['slexcl','sl excl']);
-  const retCol=findCol(rows,['return%','returnrate']);
-  const canCol=findCol(rows,['cancelled%','cancelrate']);
-  const qtyCol=findCol(rows,['totalqty','qty']);
-  const ordCol=findCol(rows,['totalorder','order']);
-
-  const metric=gv('hmMetric');
-  const getVal=(r)=>{
-    if(metric==='sl')    return toN(r[slCol]);
-    if(metric==='slexcl')return toN(r[slExCol]);
-    if(metric==='ret')   return toN(r[retCol]);
-    if(metric==='can')   return toN(r[canCol]);
-    return toN(r[slCol]);
-  };
-  const isRateMetric = metric==='ret'||metric==='can';
-  const metricLabel  = metric==='sl'?'SL %':metric==='slexcl'?'SL Excl %':metric==='ret'?'Return %':'Cancel %';
-
-  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
-  const allMPs  =mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
-  const latestWk=allWeeks[allWeeks.length-1];
-
-  function cellColor(v){
-    if(isRateMetric){
-      if(v<=2)  return {bg:'#064e3b',text:'#6ee7b7'};
-      if(v<=4)  return {bg:'#065f46',text:'#34d399'};
-      if(v<=6)  return {bg:'#78350f',text:'#fcd34d'};
-      if(v<=9)  return {bg:'#92400e',text:'#fbbf24'};
-      if(v<=12) return {bg:'#7f1d1d',text:'#fca5a5'};
-      return           {bg:'#991b1b',text:'#f87171'};
-    } else {
-      if(v>=97) return {bg:'#064e3b',text:'#6ee7b7'};
-      if(v>=95) return {bg:'#065f46',text:'#34d399'};
-      if(v>=93) return {bg:'#047857',text:'#6ee7b7'};
-      if(v>=90) return {bg:'#78350f',text:'#fcd34d'};
-      if(v>=87) return {bg:'#92400e',text:'#fbbf24'};
-      if(v>=85) return {bg:'#7f1d1d',text:'#fca5a5'};
-      return           {bg:'#991b1b',text:'#f87171'};
-    }
-  }
-
-  function fmtV(v){return v.toFixed(1)+'%';}
-  function fmtQ(v){if(v>=1e6)return(v/1e6).toFixed(1)+'jt';if(v>=1e3)return(v/1e3).toFixed(1)+'rb';return Math.round(v).toString();}
-
-  const cell={};
-  rows.forEach(r=>{
-    const k=`${r[mpCol]}__${r[wkCol]}`;
-    if(!cell[k])cell[k]={v:0,qty:0,ord:0};
-    cell[k].v  +=getVal(r);
-    cell[k].qty+=toN(r[qtyCol]);
-    cell[k].ord+=toN(r[ordCol]);
-  });
-
-  let html=`
-  <style>
-  .hm-wrap{overflow-x:auto;}
-  .hm-tbl{border-collapse:separate;border-spacing:0;font-size:11.5px;min-width:600px;}
-  .hm-th{padding:6px 10px;text-align:center;color:var(--text2);font-size:10px;font-weight:600;white-space:nowrap;background:var(--card);border-bottom:2px solid var(--border);}
-  .hm-th:first-child{text-align:left;min-width:130px;border-right:2px solid var(--border);position:sticky;left:0;background:var(--card);z-index:2;}
-  .hm-th.latest{color:var(--blue);font-weight:700;}
-  .hm-rl{padding:10px 12px 10px 8px;font-weight:600;font-size:12px;border-right:2px solid var(--border);border-bottom:1px solid var(--border);background:#faf9ff;position:sticky;left:0;z-index:1;white-space:nowrap;}
-  .hm-rl .rl-sub{display:block;font-size:9px;color:var(--text2);font-family:monospace;margin-top:2px;}
-  .hm-cell{padding:0;border-bottom:1px solid rgba(0,0,0,0.15);border-right:1px solid rgba(0,0,0,0.1);cursor:pointer;transition:filter 0.12s;min-width:70px;position:relative;}
-  .hm-cell:hover{filter:brightness(1.25);z-index:1;}
-  .hm-cell:hover .hm-tip{opacity:1;}
-  .hm-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:7px 5px;height:58px;}
-  .hm-v{font-size:12px;font-weight:700;font-family:monospace;line-height:1;}
-  .hm-d{font-size:9px;font-weight:600;font-family:monospace;line-height:1;opacity:0.9;}
-  .hm-q{font-size:9px;opacity:0.6;line-height:1;}
-  .hm-tip{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:#1a0a2e;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:11px;color:var(--text);white-space:nowrap;z-index:10;opacity:0;transition:opacity 0.15s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.4);min-width:150px;}
-  .hm-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a0a2e;}
-  .tt-r{display:flex;justify-content:space-between;gap:14px;margin-bottom:2px;font-size:10px;}
-  .tt-k{color:var(--text2)}.tt-v{font-weight:600;}
-  .hm-tot-row .hm-rl{color:var(--blue);border-top:2px solid var(--border);}
-  .hm-tot-row .hm-cell{border-top:2px solid var(--border);}
-  .hm-avg-cell{text-align:center;padding:0;border-left:2px solid var(--border);border-bottom:1px solid var(--border);}
-  .legend-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:10px;color:var(--text2);}
-  .leg-swatch{display:flex;gap:2px;align-items:center;}
-  .leg-box{width:16px;height:12px;border-radius:2px;}
-  </style>
-
-  <div class="kpi-matrix-card">
-    <div class="kpi-matrix-header">
-      <div class="kpi-matrix-title">🟥 ${metricLabel} Heatmap — Week × Marketplace</div>
-      <span class="kpi-week-badge">Wk ${allWeeks[0]} → Wk ${latestWk} · ${allWeeks.length} weeks</span>
-    </div>
-    <div class="legend-row">
-      <span>Legend:</span>
-      <div class="leg-swatch">
-        <div class="leg-box" style="background:#064e3b"></div>
-        <div class="leg-box" style="background:#065f46"></div>
-        <div class="leg-box" style="background:#047857"></div>
-      </div>
-      <span>${isRateMetric?'Low (good)':'High ≥93% (good)'}</span>
-      &nbsp;
-      <div class="leg-swatch">
-        <div class="leg-box" style="background:#78350f"></div>
-        <div class="leg-box" style="background:#92400e"></div>
-      </div>
-      <span>${isRateMetric?'Medium (warning)':'85–93% (warning)'}</span>
-      &nbsp;
-      <div class="leg-swatch">
-        <div class="leg-box" style="background:#7f1d1d"></div>
-        <div class="leg-box" style="background:#991b1b"></div>
-      </div>
-      <span>${isRateMetric?'High (critical)':'<85% (critical)'}</span>
-      &nbsp;&nbsp;
-      <span style="color:var(--text2)">▲▼ = WoW delta · angka bawah = total qty</span>
-    </div>
-    <div class="hm-wrap"><table class="hm-tbl"><thead><tr>
-      <th class="hm-th">Marketplace</th>`;
-
-  allWeeks.forEach(w=>{
-    const isLast=String(w)===String(latestWk);
-    html+=`<th class="hm-th ${isLast?'latest':''}">${isLast?'★ ':''}Wk ${w}</th>`;
-  });
-  html+=`<th class="hm-th" style="border-left:2px solid var(--border);color:var(--blue)">Avg</th>
-    </tr></thead><tbody>`;
-
-  allMPs.forEach(mp=>{
-    const vals=allWeeks.map(w=>cell[`${mp}__${w}`]?.v||0);
-    const qtys=allWeeks.map(w=>cell[`${mp}__${w}`]?.qty||0);
-    const avg =(vals.filter(v=>v>0).reduce((a,b)=>a+b,0)/(vals.filter(v=>v>0).length||1));
-    const totQty=qtys.reduce((a,b)=>a+b,0);
-    const {bg:aBg,text:aTxt}=cellColor(avg);
-    html+=`<tr><td class="hm-rl">${mp}<span class="rl-sub">avg ${avg.toFixed(1)}% · ${fmtQ(totQty)}</span></td>`;
-    vals.forEach((v,i)=>{
-      const prev=i>0?vals[i-1]:null;
-      const d=(prev!==null&&v>0&&prev>0)?(v-prev):null;
-      const {bg,text}=cellColor(v);
-      const dStr=d!==null?(d>=0?`▲ +${d.toFixed(1)}%`:`▼ ${d.toFixed(1)}%`):'';
-      const dColor=d!==null?(d>=0?'#6ee7b7':'#fca5a5'):'transparent';
-      const isLast=String(allWeeks[i])===String(latestWk);
-      const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
-      const status=isRateMetric?(v<=4?'✅ Good':v<=9?'⚠ Warning':'🚨 Critical'):(v>=95?'✅ Good':v>=85?'⚠ Warning':'🚨 Critical');
-      html+=`<td class="hm-cell" style="background:${bg};${outline}">
-        <div class="hm-inner">
-          <div class="hm-v" style="color:${text}">${v>0?fmtV(v):'—'}</div>
-          <div class="hm-d" style="color:${dColor}">${dStr}</div>
-          <div class="hm-q" style="color:${text}">${fmtQ(qtys[i])}</div>
-        </div>
-        <div class="hm-tip">
-          <div style="font-weight:700;margin-bottom:6px;color:var(--blue)">${mp} · Wk ${allWeeks[i]}</div>
-          <div class="tt-r"><span class="tt-k">${metricLabel}</span><span class="tt-v" style="color:${text}">${v>0?fmtV(v):'—'}</span></div>
-          <div class="tt-r"><span class="tt-k">WoW</span><span class="tt-v" style="color:${dColor}">${dStr||'—'}</span></div>
-          <div class="tt-r"><span class="tt-k">Total Qty</span><span class="tt-v">${qtys[i].toLocaleString('id-ID')}</span></div>
-          <div class="tt-r"><span class="tt-k">Status</span><span class="tt-v" style="color:${text}">${v>0?status:'—'}</span></div>
-        </div>
-      </td>`;
-    });
-    html+=`<td class="hm-avg-cell" style="background:${aBg}">
-      <div class="hm-inner"><div class="hm-v" style="color:${aTxt}">${avg.toFixed(1)}%</div></div>
-    </td></tr>`;
-  });
-
-  html+=`<tr class="hm-tot-row"><td class="hm-rl" style="color:var(--blue)">ALL MP<span class="rl-sub">weighted avg</span></td>`;
-  const totVals=allWeeks.map(w=>{
-    const rowVals=allMPs.map(mp=>cell[`${mp}__${w}`]?.v||0).filter(v=>v>0);
-    return rowVals.length?(rowVals.reduce((a,b)=>a+b,0)/rowVals.length):0;
-  });
-  const totQtys=allWeeks.map(w=>allMPs.reduce((s,mp)=>s+(cell[`${mp}__${w}`]?.qty||0),0));
-  const grandAvg=totVals.filter(v=>v>0).reduce((a,b)=>a+b,0)/(totVals.filter(v=>v>0).length||1);
-  const {bg:gBg,text:gTxt}=cellColor(grandAvg);
-  totVals.forEach((v,i)=>{
-    const prev=i>0?totVals[i-1]:null;
-    const d=(prev!==null&&v>0&&prev>0)?(v-prev):null;
-    const {bg,text}=cellColor(v);
-    const dStr=d!==null?(d>=0?`▲ +${d.toFixed(1)}%`:`▼ ${d.toFixed(1)}%`):'';
-    const dColor=d!==null?(d>=0?'#6ee7b7':'#fca5a5'):'transparent';
-    const isLast=String(allWeeks[i])===String(latestWk);
-    const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
-    html+=`<td class="hm-cell" style="background:${bg};${outline}">
-      <div class="hm-inner">
-        <div class="hm-v" style="color:${text};font-size:13px">${v>0?fmtV(v):'—'}</div>
-        <div class="hm-d" style="color:${dColor}">${dStr}</div>
-        <div class="hm-q" style="color:${text}">${fmtQ(totQtys[i])}</div>
-      </div>
-    </td>`;
-  });
-  html+=`<td class="hm-avg-cell" style="background:${gBg}">
-    <div class="hm-inner"><div class="hm-v" style="color:${gTxt};font-size:13px">${grandAvg.toFixed(1)}%</div></div>
-  </td></tr></tbody></table></div></div>`;
-
-  document.getElementById('hmContent').innerHTML=html;
-  document.getElementById('hmStatus').textContent=`${allMPs.length} marketplace · ${allWeeks.length} weeks`;
+  html+='</tbody></table></div></div>';
+  document.getElementById('codContent').innerHTML=html;
+  document.getElementById('codStatus').textContent=`${isDaily?xKeys.length+' hari':xKeys.length+' weeks'} · ${allMPs.length} marketplace`;
+  const lineOpts={responsive:true,maintainAspectRatio:false,layout:{padding:{top:28,right:12,left:8,bottom:20}},interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},datalabels:{},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}}},scales:{x:{display:true,title:{display:true,text:isDaily?'Date':'Week',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},y:{display:true,beginAtZero:true,title:{display:true,text:'Rate %',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}}};
+  killChart('codReturnChart');charts['codReturnChart']=new Chart(document.getElementById('codReturnChart'),{type:'line',data:{labels:xLabels,datasets:[{label:'Return COD %',data:retCOD_x,borderColor:'#e6944a',backgroundColor:'#e6944a20',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#e6944a',tension:0.3,fill:false,datalabels:{anchor:'top',align:'top',color:'#e6944a',font:{weight:'700',size:9},formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},{label:'Return Non-COD %',data:retNCOD_x,borderColor:'#1D9E75',backgroundColor:'#1D9E7520',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:false,datalabels:{anchor:'bottom',align:'bottom',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:lineOpts});
+  killChart('codCancelChart');charts['codCancelChart']=new Chart(document.getElementById('codCancelChart'),{type:'line',data:{labels:xLabels,datasets:[{label:'Cancel COD %',data:canCOD_x,borderColor:'#e05b5b',backgroundColor:'#e05b5b20',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#e05b5b',tension:0.3,fill:false,datalabels:{anchor:'top',align:'top',color:'#e05b5b',font:{weight:'700',size:9},formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},{label:'Cancel Non-COD %',data:canNCOD_x,borderColor:'#7c3aed',backgroundColor:'#7c3aed20',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#7c3aed',tension:0.3,fill:false,datalabels:{anchor:'bottom',align:'bottom',color:'#7c3aed',font:{weight:'700',size:9},formatter:v=>v>0?v.toFixed(2)+'%':'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:lineOpts});
+  killChart('codMPChart');charts['codMPChart']=new Chart(document.getElementById('codMPChart'),{data:{labels:mps,datasets:[
+    {type:'bar',label:'Return COD',data:qtyRetCOD_mp,backgroundColor:'#e6944add',borderColor:'#e6944a',borderWidth:1,borderRadius:3,stack:'return',yAxisID:'yQty',order:3,datalabels:{anchor:'center',align:'center',color:'#fff',font:{weight:'700',size:9},formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'bar',label:'Return Non-COD',data:qtyRetNCOD_mp,backgroundColor:'#e6944a77',borderColor:'#e6944a',borderWidth:1,stack:'return',yAxisID:'yQty',order:3,datalabels:{anchor:'center',align:'center',color:'#e6944a',font:{weight:'700',size:9},formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'bar',label:'Cancel COD',data:qtyCanCOD_mp,backgroundColor:'#e05b5bdd',borderColor:'#e05b5b',borderWidth:1,borderRadius:3,stack:'cancel',yAxisID:'yQty',order:3,datalabels:{anchor:'center',align:'center',color:'#fff',font:{weight:'700',size:9},formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'bar',label:'Cancel Non-COD',data:qtyCanNCOD_mp,backgroundColor:'#e05b5b77',borderColor:'#e05b5b',borderWidth:1,stack:'cancel',yAxisID:'yQty',order:3,datalabels:{anchor:'center',align:'center',color:'#e05b5b',font:{weight:'700',size:9},formatter:v=>v>0?fmtLabel(v):'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'line',label:'Total Qty',data:qtyTot_mp,borderColor:'#5b3fa8',backgroundColor:'#5b3fa820',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#5b3fa8',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrd',order:1,datalabels:{anchor:'top',align:'top',color:'#5b3fa8',font:{weight:'700',size:9},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+    {type:'line',label:'Total Order',data:ordTot_mp,borderColor:'#e879a0',backgroundColor:'#e879a020',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrd2',order:2,datalabels:{anchor:'bottom',align:'bottom',color:'#e879a0',font:{weight:'700',size:9},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
+  ]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:32,right:20,left:10,bottom:10}},interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},datalabels:{},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},scales:{x:{display:true,title:{display:true,text:'Marketplace',color:'#6b5b8a',font:{size:11,weight:'700'}}},yQty:{type:'linear',position:'left',beginAtZero:true,stacked:true,title:{display:true,text:'Qty Return/Cancel',color:'#e05b5b',font:{size:9,weight:'600'}},ticks:{color:'#e05b5b',callback:v=>fmtLabel(v)},grid:{color:'#e2daf2'}},yOrd:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:9,weight:'600'}},ticks:{color:'#5b3fa8',callback:v=>fmtLabel(v)},grid:{drawOnChartArea:false}},yOrd2:{type:'linear',position:'right',beginAtZero:true,offset:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:9,weight:'600'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
 }
 
 // ─── NAV ─────────────────────────────────────────────────────────────────────
@@ -1990,7 +1311,7 @@ async function init(){
     renderKPI();
   }catch(e){
     console.error(e);
-    ['kpiContent','mpContent','prodContent','catContent','dailyContent','monthlyContent','codContent'].forEach(id=>{
+    ['kpiContent','mpContent','prodContent','catContent','hmContent','dailyContent','moveContent','monthlyContent','codContent'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
     });
