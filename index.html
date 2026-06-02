@@ -629,6 +629,7 @@ function renderMOverview(){
   const canPCol =findCol(rows,['cancelled%','cancelrate','cancelled %']);
   const retQCol =findCol(rows,['qtyreturn','qty return']);
   const canQCol =findCol(rows,['qtycancelled','qty cancelled']);
+  const delCol  =findCol(rows,['qtydelivered','delivered']);
 
   const allMPs  =[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort();
   const allYears=[...new Set(rows.map(r=>r[yearCol]).filter(Boolean))].sort();
@@ -644,7 +645,7 @@ function renderMOverview(){
   filtered.forEach(r=>{
     const key=`${r[yearCol]}-${String(r[monthCol]).padStart(2,'0')}`;
     const lbl=mnCol?`${r[mnCol]} ${r[yearCol]}`:`${r[monthCol]}/${r[yearCol]}`;
-    if(!mMap[key])mMap[key]={key,lbl,ord:0,qty:0,slS:0,slExS:0,retS:0,canS:0,retQ:0,canQ:0,n:0};
+    if(!mMap[key])mMap[key]={key,lbl,ord:0,qty:0,slS:0,slExS:0,retS:0,canS:0,retQ:0,canQ:0,delQ:0,n:0};
     mMap[key].ord  +=toN(r[ordCol]);
     mMap[key].qty  +=toN(r[qtyCol]);
     mMap[key].slS  +=toN(r[slCol]);
@@ -653,6 +654,7 @@ function renderMOverview(){
     mMap[key].canS +=canPCol?toN(r[canPCol]):0;
     mMap[key].retQ +=retQCol?toN(r[retQCol]):0;
     mMap[key].canQ +=canQCol?toN(r[canQCol]):0;
+    mMap[key].delQ +=delCol?toN(r[delCol]):0;
     mMap[key].n++;
   });
   const mos=Object.values(mMap).sort((a,b)=>a.key.localeCompare(b.key));
@@ -666,128 +668,154 @@ function renderMOverview(){
 
   const totQty=mos.reduce((s,m)=>s+m.qty,0);
   const totOrd=mos.reduce((s,m)=>s+m.ord,0);
+  const totDel=mos.reduce((s,m)=>s+m.delQ,0);
+  const totLoss=mos.reduce((s,m)=>s+m.retQ+m.canQ,0);
+  const avgQtyPerMonth=mos.length?Math.round(totQty/mos.length):0;
   const avgSL =slV.length?+(slV.reduce((a,b)=>a+b,0)/slV.length).toFixed(2):0;
   const avgSLEx=slExV.length?+(slExV.reduce((a,b)=>a+b,0)/slExV.length).toFixed(2):0;
   const avgRet=retV.length?+(retV.reduce((a,b)=>a+b,0)/retV.length).toFixed(2):0;
   const avgCan=canV.length?+(canV.reduce((a,b)=>a+b,0)/canV.length).toFixed(2):0;
   const peakM =mos.length?mos.reduce((a,b)=>b.qty>a.qty?b:a):null;
+  const growthMom=mos.length>1?((mos[mos.length-1].qty-mos[mos.length-2].qty)/mos[mos.length-2].qty*100):0;
 
   let html=`
-  <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border);">
-    📦 Section 1 — Volume Bulanan
-  </div>
-
-  <div class="kpi-cards-row">
-    <div class="kpi-card"><div class="kpi-card-label">📦 Total Qty</div><div class="kpi-card-value">${fmtN(totQty)}</div><div class="kpi-card-sub">${mos.length} bulan</div></div>
-    <div class="kpi-card green"><div class="kpi-card-label">🔢 Total Order</div><div class="kpi-card-value">${fmtN(totOrd)}</div><div class="kpi-card-sub">Unique orders</div></div>
-    <div class="kpi-card orange"><div class="kpi-card-label">📊 Avg Qty/Bulan</div><div class="kpi-card-value">${fmtN(Math.round(totQty/(mos.length||1)))}</div><div class="kpi-card-sub">Rata-rata per bulan</div></div>
-    <div class="kpi-card pink"><div class="kpi-card-label">🏆 Peak Month</div><div class="kpi-card-value">${peakM?fmtN(peakM.qty):'—'}</div><div class="kpi-card-sub">${peakM?peakM.lbl:'—'}</div></div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">📊 Total Qty & Total Order per Bulan</div>
-    <div class="chart-sub">${fMP!=='all'?fMP:'Semua Marketplace'} · ${mos.length} bulan</div>
-    <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8"></div>Total Qty (Bar)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>Total Order (Line)</div>
+  <!-- ROW 1: EXECUTIVE KPI CARDS -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #5b3fa8;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📦 Total Qty</div>
+      <div style="font-size:24px;font-weight:800;color:#5b3fa8;margin-bottom:4px;">${fmtN(totQty)}</div>
+      <div style="font-size:10px;color:var(--text2);">${mos.length} bulan</div>
     </div>
-    <div class="chart-wrap tall"><canvas id="moveVolChart"></canvas></div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🔢 Total Order</div>
+      <div style="font-size:24px;font-weight:800;color:#1D9E75;margin-bottom:4px;">${fmtN(totOrd)}</div>
+      <div style="font-size:10px;color:var(--text2);">Unique orders</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e6944a;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">✅ Total Delivery</div>
+      <div style="font-size:24px;font-weight:800;color:#e6944a;margin-bottom:4px;">${fmtN(totDel)}</div>
+      <div style="font-size:10px;color:var(--text2);">Terpenuhi</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🎯 Service Level %</div>
+      <div style="font-size:24px;font-weight:800;color:${avgSL>=95?'#1D9E75':avgSL>=85?'#e6944a':'#e05b5b'};margin-bottom:4px;">${fmtPct(avgSL)}</div>
+      <div style="font-size:10px;color:var(--text2);">Rata-rata</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e05b5b;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">❌ Total Loss</div>
+      <div style="font-size:24px;font-weight:800;color:#e05b5b;margin-bottom:4px;">${fmtN(totLoss)}</div>
+      <div style="font-size:10px;color:var(--text2);">Return + Cancel</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #e879a0;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📈 Growth MoM %</div>
+      <div style="font-size:24px;font-weight:800;color:${growthMom>=0?'#1D9E75':'#e05b5b'};margin-bottom:4px;">${growthMom>=0?'▲':'▼'} ${Math.abs(growthMom).toFixed(1)}%</div>
+      <div style="font-size:10px;color:var(--text2);">Bulan terakhir</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #5b3fa8;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">🏆 Best Month</div>
+      <div style="font-size:24px;font-weight:800;color:#5b3fa8;margin-bottom:4px;">${peakM?fmtN(peakM.qty):'-'}</div>
+      <div style="font-size:10px;color:var(--text2);">${peakM?peakM.lbl:'-'}</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;border-top:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">📊 Avg Qty/Month</div>
+      <div style="font-size:24px;font-weight:800;color:#1D9E75;margin-bottom:4px;">${fmtN(avgQtyPerMonth)}</div>
+      <div style="font-size:10px;color:var(--text2);">Rata-rata per bulan</div>
+    </div>
   </div>
 
-  <div class="table-card">
-    <div class="table-header"><div class="table-title">📋 Detail Volume per Bulan</div><div class="table-meta">${mos.length} bulan</div></div>
-    <div style="overflow-x:auto"><table><thead><tr>
-      <th>Bulan</th>
-      <th style="text-align:right;color:var(--blue)">Total Order</th>
-      <th style="text-align:right;color:var(--green)">Total Qty</th>
-      <th style="text-align:right">Qty Return</th>
-      <th style="text-align:right">Qty Cancel</th>
-      <th style="text-align:right;color:var(--orange)">Growth Qty</th>
-    </tr></thead><tbody>`;
+  <!-- ROW 2: PERFORMANCE TREND + MARKETPLACE CONTRIBUTION -->
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">📈 Monthly Performance Trend</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Trend performa bulanan dengan dual axis analysis</div>
+      <div style="height:320px;position:relative;"><canvas id="moveVolChart"></canvas></div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">🛒 Marketplace Contribution</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Kontribusi total qty per marketplace</div>
+      <div style="height:320px;position:relative;"><canvas id="moveContribChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ROW 3: INSIGHTS & TREND ANALYSIS -->
+  <div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:16px;margin-bottom:24px;">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📊 Growth Analysis</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.8;">`;
+  
+  if(mos.length>1){
+    const bestGrowth=mos.slice(1).reduce((a,b)=>((b.qty-mos[mos.indexOf(b)-1].qty)/mos[mos.indexOf(b)-1].qty*100)>((a.qty-mos[mos.indexOf(a)-1].qty)/mos[mos.indexOf(a)-1].qty*100)?b:a);
+    const worstGrowth=mos.slice(1).reduce((a,b)=>((b.qty-mos[mos.indexOf(b)-1].qty)/mos[mos.indexOf(b)-1].qty*100)<((a.qty-mos[mos.indexOf(a)-1].qty)/mos[mos.indexOf(a)-1].qty*100)?b:a);
+    const growthValues=mos.slice(1).map((m,i)=>(m.qty-mos[i].qty)/mos[i].qty*100);
+    const avgGrowth=growthValues.length?+(growthValues.reduce((a,b)=>a+b,0)/growthValues.length).toFixed(2):0;
+    html+=`<strong>📈 Best Growth:</strong><br>${bestGrowth.lbl}<br><span style="color:#1D9E75;font-weight:700;">+${(((bestGrowth.qty-mos[mos.indexOf(bestGrowth)-1].qty)/mos[mos.indexOf(bestGrowth)-1].qty)*100).toFixed(1)}%</span><br><br>`;
+    html+=`<strong>📉 Worst Growth:</strong><br>${worstGrowth.lbl}<br><span style="color:#e05b5b;font-weight:700;">${(((worstGrowth.qty-mos[mos.indexOf(worstGrowth)-1].qty)/mos[mos.indexOf(worstGrowth)-1].qty)*100).toFixed(1)}%</span><br><br>`;
+    html+=`<strong>⚙️ Avg Growth:</strong><br><span style="color:${avgGrowth>=0?'#1D9E75':'#e05b5b'};font-weight:700;">${avgGrowth>=0?'+':''}${avgGrowth.toFixed(1)}%</span>`;
+  }else{
+    html+=`Minimal data untuk analisis pertumbuhan`;
+  }
+  html+=`</div></div>`;
+
+  html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📈 Service Level Trend</div>
+    <div style="height:320px;position:relative;"><canvas id="moveSLChart"></canvas></div>
+  </div>`;
+
+  html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">💡 Executive Insight</div>
+    <div style="font-size:10px;color:var(--text2);line-height:1.8;">
+      <div>• <strong>Peak:</strong> ${peakM?peakM.lbl:'—'}</div>
+      <div>• <strong>SL Avg:</strong> ${fmtPct(avgSL)}${avgSL>=95?' ✓':avgSL>=85?' ⚠':'❌'}</div>
+      <div>• <strong>Loss Rate:</strong> ${totQty>0?(totLoss/totQty*100).toFixed(2):'0'}%</div>
+      <div>• <strong>Trend:</strong> ${growthMom>=0?'📈 Naik':'📉 Turun'}</div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:9px;">Data: ${mos.length} bulan</div>
+    </div>
+  </div></div>
+
+  <!-- ROW 4: DETAIL TABLE -->
+  <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div><div style="font-size:13px;font-weight:700;color:var(--text);">📋 Detail Monthly Performance</div></div>
+      <div style="font-size:11px;color:var(--text2);">${mos.length} bulan</div>
+    </div>
+    <div style="overflow-x:auto;border-radius:8px;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead style="background:#f8f6ff;position:sticky;top:0;">
+          <tr>
+            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;white-space:nowrap;">Bulan</th>
+            <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;white-space:nowrap;">Order</th>
+            <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;white-space:nowrap;">Qty</th>
+            <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;white-space:nowrap;">Delivery</th>
+            <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:var(--red);font-weight:600;white-space:nowrap;">Return</th>
+            <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:var(--orange);font-weight:600;white-space:nowrap;">Cancel</th>
+            <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;white-space:nowrap;">SL %</th>
+            <th style="padding:10px 12px;text-align:right;border-bottom:2px solid var(--border);color:#5b3fa8;font-weight:600;white-space:nowrap;">Growth</th>
+          </tr>
+        </thead>
+        <tbody>`;
 
   mos.forEach((m,i)=>{
     const prev=mos[i-1];
     const growth=prev&&prev.qty>0?((m.qty-prev.qty)/prev.qty*100):null;
     const gStr=growth===null?'—':(growth>=0?'▲ ':'▼ ')+Math.abs(growth).toFixed(1)+'%';
     const gCol=growth===null?'var(--text2)':growth>=0?'var(--green)':'var(--red)';
-    html+=`<tr>
-      <td style="font-weight:600">${m.lbl}</td>
-      <td class="num">${fmtN(m.ord)}</td>
-      <td class="num">${fmtN(m.qty)}</td>
-      <td class="num" style="color:var(--red)">${fmtN(m.retQ)}</td>
-      <td class="num" style="color:var(--orange)">${fmtN(m.canQ)}</td>
-      <td class="num" style="color:${gCol};font-weight:700">${gStr}</td>
-    </tr>`;
-  });
-  html+=`</tbody></table></div></div>`;
-
-  html+=`
-  <div style="font-size:13px;font-weight:800;color:var(--text);margin:24px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--border);">
-    📈 Section 2 — Kualitas Bulanan
-  </div>
-
-  <div class="kpi-cards-row">
-    <div class="kpi-card" style="--before-bg:var(--green)">
-      <div class="kpi-card-label">🎯 Avg Service Level %</div>
-      <div class="kpi-card-value" style="color:${avgSL>=95?'var(--green)':avgSL>=85?'var(--orange)':'var(--red)'}">${fmtPct(avgSL)}</div>
-      <div class="kpi-card-sub">Rata-rata ${mos.length} bulan</div>
-    </div>
-    <div class="kpi-card green">
-      <div class="kpi-card-label">✅ Avg SL Excl Return/Cancel</div>
-      <div class="kpi-card-value" style="color:${avgSLEx>=95?'var(--green)':avgSLEx>=85?'var(--orange)':avgSLEx<95?'var(--red)':'var(--red)'}">${fmtPct(avgSLEx)}</div>
-      <div class="kpi-card-sub">Rata-rata ${mos.length} bulan</div>
-    </div>
-    <div class="kpi-card orange">
-      <div class="kpi-card-label">↩️ Avg Return %</div>
-      <div class="kpi-card-value" style="color:var(--red)">${fmtPct(avgRet)}</div>
-      <div class="kpi-card-sub">Rata-rata ${mos.length} bulan</div>
-    </div>
-    <div class="kpi-card pink">
-      <div class="kpi-card-label">❌ Avg Cancel %</div>
-      <div class="kpi-card-value" style="color:var(--orange)">${fmtPct(avgCan)}</div>
-      <div class="kpi-card-sub">Rata-rata ${mos.length} bulan</div>
-    </div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">📈 Tren Kualitas per Bulan</div>
-    <div class="chart-sub">Service Level %, SL Excl %, Return %, Cancel %</div>
-    <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#1D9E75;border-radius:50%"></div>Service Level %</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa8;border-radius:50%"></div>SL Excl Return/Cancel %</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a0;border-radius:50%"></div>Return %</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e6944a;border-radius:50%"></div>Cancel %</div>
-    </div>
-    <div class="chart-wrap tall"><canvas id="moveQualChart"></canvas></div>
-  </div>
-
-  <div class="table-card">
-    <div class="table-header"><div class="table-title">📋 Detail Kualitas per Bulan</div><div class="table-meta">${mos.length} bulan</div></div>
-    <div style="overflow-x:auto"><table><thead><tr>
-      <th>Bulan</th>
-      <th style="text-align:right;color:var(--green)">Service Level %</th>
-      <th style="text-align:right;color:#5b3fa8">SL Excl Return/Cancel %</th>
-      <th style="text-align:right;color:var(--red)">Return %</th>
-      <th style="text-align:right;color:var(--orange)">Cancel %</th>
-    </tr></thead><tbody>`;
-
-  mos.forEach(m=>{
     const sl=m.n?+(m.slS/m.n).toFixed(2):0;
-    const slEx=m.n?+(m.slExS/m.n).toFixed(2):0;
-    const ret=m.n?+(m.retS/m.n).toFixed(2):0;
-    const can=m.n?+(m.canS/m.n).toFixed(2):0;
-    html+=`<tr>
-      <td style="font-weight:600">${m.lbl}</td>
-      <td class="num ${slClass(sl)}">${fmtPct(sl)}</td>
-      <td class="num" style="color:${slEx>=95?'var(--green)':slEx>=85?'var(--orange)':'var(--red)'};font-weight:700">${fmtPct(slEx)}</td>
-      <td class="num" style="color:var(--red);font-weight:600">${fmtPct(ret)}</td>
-      <td class="num" style="color:var(--orange);font-weight:600">${fmtPct(can)}</td>
+    const bgColor=i%2===0?'#faf9ff':'#fff';
+    html+=`<tr style="background:${bgColor};border-bottom:1px solid var(--border);">
+      <td style="padding:10px 12px;text-align:left;font-weight:600;color:var(--text);">${m.lbl}</td>
+      <td style="padding:10px 12px;text-align:right;color:var(--blue);font-weight:600;">${fmtN(m.ord)}</td>
+      <td style="padding:10px 12px;text-align:right;color:var(--green);font-weight:700;">${fmtN(m.qty)}</td>
+      <td style="padding:10px 12px;text-align:right;color:var(--green);">${fmtN(m.delQ)}</td>
+      <td style="padding:10px 12px;text-align:right;color:var(--red);font-weight:600;">${fmtN(m.retQ)}</td>
+      <td style="padding:10px 12px;text-align:right;color:var(--orange);font-weight:600;">${fmtN(m.canQ)}</td>
+      <td style="padding:10px 12px;text-align:right;color:${sl>=95?'var(--green)':sl>=85?'var(--orange)':'var(--red)'};font-weight:700;">${fmtPct(sl)}</td>
+      <td style="padding:10px 12px;text-align:right;color:${gCol};font-weight:700;">${gStr}</td>
     </tr>`;
   });
   html+=`</tbody></table></div></div>`;
 
   document.getElementById('moveContent').innerHTML=html;
-  document.getElementById('moveStatus').textContent=`${mos.length} bulan · ${fMP!=='all'?fMP:'Semua MP'}`;
+  document.getElementById('moveStatus').textContent=`${mos.length} bulan · ${fMP!=='all'?fMP:'Semua MP'} · SL: ${fmtPct(avgSL)}`;
 
   killChart('moveVolChart');
   charts['moveVolChart']=new Chart(document.getElementById('moveVolChart'),{
@@ -795,36 +823,48 @@ function renderMOverview(){
       {type:'bar',label:'Total Qty',data:qtyV,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:5,yAxisID:'yQty',order:2,
         datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
       {type:'line',label:'Total Order',data:ordV,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e879a0',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,yAxisID:'yOrd',order:1,
-        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]
+        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
+      {type:'line',label:'Service Level %',data:slV,borderColor:'#1D9E75',backgroundColor:'#1D9E7515',borderWidth:2,pointRadius:4,pointBackgroundColor:'#1D9E75',tension:0.3,fill:false,yAxisID:'ySL',order:1,
+        datalabels:{anchor:'bottom',align:'bottom',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]
     },
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}},datalabels:{}},
+      plugins:{legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:10},padding:10}},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.dataset.yAxisID==='ySL'?c.parsed.y.toFixed(2)+'%':Math.round(c.parsed.y).toLocaleString('id-ID')}`}},datalabels:{}},
       scales:{
         x:{display:true,title:{display:true,text:'Bulan',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},
         yQty:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:11,weight:'700'}},ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}},
-        yOrd:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:11,weight:'700'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}
+        yOrd:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:11,weight:'700'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}},
+        ySL:{type:'linear',position:'right',beginAtZero:true,offset:true,max:100,title:{display:true,text:'SL %',color:'#1D9E75',font:{size:11,weight:'700'}},ticks:{color:'#1D9E75',callback:v=>v+'%'},grid:{drawOnChartArea:false}}
       }
     }
   });
 
-  killChart('moveQualChart');
-  charts['moveQualChart']=new Chart(document.getElementById('moveQualChart'),{
+  killChart('moveContribChart');
+  const mpqtys=mpCol?allMPs.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0)):[];
+  charts['moveContribChart']=new Chart(document.getElementById('moveContribChart'),{
+    type:'doughnut',
+    data:{labels:mpCol?allMPs:[],datasets:[{data:mpqtys,backgroundColor:['#5b3fa8dd','#e879a0dd','#1D9E75dd','#e6944add','#e05b5bdd','#7c3aeddd'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:10},padding:8}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}% (${Math.round(v).toLocaleString('id-ID')})`}}}}},
+    plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.05)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.70,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(((v/tot)*100).toFixed(0)+'%',x,y);ctx.restore();});}}]
+  });
+
+  killChart('moveSLChart');
+  charts['moveSLChart']=new Chart(document.getElementById('moveSLChart'),{
     type:'line',
-    data:{labels,datasets:[
-      {label:'Service Level %',data:slV,borderColor:'#1D9E75',backgroundColor:'#1D9E7515',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,
-        datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {label:'SL Excl %',data:slExV,borderColor:'#5b3fa8',backgroundColor:'#5b3fa815',borderWidth:2,pointRadius:4,pointBackgroundColor:'#5b3fa8',tension:0.3,fill:false,borderDash:[5,3],
-        datalabels:{anchor:'bottom',align:'bottom',color:'#5b3fa8',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {label:'Return %',data:retV,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e879a0',tension:0.3,fill:false,
-        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
-      {label:'Cancel %',data:canV,borderColor:'#e6944a',backgroundColor:'#e6944a15',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e6944a',tension:0.3,fill:false,
-        datalabels:{anchor:'bottom',align:'bottom',color:'#e6944a',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}},datalabels:{}},
+    data:{labels,datasets:[{
+      label:'Service Level %',data:slV,
+      borderColor:'#1D9E75',backgroundColor:'#1D9E7525',borderWidth:2.5,
+      pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,
+      tension:0.3,fill:true,
+      datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:10},
+        formatter:(v)=>fmtLabelPct(v),display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>` SL: ${c.parsed.y.toFixed(2)}%`}},
+        datalabels:{}},
       scales:{
         x:{display:true,title:{display:true,text:'Bulan',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},
-        y:{display:true,beginAtZero:true,title:{display:true,text:'%',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}
+        y:{display:true,beginAtZero:false,min:50,max:100,title:{display:true,text:'Service Level %',color:'#1D9E75',font:{size:11,weight:'700'}},ticks:{callback:v=>v+'%'},grid:{color:'#e2daf2'}}
       }
     }
   });
