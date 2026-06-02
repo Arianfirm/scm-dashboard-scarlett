@@ -614,8 +614,10 @@ function catSwitch(m,el){catMetric=m;document.querySelectorAll('#catTabs .metric
 
 // ─── MONTHLY OVERVIEW ────────────────────────────────────────────────────────
 function renderMOverview(){
+  console.log('[renderMOverview] START');
   const rows=D.monthly;
   if(!rows.length){document.getElementById('moveContent').innerHTML='<div class="error-state">Data Monthly belum tersedia.</div>';return;}
+  console.log('[renderMOverview] Data rows:', rows.length);
 
   const yearCol =findCol(rows,['year','tahun']);
   const monthCol=findCol(rows,['month','bulan']);
@@ -806,9 +808,12 @@ function renderMOverview(){
 
   document.getElementById('moveContent').innerHTML=html;
   document.getElementById('moveStatus').textContent=`${mos.length} bulan · ${fMP!=='all'?fMP:'Semua MP'} · SL: ${fmtPct(avgSL)}`;
+  console.log('[renderMOverview] HTML injected, mos.length:', mos.length);
 
   killChart('moveVolChart');
-  charts['moveVolChart']=new Chart(document.getElementById('moveVolChart'),{
+  console.log('[renderMOverview] Initializing moveVolChart...');
+  try{
+    charts['moveVolChart']=new Chart(document.getElementById('moveVolChart'),{
     data:{labels,datasets:[
       {type:'bar',label:'Total Qty',data:qtyV,backgroundColor:'#5b3fa8aa',borderColor:'#5b3fa8',borderWidth:1.5,borderRadius:5,yAxisID:'yQty',order:2,
         datalabels:{anchor:'end',align:'end',color:'#5b3fa8',font:{weight:'700',size:10},formatter:v=>fmtLabel(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
@@ -827,21 +832,32 @@ function renderMOverview(){
       }
     }
   });
+  console.log('[renderMOverview] moveVolChart created successfully');
+  }catch(e){
+    console.error('[renderMOverview] moveVolChart ERROR:', e.message);
+  }
 
   killChart('moveContribChart');
   const mpqtys=mpCol?allMPs.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0)):[];
-  charts['moveContribChart']=new Chart(document.getElementById('moveContribChart'),{
+  console.log('[renderMOverview] Initializing moveContribChart, mpqtys length:', mpqtys.length);
+  try{
+    charts['moveContribChart']=new Chart(document.getElementById('moveContribChart'),{
     type:'doughnut',
     data:{labels:mpCol?allMPs:[],datasets:[{data:mpqtys,backgroundColor:['#5b3fa8dd','#e879a0dd','#1D9E75dd','#e6944add','#e05b5bdd','#7c3aeddd'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:10},padding:8}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}% (${Math.round(v).toLocaleString('id-ID')})`}}}}},
     plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.05)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.70,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(((v/tot)*100).toFixed(0)+'%',x,y);ctx.restore();});}}]
   });
+    console.log('[renderMOverview] moveContribChart created successfully');
+  }catch(e){
+    console.error('[renderMOverview] moveContribChart ERROR:', e.message);
+  }
 
   killChart('moveWFChart');
   const wfLabels=[];
   const wfValues=[];
   const wfColors=[];
   const wfOffsets=[];
+  console.log('[renderMOverview] Building waterfall data, mos.length:', mos.length);
   
   mos.forEach((m,i)=>{
     const monthParts=m.lbl.split(' ');
@@ -858,8 +874,10 @@ function renderMOverview(){
       wfOffsets.push(Math.min(mos[i-1].qty,m.qty));
     }
   });
+  console.log('[renderMOverview] WF data - labels:', wfLabels.length, 'values:', wfValues.length, 'offsets:', wfOffsets.length);
 
-  charts['moveWFChart']=new Chart(document.getElementById('moveWFChart'),{
+  try{
+    charts['moveWFChart']=new Chart(document.getElementById('moveWFChart'),{
     type:'bar',
     data:{labels:wfLabels,datasets:[
       {data:wfOffsets,backgroundColor:'transparent',borderWidth:0,stack:'Stack0',borderSkipped:false},
@@ -881,9 +899,15 @@ function renderMOverview(){
       }
     }
   });
+    console.log('[renderMOverview] moveWFChart created successfully');
+  }catch(e){
+    console.error('[renderMOverview] moveWFChart ERROR:', e.message);
+  }
 
   killChart('moveSLChart');
-  charts['moveSLChart']=new Chart(document.getElementById('moveSLChart'),{
+  console.log('[renderMOverview] Initializing moveSLChart...');
+  try{
+    charts['moveSLChart']=new Chart(document.getElementById('moveSLChart'),{
     type:'line',
     data:{labels,datasets:[{
       label:'Service Level %',data:slV,
@@ -903,6 +927,11 @@ function renderMOverview(){
       }
     }
   });
+  console.log('[renderMOverview] moveSLChart created successfully');
+  }catch(e){
+    console.error('[renderMOverview] moveSLChart ERROR:', e.message);
+  }
+  console.log('[renderMOverview] COMPLETE - All charts initialized');
 }
 
 // ─── DAILY TREND ──────────────────────────────────────────────────────────────
