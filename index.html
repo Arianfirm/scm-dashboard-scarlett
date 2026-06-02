@@ -795,9 +795,15 @@ function renderHeatmap(){
   .tt-k{color:#8b82b0;}.tt-v{font-weight:600;}
   .hm-tot-row .hm-rank{background:#F8F7FC;color:#3C3B5F;}
   .hm-tot-row .hm-rl{color:#2F2D4B;border-top:2px solid #E5E1F0;font-weight:700;}
-  .hm-tot-row .hm-cell{border-top:2px solid rgba(97,92,148,0.18);}
-  .hm-avg-cell{text-align:center;padding:0;border-left:2px solid #E5E1F0;border-bottom:1px solid rgba(97,92,148,0.12);}
+  .hm-tot-row .hm-cell{border-top:2px solid rgba(97,92,148,0.18);} 
+  .hm-avg-cell{text-align:center;padding:8px 10px;border-left:4px solid #6D4AFF;border-bottom:1px solid rgba(97,92,148,0.12);background:#EEF2FF;font-weight:700;position:sticky;right:0;z-index:3;color:#1F2957;min-width:110px;}
+  .hm-current-week-header{background:#F3E8FF;border-left:3px solid #7C3AED;border-right:3px solid #7C3AED;color:#4A2B7A;}
+  .hm-current-week-cell-overlay{background:linear-gradient(rgba(243,232,255,0.28),rgba(243,232,255,0.28)), var(--cell-bg);} 
+  .hm-na{color:#7C7A96;font-weight:600;font-family:monospace}
+  .hm-avg-header{position:sticky;right:0;z-index:4;background:#EEF2FF;font-weight:800;border-left:4px solid #6D4AFF;color:#1F2957;padding:8px 10px;}
   .legend-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:10px;color:#7C7A96;}
+  /* ALL MP summary row */
+  .hm-tot-row{background:#F8FAFC;font-weight:700;border-top:4px solid #6D4AFF;}
   .hm-subtitle{font-size:12px;color:#7C7A96;margin-top:4px;line-height:1.4;}
   #page-heatmap .filter-bar{padding:14px 18px;gap:14px;align-items:center;}
   #page-heatmap .filter-item{margin-bottom:0;}
@@ -859,17 +865,19 @@ function renderHeatmap(){
       &nbsp;&nbsp;
       <span>▲▼ = WoW delta · angka bawah = total qty</span>
     </div>
+    <div style="margin-top:6px;text-align:right;color:#6b6a85;font-size:12px">Ranking: ${slCol? 'Avg SL' : 'Avg '+metricLabel}</div>
     <div class="hm-wrap"><table class="hm-tbl"><thead><tr>
       <th class="hm-th rank-col">Rank</th>
       <th class="hm-th marketplace-col">Marketplace</th>`;
 
   displayWeeks.forEach(w=>{
     const isLast=String(w)===String(latestWk);
-    html+=`<th class="hm-th ${isLast?'latest':''}">${isLast?'★ ':''}Wk ${w}</th>`;
+    html+=`<th class="hm-th ${isLast?'latest hm-current-week-header':''}">${isLast?'★ ':''}Wk ${w}</th>`;
   });
-  html+=`<th class="hm-th" style="border-left:2px solid var(--border);color:var(--blue)">Avg</th></tr></thead><tbody>`;
+  html+=`<th class="hm-th hm-current-week-header hm-avg-header" style="border-left:4px solid #6D4AFF;color:#1F2957">Avg</th></tr></thead><tbody>`;
 
-  filteredMPs.forEach(mp=>{
+  const orderedMPs = slCol ? [...rankedMPs.filter(m=>filteredMPs.includes(m)), ...filteredMPs.filter(m=>!rankedMPs.includes(m))] : filteredMPs;
+  orderedMPs.forEach(mp=>{
     const vals=displayWeeks.map(w=>cell[`${mp}__${w}`]?.v||0);
     const qtys=displayWeeks.map(w=>cell[`${mp}__${w}`]?.qty||0);
     const nonZero=vals.filter(v=>v>0);
@@ -885,24 +893,34 @@ function renderHeatmap(){
       const dStr=d!==null?(d>=0?`▲ +${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`:`▼ ${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`):'';
       const dColor=d!==null?((!isRateMetric&&d>=0)||(isRateMetric&&d<=0)?'#6ee7b7':'#fca5a5'):'transparent';
       const isLast=String(displayWeeks[i])===String(latestWk);
-      const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
-      const status=isRateMetric?(v<=4?'✅ Good':v<=9?'⚠ Warning':'🚨 Critical'):(v>=95?'✅ Good':v>=85?'⚠ Warning':'🚨 Critical');
-      html+=`<td class="hm-cell" style="background:${bg};${outline}">
+      const overlayStyle = isLast ? `background:linear-gradient(rgba(243,232,255,0.28),rgba(243,232,255,0.28)), ${bg}; border-left:3px solid #7C3AED; border-right:3px solid #7C3AED;` : `background:${bg};`;
+      const status = v>0 ? (isRateMetric ? (v<=4?'✅ Good':v<=9?'⚠ Warning':'🚨 Critical') : (v>=95?'✅ Good':v>=85?'⚠ Warning':'🚨 Critical')) : 'N/A';
+      const cellValue = v>0 ? fmtV(v) : '<span class="hm-na">N/A</span>';
+      const qtyValue = qtys[i]>0 ? fmtQ(qtys[i]) : '<span class="hm-na">N/A</span>';
+      const targetDisplay = isQtyMetric ? '-' : targetSL + '%';
+      const gapDisplay = (!isQtyMetric && v>0) ? ((v - targetSL)>=0?'+':'') + (v - targetSL).toFixed(1) + '%' : 'N/A';
+      const rankForCell = rankIndex[mp] || '-';
+      const noteNoData = v>0 ? '' : `<div class="tt-r"><span class="tt-k">Note</span><span class="tt-v">No data available</span></div>`;
+      html+=`<td class="hm-cell" style="${overlayStyle}">
         <div class="hm-inner">
-          <div class="hm-v" style="color:${text}">${v>0?fmtV(v):'—'}</div>
+          <div class="hm-v" style="color:${text}">${cellValue}</div>
           <div class="hm-d" style="color:${dColor}">${dStr}</div>
-          <div class="hm-q" style="color:${text}">${qtys[i]>0?fmtQ(qtys[i]):'—'}</div>
+          <div class="hm-q" style="color:${text}">${qtyValue}</div>
         </div>
         <div class="hm-tip">
           <div style="font-weight:700;margin-bottom:6px;color:#a78bfa">${mp} · Wk ${displayWeeks[i]}</div>
-          <div class="tt-r"><span class="tt-k">${metricLabel}</span><span class="tt-v" style="color:${text}">${v>0?fmtV(v):'—'}</span></div>
-          <div class="tt-r"><span class="tt-k">WoW</span><span class="tt-v" style="color:${dColor}">${dStr||'—'}</span></div>
-          <div class="tt-r"><span class="tt-k">Total Qty</span><span class="tt-v">${qtys[i].toLocaleString('id-ID')}</span></div>
-          ${!isQtyMetric?`<div class="tt-r"><span class="tt-k">Status</span><span class="tt-v" style="color:${text}">${v>0?status:'—'}</span></div>`:''}
+          <div class="tt-r"><span class="tt-k">${metricLabel}</span><span class="tt-v" style="color:${text}">${cellValue}</span></div>
+          <div class="tt-r"><span class="tt-k">Target</span><span class="tt-v">${targetDisplay}</span></div>
+          <div class="tt-r"><span class="tt-k">Gap</span><span class="tt-v">${gapDisplay}</span></div>
+          <div class="tt-r"><span class="tt-k">WoW</span><span class="tt-v" style="color:${dColor}">${dStr||'N/A'}</span></div>
+          <div class="tt-r"><span class="tt-k">Total Qty</span><span class="tt-v">${qtyValue==='N/A'?qtyValue:qtys[i].toLocaleString('id-ID')}</span></div>
+          <div class="tt-r"><span class="tt-k">Rank</span><span class="tt-v">${rankForCell}</span></div>
+          <div class="tt-r"><span class="tt-k">Status</span><span class="tt-v" style="color:${text}">${status}</span></div>
+          ${noteNoData}
         </div>
       </td>`;
     });
-    html+=`<td class="hm-avg-cell" style="background:${aBg}"><div class="hm-inner"><div class="hm-v" style="color:${aTxt}">${avg>0?fmtV(avg):'—'}</div></div></td></tr>`;
+    html+=`<td class="hm-avg-cell"><div class="hm-inner"><div class="hm-v">${avg>0?fmtV(avg):'<span class="hm-na">N/A</span>'}</div></div></td></tr>`;
   });
 
   // TOTAL ROW — FIX: use filteredMPs for aggregate
@@ -922,8 +940,8 @@ function renderHeatmap(){
     const dStr=d!==null?(d>=0?`▲ +${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`:`▼ ${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`):'';
     const dColor=d!==null?((!isRateMetric&&d>=0)||(isRateMetric&&d<=0)?'#6ee7b7':'#fca5a5'):'transparent';
     const isLast=String(displayWeeks[i])===String(latestWk);
-    const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
-    html+=`<td class="hm-cell" style="background:${bg};${outline}"><div class="hm-inner"><div class="hm-v" style="color:${text};font-size:13px">${v>0?fmtV(v):'—'}</div><div class="hm-d" style="color:${dColor}">${dStr}</div><div class="hm-q" style="color:${text}">${totQtys[i]>0?fmtQ(totQtys[i]):'—'}</div></div></td>`;
+    const overlayStyle = isLast ? `background:linear-gradient(rgba(243,232,255,0.28),rgba(243,232,255,0.28)), ${bg}; border-left:3px solid #7C3AED; border-right:3px solid #7C3AED;` : `background:${bg};`;
+    html+=`<td class="hm-cell" style="${overlayStyle}"><div class="hm-inner"><div class="hm-v" style="color:${text};font-size:13px">${v>0?fmtV(v):'<span class="hm-na">N/A</span>'}</div><div class="hm-d" style="color:${dColor}">${dStr}</div><div class="hm-q" style="color:${text}">${totQtys[i]>0?fmtQ(totQtys[i]):'<span class="hm-na">N/A</span>'}</div></div></td>`;
   });
   html+=`<td class="hm-avg-cell" style="background:${gBg}"><div class="hm-inner"><div class="hm-v" style="color:${gTxt};font-size:13px">${grandAvg>0?fmtV(grandAvg):'—'}</div></div></td></tr></tbody></table></div></div>`;
 
