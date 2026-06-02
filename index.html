@@ -737,30 +737,40 @@ function renderMOverview(){
     </div>
   </div>
 
-  <!-- ROW 3: WATERFALL GROWTH + SL TREND + INSIGHT -->
-  <div style="display:grid;grid-template-columns:2fr 1.75fr 1.25fr;gap:16px;margin-bottom:24px;">
+  <!-- ROW 3: INSIGHTS & TREND ANALYSIS -->
+  <div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:16px;margin-bottom:24px;">
     <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Growth Qty MoM (Waterfall)</div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Month-over-month quantity changes</div>
-      <div style="height:320px;position:relative;"><canvas id="moveWFChart"></canvas></div>
-    </div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📊 Growth Analysis</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.8;">`;
+  
+  if(mos.length>1){
+    const bestGrowth=mos.slice(1).reduce((a,b)=>((b.qty-mos[mos.indexOf(b)-1].qty)/mos[mos.indexOf(b)-1].qty*100)>((a.qty-mos[mos.indexOf(a)-1].qty)/mos[mos.indexOf(a)-1].qty*100)?b:a);
+    const worstGrowth=mos.slice(1).reduce((a,b)=>((b.qty-mos[mos.indexOf(b)-1].qty)/mos[mos.indexOf(b)-1].qty*100)<((a.qty-mos[mos.indexOf(a)-1].qty)/mos[mos.indexOf(a)-1].qty*100)?b:a);
+    const growthValues=mos.slice(1).map((m,i)=>(m.qty-mos[i].qty)/mos[i].qty*100);
+    const avgGrowth=growthValues.length?+(growthValues.reduce((a,b)=>a+b,0)/growthValues.length).toFixed(2):0;
+    html+=`<strong>📈 Best Growth:</strong><br>${bestGrowth.lbl}<br><span style="color:#1D9E75;font-weight:700;">+${(((bestGrowth.qty-mos[mos.indexOf(bestGrowth)-1].qty)/mos[mos.indexOf(bestGrowth)-1].qty)*100).toFixed(1)}%</span><br><br>`;
+    html+=`<strong>📉 Worst Growth:</strong><br>${worstGrowth.lbl}<br><span style="color:#e05b5b;font-weight:700;">${(((worstGrowth.qty-mos[mos.indexOf(worstGrowth)-1].qty)/mos[mos.indexOf(worstGrowth)-1].qty)*100).toFixed(1)}%</span><br><br>`;
+    html+=`<strong>⚙️ Avg Growth:</strong><br><span style="color:${avgGrowth>=0?'#1D9E75':'#e05b5b'};font-weight:700;">${avgGrowth>=0?'+':''}${avgGrowth.toFixed(1)}%</span>`;
+  }else{
+    html+=`Minimal data untuk analisis pertumbuhan`;
+  }
+  html+=`</div></div>`;
 
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📈 Service Level Trend</div>
-      <div style="height:320px;position:relative;"><canvas id="moveSLChart"></canvas></div>
-    </div>
+  html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">📈 Service Level Trend</div>
+    <div style="height:320px;position:relative;"><canvas id="moveSLChart"></canvas></div>
+  </div>`;
 
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">💡 Executive Insight</div>
-      <div style="font-size:10px;color:var(--text2);line-height:1.8;">
-        <div>• <strong>Peak:</strong> ${peakM?peakM.lbl:'—'}</div>
-        <div>• <strong>SL Avg:</strong> ${fmtPct(avgSL)}${avgSL>=95?' ✓':avgSL>=85?' ⚠':'❌'}</div>
-        <div>• <strong>Loss Rate:</strong> ${totQty>0?(totLoss/totQty*100).toFixed(2):'0'}%</div>
-        <div>• <strong>Trend:</strong> ${growthMom>=0?'📈 Naik':'📉 Turun'}</div>
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:9px;">Data: ${mos.length} bulan</div>
-      </div>
+  html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">💡 Executive Insight</div>
+    <div style="font-size:10px;color:var(--text2);line-height:1.8;">
+      <div>• <strong>Peak:</strong> ${peakM?peakM.lbl:'—'}</div>
+      <div>• <strong>SL Avg:</strong> ${fmtPct(avgSL)}${avgSL>=95?' ✓':avgSL>=85?' ⚠':'❌'}</div>
+      <div>• <strong>Loss Rate:</strong> ${totQty>0?(totLoss/totQty*100).toFixed(2):'0'}%</div>
+      <div>• <strong>Trend:</strong> ${growthMom>=0?'📈 Naik':'📉 Turun'}</div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:9px;">Data: ${mos.length} bulan</div>
     </div>
-  </div>
+  </div></div>
 
   <!-- ROW 4: DETAIL TABLE -->
   <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
@@ -835,51 +845,6 @@ function renderMOverview(){
     data:{labels:mpCol?allMPs:[],datasets:[{data:mpqtys,backgroundColor:['#5b3fa8dd','#e879a0dd','#1D9E75dd','#e6944add','#e05b5bdd','#7c3aeddd'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:10},padding:8}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}% (${Math.round(v).toLocaleString('id-ID')})`}}}}},
     plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.05)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.70,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(((v/tot)*100).toFixed(0)+'%',x,y);ctx.restore();});}}]
-  });
-
-  killChart('moveWFChart');
-  const wfLabels=[];
-  const wfValues=[];
-  const wfColors=[];
-  const wfOffsets=[];
-  
-  mos.forEach((m,i)=>{
-    const monthParts=m.lbl.split(' ');
-    wfLabels.push(monthParts[0]);
-    
-    if(i===0){
-      wfValues.push(m.qty);
-      wfColors.push('#5b3fa8');
-      wfOffsets.push(0);
-    }else{
-      const delta=m.qty-mos[i-1].qty;
-      wfValues.push(delta);
-      wfColors.push(delta>=0?'#1D9E75':'#e05b5b');
-      wfOffsets.push(Math.min(mos[i-1].qty,m.qty));
-    }
-  });
-
-  charts['moveWFChart']=new Chart(document.getElementById('moveWFChart'),{
-    type:'bar',
-    data:{labels:wfLabels,datasets:[
-      {data:wfOffsets,backgroundColor:'transparent',borderWidth:0,stack:'Stack0',borderSkipped:false},
-      {label:'Qty Change',data:wfValues,backgroundColor:wfColors,borderColor:'#fff',borderWidth:1.5,borderRadius:4,stack:'Stack0',
-        datalabels:{anchor:'center',align:'center',color:'#fff',font:{weight:'700',size:10},
-          formatter:(v,ctx)=>{if(ctx.datasetIndex===1){if(v===0)return fmtLabel(mos[ctx.dataIndex].qty);return(v>=0?'+':'')+fmtLabel(v);}return'';},
-          display:ctx=>true}}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'x',
-      plugins:{legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:10},padding:8}},
-        tooltip:{callbacks:{title:ctx=>ctx[0].label,
-          label:ctx=>{if(ctx.datasetIndex===1){const idx=ctx.dataIndex;if(idx===0)return`Total Qty: ${fmtN(mos[idx].qty)}`;const d=mos[idx].qty-mos[idx-1].qty;return`Change: ${d>=0?'+':''} ${fmtN(d)}`;}return'';}},
-          backgroundColor:'rgba(0,0,0,0.8)',titleColor:'#fff',bodyColor:'#fff',borderColor:'#999',borderWidth:1,titleFont:{size:11,weight:'700'},bodyFont:{size:10},padding:8}},
-        datalabels:{}},
-      scales:{
-        x:{display:true,stacked:true,title:{display:true,text:'Bulan',color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{maxRotation:45,font:{size:9}}},
-        y:{display:true,stacked:true,beginAtZero:true,title:{display:true,text:'Qty',color:'#6b5b8a',font:{size:11,weight:'700'}},
-          ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v.toLocaleString('id-ID')},grid:{color:'#e2daf2'}}
-      }
-    }
   });
 
   killChart('moveSLChart');
