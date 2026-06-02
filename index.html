@@ -838,13 +838,14 @@ function renderMOverview(){
   }
 
   killChart('moveContribChart');
-  const mpqtys=mpCol?allMPs.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0)):[];
+  const mpForChart = fMP !== 'all' ? [fMP] : allMPs;
+  const mpqtys=mpCol?mpForChart.map(mp=>filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[qtyCol]),0)):[];
   console.log('[renderMOverview] Initializing moveContribChart, mpqtys length:', mpqtys.length);
   try{
     charts['moveContribChart']=new Chart(document.getElementById('moveContribChart'),{
     type:'doughnut',
-    data:{labels:mpCol?allMPs:[],datasets:[{data:mpqtys,backgroundColor:['#5b3fa8dd','#e879a0dd','#1D9E75dd','#e6944add','#e05b5bdd','#7c3aeddd'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:10},padding:8}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}% (${Math.round(v).toLocaleString('id-ID')})`}}}}}},
+    data:{labels:mpCol?mpForChart:[],datasets:[{data:mpqtys,backgroundColor:['#5b3fa8dd','#e879a0dd','#1D9E75dd','#e6944add','#e05b5bdd','#7c3aeddd'],borderColor:'#fff',borderWidth:2,hoverOffset:8,datalabels:{display:false}}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:10},padding:8}},tooltip:{callbacks:{title:()=>'',label:ctx=>{const v=ctx.raw,tot=ctx.dataset.data.reduce((a,b)=>a+b,0),pct=((v/tot)*100).toFixed(1);return`${pct}% (${Math.round(v).toLocaleString('id-ID')})`}}}}},
     plugins:[{id:'piePercent',afterDraw(chart){const{ctx}=chart,ds=chart.data.datasets[0],tot=ds.data.reduce((a,b)=>a+b,0);chart.getDatasetMeta(0).data.forEach((arc,i)=>{const v=ds.data[i];if(v/tot<0.05)return;const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.70,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.fillStyle='#fff';ctx.font='bold 10px Plus Jakarta Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(((v/tot)*100).toFixed(0)+'%',x,y);ctx.restore();});}}]
   });
     console.log('[renderMOverview] moveContribChart created successfully');
@@ -1176,6 +1177,10 @@ function renderMonthly(){
 
   // Agregat per bulan (year+month)
   const monthMap={};
+  const delC=findCol(rows,['qtydelivered','delivered']);
+  const disC=findCol(rows,['qtydispatched','dispatched']);
+  const canC=findCol(rows,['qtycancelled','cancelled']);
+  const retC=findCol(rows,['qtyreturn','return']);
   filtered.forEach(r=>{
     const key=`${r[yearCol]}-${String(r[monthCol]).padStart(2,'0')}`;
     const label=mnameCol?`${r[mnameCol]} ${r[yearCol]}`:`${r[monthCol]}/${r[yearCol]}`;
@@ -1184,10 +1189,6 @@ function renderMonthly(){
     monthMap[key].qty   += toN(r[qtyCol]);
     monthMap[key].slSum += toN(r[slCol]);
     monthMap[key].slCount++;
-    const delC=findCol(rows,['qtydelivered','delivered']);
-    const disC=findCol(rows,['qtydispatched','dispatched']);
-    const canC=findCol(rows,['qtycancelled','cancelled']);
-    const retC=findCol(rows,['qtyreturn','return']);
     if(delC)monthMap[key].del+=toN(r[delC]);
     if(disC)monthMap[key].dis+=toN(r[disC]);
     if(canC)monthMap[key].can+=toN(r[canC]);
@@ -1604,7 +1605,10 @@ function renderCOD(){
     if(a[mpCol]>b[mpCol]) return 1;
     return a[payCol]==='COD'?-1:1;
   }).forEach(r=>{
-    const rr=toN(r[retRCol]||0), cr=toN(r[canRCol]||0), sl=toN(r[slCol]||0);
+    const qty=toN(r[qtyCol]);
+    const rr=retRCol?toN(r[retRCol]):(qty?toN(r[retCol])/qty*100:0);
+    const cr=canRCol?toN(r[canRCol]):(qty?toN(r[canCol])/qty*100:0);
+    const sl=toN(r[slCol]||0);
     const isCod=r[payCol]==='COD';
     const xVal = isDaily ? r[dateCol] : 'Wk '+r[wkCol];
     html+=`<tr>
