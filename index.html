@@ -180,6 +180,7 @@ td.sl-bad{color:var(--red);font-weight:700;}
   <div class="nav-item" onclick="showPage('marketplace',this)"><span class="nav-icon">🛒</span>Marketplace</div>
   <div class="nav-item" onclick="showPage('product',this)"><span class="nav-icon">📦</span>Product Trend</div>
   <div class="nav-item" onclick="showPage('category',this)"><span class="nav-icon">🏷️</span>Category</div>
+  <div class="nav-item" onclick="showPage('heatmap',this)"><span class="nav-icon">🟥</span>WoW Heatmap</div>
   <div class="nav-item" onclick="showPage('moverview',this)"><span class="nav-icon">📅</span>Monthly Overview</div>
 
   <div class="nav-section">Trend</div>
@@ -257,6 +258,28 @@ td.sl-bad{color:var(--red);font-weight:700;}
       <button class="btn-reset" onclick="document.getElementById('catWeek').value='all';document.getElementById('catCat').value='all';renderCategory()">↺ Reset</button>
     </div>
     <div id="catContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data Category...</div></div></div>
+  </div>
+
+  <!-- WOW HEATMAP -->
+  <div class="page" id="page-heatmap">
+    <div class="page-header">
+      <div><div class="page-title">🟥 WoW Heatmap</div><div class="page-sub">Service Level % per Marketplace per Week</div></div>
+      <div class="live-badge"><div class="dot"></div><span id="hmStatus">Memuat...</span></div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-bar-label">🔽 Filter:</span>
+      <div class="filter-item"><label>Metric</label>
+        <select class="filter-select" id="hmMetric" onchange="renderHeatmap()">
+          <option value="sl">SL %</option>
+          <option value="slexcl">SL Excl %</option>
+          <option value="ret">Return %</option>
+          <option value="can">Cancel %</option>
+        </select>
+      </div>
+      <div class="filter-divider"></div>
+      <button class="btn-reset" onclick="document.getElementById('hmMetric').value='sl';renderHeatmap()">↺ Reset</button>
+    </div>
+    <div id="hmContent"><div class="loading-state"><div class="spinner"></div><div>Memuat Heatmap...</div></div></div>
   </div>
 
   <!-- DAILY TREND -->
@@ -1741,6 +1764,200 @@ function renderCOD(){
   });
 }
 
+// ─── WOW HEATMAP ─────────────────────────────────────────────────────────────
+function renderHeatmap(){
+  const rows=D.mp;
+  if(!rows.length){document.getElementById('hmContent').innerHTML='<div class="error-state">Data belum tersedia. Buka halaman Marketplace dulu sekali.</div>';return;}
+
+  const wkCol=findCol(rows,['week','minggu','wk']);
+  const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
+  const slCol=findCol(rows,['servicelevel','sl%']);
+  const slExCol=findCol(rows,['slexcl','sl excl']);
+  const retCol=findCol(rows,['return%','returnrate']);
+  const canCol=findCol(rows,['cancelled%','cancelrate']);
+  const qtyCol=findCol(rows,['totalqty','qty']);
+  const ordCol=findCol(rows,['totalorder','order']);
+
+  const metric=gv('hmMetric');
+  const getVal=(r)=>{
+    if(metric==='sl')    return toN(r[slCol]);
+    if(metric==='slexcl')return toN(r[slExCol]);
+    if(metric==='ret')   return toN(r[retCol]);
+    if(metric==='can')   return toN(r[canCol]);
+    return toN(r[slCol]);
+  };
+  const isRateMetric = metric==='ret'||metric==='can';
+  const metricLabel  = metric==='sl'?'SL %':metric==='slexcl'?'SL Excl %':metric==='ret'?'Return %':'Cancel %';
+
+  const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
+  const allMPs  =mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
+  const latestWk=allWeeks[allWeeks.length-1];
+
+  function cellColor(v){
+    if(isRateMetric){
+      if(v<=2)  return {bg:'#064e3b',text:'#6ee7b7'};
+      if(v<=4)  return {bg:'#065f46',text:'#34d399'};
+      if(v<=6)  return {bg:'#78350f',text:'#fcd34d'};
+      if(v<=9)  return {bg:'#92400e',text:'#fbbf24'};
+      if(v<=12) return {bg:'#7f1d1d',text:'#fca5a5'};
+      return           {bg:'#991b1b',text:'#f87171'};
+    } else {
+      if(v>=97) return {bg:'#064e3b',text:'#6ee7b7'};
+      if(v>=95) return {bg:'#065f46',text:'#34d399'};
+      if(v>=93) return {bg:'#047857',text:'#6ee7b7'};
+      if(v>=90) return {bg:'#78350f',text:'#fcd34d'};
+      if(v>=87) return {bg:'#92400e',text:'#fbbf24'};
+      if(v>=85) return {bg:'#7f1d1d',text:'#fca5a5'};
+      return           {bg:'#991b1b',text:'#f87171'};
+    }
+  }
+
+  function fmtV(v){return v.toFixed(1)+'%';}
+  function fmtQ(v){if(v>=1e6)return(v/1e6).toFixed(1)+'jt';if(v>=1e3)return(v/1e3).toFixed(1)+'rb';return Math.round(v).toString();}
+
+  const cell={};
+  rows.forEach(r=>{
+    const k=`${r[mpCol]}__${r[wkCol]}`;
+    if(!cell[k])cell[k]={v:0,qty:0,ord:0};
+    cell[k].v  +=getVal(r);
+    cell[k].qty+=toN(r[qtyCol]);
+    cell[k].ord+=toN(r[ordCol]);
+  });
+
+  let html=`
+  <style>
+  .hm-wrap{overflow-x:auto;}
+  .hm-tbl{border-collapse:separate;border-spacing:0;font-size:11.5px;min-width:600px;}
+  .hm-th{padding:6px 10px;text-align:center;color:var(--text2);font-size:10px;font-weight:600;white-space:nowrap;background:var(--card);border-bottom:2px solid var(--border);}
+  .hm-th:first-child{text-align:left;min-width:130px;border-right:2px solid var(--border);position:sticky;left:0;background:var(--card);z-index:2;}
+  .hm-th.latest{color:var(--blue);font-weight:700;}
+  .hm-rl{padding:10px 12px 10px 8px;font-weight:600;font-size:12px;border-right:2px solid var(--border);border-bottom:1px solid var(--border);background:#faf9ff;position:sticky;left:0;z-index:1;white-space:nowrap;}
+  .hm-rl .rl-sub{display:block;font-size:9px;color:var(--text2);font-family:monospace;margin-top:2px;}
+  .hm-cell{padding:0;border-bottom:1px solid rgba(0,0,0,0.15);border-right:1px solid rgba(0,0,0,0.1);cursor:pointer;transition:filter 0.12s;min-width:70px;position:relative;}
+  .hm-cell:hover{filter:brightness(1.25);z-index:1;}
+  .hm-cell:hover .hm-tip{opacity:1;}
+  .hm-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:7px 5px;height:58px;}
+  .hm-v{font-size:12px;font-weight:700;font-family:monospace;line-height:1;}
+  .hm-d{font-size:9px;font-weight:600;font-family:monospace;line-height:1;opacity:0.9;}
+  .hm-q{font-size:9px;opacity:0.6;line-height:1;}
+  .hm-tip{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:#1a0a2e;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:11px;color:var(--text);white-space:nowrap;z-index:10;opacity:0;transition:opacity 0.15s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.4);min-width:150px;}
+  .hm-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a0a2e;}
+  .tt-r{display:flex;justify-content:space-between;gap:14px;margin-bottom:2px;font-size:10px;}
+  .tt-k{color:var(--text2)}.tt-v{font-weight:600;}
+  .hm-tot-row .hm-rl{color:var(--blue);border-top:2px solid var(--border);}
+  .hm-tot-row .hm-cell{border-top:2px solid var(--border);}
+  .hm-avg-cell{text-align:center;padding:0;border-left:2px solid var(--border);border-bottom:1px solid var(--border);}
+  .legend-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:10px;color:var(--text2);}
+  .leg-swatch{display:flex;gap:2px;align-items:center;}
+  .leg-box{width:16px;height:12px;border-radius:2px;}
+  </style>
+
+  <div class="kpi-matrix-card">
+    <div class="kpi-matrix-header">
+      <div class="kpi-matrix-title">🟥 ${metricLabel} Heatmap — Week × Marketplace</div>
+      <span class="kpi-week-badge">Wk ${allWeeks[0]} → Wk ${latestWk} · ${allWeeks.length} weeks</span>
+    </div>
+    <div class="legend-row">
+      <span>Legend:</span>
+      <div class="leg-swatch">
+        <div class="leg-box" style="background:#064e3b"></div>
+        <div class="leg-box" style="background:#065f46"></div>
+        <div class="leg-box" style="background:#047857"></div>
+      </div>
+      <span>${isRateMetric?'Low (good)':'High ≥93% (good)'}</span>
+      &nbsp;
+      <div class="leg-swatch">
+        <div class="leg-box" style="background:#78350f"></div>
+        <div class="leg-box" style="background:#92400e"></div>
+      </div>
+      <span>${isRateMetric?'Medium (warning)':'85–93% (warning)'}</span>
+      &nbsp;
+      <div class="leg-swatch">
+        <div class="leg-box" style="background:#7f1d1d"></div>
+        <div class="leg-box" style="background:#991b1b"></div>
+      </div>
+      <span>${isRateMetric?'High (critical)':'<85% (critical)'}</span>
+      &nbsp;&nbsp;
+      <span style="color:var(--text2)">▲▼ = WoW delta · angka bawah = total qty</span>
+    </div>
+    <div class="hm-wrap"><table class="hm-tbl"><thead><tr>
+      <th class="hm-th">Marketplace</th>`;
+
+  allWeeks.forEach(w=>{
+    const isLast=String(w)===String(latestWk);
+    html+=`<th class="hm-th ${isLast?'latest':''}">${isLast?'★ ':''}Wk ${w}</th>`;
+  });
+  html+=`<th class="hm-th" style="border-left:2px solid var(--border);color:var(--blue)">Avg</th>
+    </tr></thead><tbody>`;
+
+  allMPs.forEach(mp=>{
+    const vals=allWeeks.map(w=>cell[`${mp}__${w}`]?.v||0);
+    const qtys=allWeeks.map(w=>cell[`${mp}__${w}`]?.qty||0);
+    const avg =(vals.filter(v=>v>0).reduce((a,b)=>a+b,0)/(vals.filter(v=>v>0).length||1));
+    const totQty=qtys.reduce((a,b)=>a+b,0);
+    const {bg:aBg,text:aTxt}=cellColor(avg);
+    html+=`<tr><td class="hm-rl">${mp}<span class="rl-sub">avg ${avg.toFixed(1)}% · ${fmtQ(totQty)}</span></td>`;
+    vals.forEach((v,i)=>{
+      const prev=i>0?vals[i-1]:null;
+      const d=prev!==null?(v-prev):null;
+      const {bg,text}=cellColor(v);
+      const dStr=d!==null?(d>=0?`▲ +${d.toFixed(1)}%`:`▼ ${d.toFixed(1)}%`):'';
+      const dColor=d!==null?(d>=0?'#6ee7b7':'#fca5a5'):'transparent';
+      const isLast=String(allWeeks[i])===String(latestWk);
+      const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
+      const status=isRateMetric?(v<=4?'✅ Good':v<=9?'⚠ Warning':'🚨 Critical'):(v>=95?'✅ Good':v>=85?'⚠ Warning':'🚨 Critical');
+      html+=`<td class="hm-cell" style="background:${bg};${outline}">
+        <div class="hm-inner">
+          <div class="hm-v" style="color:${text}">${v>0?fmtV(v):'—'}</div>
+          <div class="hm-d" style="color:${dColor}">${dStr}</div>
+          <div class="hm-q" style="color:${text}">${fmtQ(qtys[i])}</div>
+        </div>
+        <div class="hm-tip">
+          <div style="font-weight:700;margin-bottom:6px;color:var(--blue)">${mp} · Wk ${allWeeks[i]}</div>
+          <div class="tt-r"><span class="tt-k">${metricLabel}</span><span class="tt-v" style="color:${text}">${v>0?fmtV(v):'—'}</span></div>
+          <div class="tt-r"><span class="tt-k">WoW</span><span class="tt-v" style="color:${dColor}">${dStr||'—'}</span></div>
+          <div class="tt-r"><span class="tt-k">Total Qty</span><span class="tt-v">${qtys[i].toLocaleString('id-ID')}</span></div>
+          <div class="tt-r"><span class="tt-k">Status</span><span class="tt-v" style="color:${text}">${v>0?status:'—'}</span></div>
+        </div>
+      </td>`;
+    });
+    html+=`<td class="hm-avg-cell" style="background:${aBg}">
+      <div class="hm-inner"><div class="hm-v" style="color:${aTxt}">${avg.toFixed(1)}%</div></div>
+    </td></tr>`;
+  });
+
+  html+=`<tr class="hm-tot-row"><td class="hm-rl" style="color:var(--blue)">ALL MP<span class="rl-sub">weighted avg</span></td>`;
+  const totVals=allWeeks.map(w=>{
+    const rowVals=allMPs.map(mp=>cell[`${mp}__${w}`]?.v||0).filter(v=>v>0);
+    return rowVals.length?(rowVals.reduce((a,b)=>a+b,0)/rowVals.length):0;
+  });
+  const totQtys=allWeeks.map(w=>allMPs.reduce((s,mp)=>s+(cell[`${mp}__${w}`]?.qty||0),0));
+  const grandAvg=totVals.filter(v=>v>0).reduce((a,b)=>a+b,0)/(totVals.filter(v=>v>0).length||1);
+  const {bg:gBg,text:gTxt}=cellColor(grandAvg);
+  totVals.forEach((v,i)=>{
+    const prev=i>0?totVals[i-1]:null;
+    const d=prev!==null?(v-prev):null;
+    const {bg,text}=cellColor(v);
+    const dStr=d!==null?(d>=0?`▲ +${d.toFixed(1)}%`:`▼ ${d.toFixed(1)}%`):'';
+    const dColor=d!==null?(d>=0?'#6ee7b7':'#fca5a5'):'transparent';
+    const isLast=String(allWeeks[i])===String(latestWk);
+    const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
+    html+=`<td class="hm-cell" style="background:${bg};${outline}">
+      <div class="hm-inner">
+        <div class="hm-v" style="color:${text};font-size:13px">${v>0?fmtV(v):'—'}</div>
+        <div class="hm-d" style="color:${dColor}">${dStr}</div>
+        <div class="hm-q" style="color:${text}">${fmtQ(totQtys[i])}</div>
+      </div>
+    </td>`;
+  });
+  html+=`<td class="hm-avg-cell" style="background:${gBg}">
+    <div class="hm-inner"><div class="hm-v" style="color:${gTxt};font-size:13px">${grandAvg.toFixed(1)}%</div></div>
+  </td></tr></tbody></table></div></div>`;
+
+  document.getElementById('hmContent').innerHTML=html;
+  document.getElementById('hmStatus').textContent=`${allMPs.length} marketplace · ${allWeeks.length} weeks`;
+}
+
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 function showPage(p,el){
   document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
@@ -1751,6 +1968,7 @@ function showPage(p,el){
   else if(p==='marketplace')renderMarketplace();
   else if(p==='product')renderProduct();
   else if(p==='category')renderCategory();
+  else if(p==='heatmap')renderHeatmap();
   else if(p==='moverview')renderMOverview();
   else if(p==='daily')renderDaily();
   else if(p==='monthly')renderMonthly();
