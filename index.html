@@ -1644,7 +1644,10 @@ function renderCOD(){
     if(a[mpCol]>b[mpCol]) return 1;
     return a[payCol]==='COD'?-1:1;
   }).forEach(r=>{
-    const rr=toN(r[retRCol]||0), cr=toN(r[canRCol]||0), sl=toN(r[slCol]||0);
+    const qty=toN(r[qtyCol]);
+    const rr=retRCol?toN(r[retRCol]):(qty?toN(r[retCol])/qty*100:0);
+    const cr=canRCol?toN(r[canRCol]):(qty?toN(r[canCol])/qty*100:0);
+    const sl=toN(r[slCol]||0);
     const isCod=r[payCol]==='COD';
     const xVal = isDaily ? r[dateCol] : 'Wk '+r[wkCol];
     html+=`<tr>
@@ -1899,7 +1902,7 @@ function renderHeatmap(){
     html+=`<tr><td class="hm-rl">${mp}<span class="rl-sub">avg ${avg.toFixed(1)}% · ${fmtQ(totQty)}</span></td>`;
     vals.forEach((v,i)=>{
       const prev=i>0?vals[i-1]:null;
-      const d=prev!==null?(v-prev):null;
+      const d=(prev!==null&&v>0&&prev>0)?(v-prev):null;
       const {bg,text}=cellColor(v);
       const dStr=d!==null?(d>=0?`▲ +${d.toFixed(1)}%`:`▼ ${d.toFixed(1)}%`):'';
       const dColor=d!==null?(d>=0?'#6ee7b7':'#fca5a5'):'transparent';
@@ -1936,7 +1939,7 @@ function renderHeatmap(){
   const {bg:gBg,text:gTxt}=cellColor(grandAvg);
   totVals.forEach((v,i)=>{
     const prev=i>0?totVals[i-1]:null;
-    const d=prev!==null?(v-prev):null;
+    const d=(prev!==null&&v>0&&prev>0)?(v-prev):null;
     const {bg,text}=cellColor(v);
     const dStr=d!==null?(d>=0?`▲ +${d.toFixed(1)}%`:`▼ ${d.toFixed(1)}%`):'';
     const dColor=d!==null?(d>=0?'#6ee7b7':'#fca5a5'):'transparent';
