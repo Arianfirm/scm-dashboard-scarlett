@@ -812,13 +812,13 @@ function renderMOverview(){
     type:'line',
     data:{labels,datasets:[
       {label:'Service Level %',data:slV,borderColor:'#1D9E75',backgroundColor:'#1D9E7515',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,tension:0.3,fill:false,
-        datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}},
+        datalabels:{anchor:'top',align:'top',color:'#1D9E75',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
       {label:'SL Excl %',data:slExV,borderColor:'#5b3fa8',backgroundColor:'#5b3fa815',borderWidth:2,pointRadius:4,pointBackgroundColor:'#5b3fa8',tension:0.3,fill:false,borderDash:[5,3],
-        datalabels:{anchor:'bottom',align:'bottom',color:'#5b3fa8',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}},
+        datalabels:{anchor:'bottom',align:'bottom',color:'#5b3fa8',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
       {label:'Return %',data:retV,borderColor:'#e879a0',backgroundColor:'#e879a015',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e879a0',tension:0.3,fill:false,
-        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}},
+        datalabels:{anchor:'top',align:'top',color:'#e879a0',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}},
       {label:'Cancel %',data:canV,borderColor:'#e6944a',backgroundColor:'#e6944a15',borderWidth:2,pointRadius:4,pointBackgroundColor:'#e6944a',tension:0.3,fill:false,
-        datalabels:{anchor:'bottom',align:'bottom',color:'#e6944a',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}}
+        datalabels:{anchor:'bottom',align:'bottom',color:'#e6944a',font:{weight:'700',size:9},formatter:v=>fmtLabelPct(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}},datalabels:{}},
