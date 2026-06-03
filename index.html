@@ -87,26 +87,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .kpi-card-label{font-size:10px;color:var(--text2);font-weight:500;margin-bottom:5px;}
 .kpi-card-value{font-size:20px;font-weight:800;color:var(--text);}
 .kpi-card-sub{font-size:10px;color:var(--text2);margin-top:3px;}
-.exec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:18px;}
-.exec-card{background:rgba(15,11,42,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px 22px;color:#f8f5ff;position:relative;overflow:hidden;box-shadow:0 18px 42px rgba(15,11,42,0.26);}
-.exec-card::before{content:'';position:absolute;left:20px;bottom:0;width:72px;height:4px;border-radius:999px;background:var(--blue);box-shadow:0 0 20px rgba(91,63,168,0.24);}
-.exec-card::after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:0 0 120px rgba(255,255,255,0.02);}
-.exec-card-title{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#c9c0f3;margin-bottom:10px;}
-.exec-card-value{font-size:32px;font-weight:800;line-height:1.05;color:#fff;margin-bottom:8px;}
-.exec-card-sub{font-size:12px;color:#d3cff6;line-height:1.5;margin-bottom:10px;}
-.exec-card-note{font-size:13px;font-weight:700;line-height:1.3;margin-bottom:8px;}
-.exec-card-note.success{color:#5eead4;}
-.exec-card-note.danger{color:#fda4af;}
-.exec-card-note.warn{color:#fbbf24;}
-.exec-card-note.accent{color:#c084fc;}
-.exec-card-bottom{font-size:11px;color:#b8b0d4;opacity:0.9;}
-.exec-card.orange::before{background:rgba(232,148,74,0.95);box-shadow:0 0 20px rgba(232,148,74,0.24);}
-.exec-card.green::before{background:rgba(29,158,117,0.95);box-shadow:0 0 20px rgba(29,158,117,0.24);}
-.exec-card.red::before{background:rgba(224,91,91,0.95);box-shadow:0 0 20px rgba(224,91,91,0.24);}
-.exec-card.amber::before{background:rgba(234,179,8,0.95);box-shadow:0 0 20px rgba(234,179,8,0.24);}
-.exec-card.purple::before{background:rgba(124,58,237,0.95);box-shadow:0 0 20px rgba(124,58,237,0.24);}
-.exec-card .value-tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;}
-@media(max-width:760px){.exec-card{padding:16px;}.exec-card-value{font-size:28px;}}
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:14px;}
 .chart-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
 .chart-sub{font-size:10.5px;color:var(--text2);margin-bottom:10px;}
@@ -165,7 +145,7 @@ td.sl-bad{color:var(--red);font-weight:700;}
     <div class="logo-icon">SC</div>
     <div style="flex:1">
       <div class="logo-name">Scarlett SCM</div>
-      <div class="logo-sub">Supply Chain Dashboard Online 2026</div>
+      <div class="logo-sub">Supply Chain Dashboard</div>
     </div>
     <div class="live-dot"></div>
   </div>
@@ -180,7 +160,11 @@ td.sl-bad{color:var(--red);font-weight:700;}
 
   <div class="nav-section">Trend</div>
   <div class="nav-item" onclick="showPage('daily',this)"><span class="nav-icon">📅</span>Daily Trend</div>
+  <div class="nav-item" onclick="showPage('monthly',this)"><span class="nav-icon">📆</span>Monthly Trend</div>
   <div class="nav-item" onclick="showPage('cod',this)"><span class="nav-icon">💳</span>COD vs Non-COD</div>
+
+  <div class="nav-section">Insight</div>
+  <div class="nav-item" onclick="showPage('forecast',this)"><span class="nav-icon">🔮</span>Forecast & Campaign</div>
 
   <div class="sidebar-footer">
     Last sync:<br><span id="lastSync">—</span><br>
@@ -257,7 +241,7 @@ td.sl-bad{color:var(--red);font-weight:700;}
   <!-- WOW HEATMAP -->
   <div class="page" id="page-heatmap">
     <div class="page-header">
-      <div><div class="page-title">🟥 WoW Heatmap</div><div class="page-sub">Performa per Marketplace per Week</div></div>
+      <div><div class="page-title">🟥 WoW Heatmap</div><div class="page-sub">Performa per Marketplace per Week — pattern langsung terlihat</div></div>
       <div class="live-badge"><div class="dot"></div><span id="hmStatus">Memuat...</span></div>
     </div>
     <div class="filter-bar">
@@ -364,6 +348,16 @@ td.sl-bad{color:var(--red);font-weight:700;}
       <button class="btn-reset" onclick="resetCODFilter()">↺ Reset</button>
     </div>
     <div id="codContent"><div class="loading-state"><div class="spinner"></div><div>Mengambil data COD...</div></div></div>
+  </div>
+
+
+  <!-- FORECAST & CAMPAIGN -->
+  <div class="page" id="page-forecast">
+    <div class="page-header">
+      <div><div class="page-title">🔮 Forecast & Campaign</div><div class="page-sub">Prediksi demand Juni & deteksi pola campaign dari histori harian</div></div>
+      <div class="live-badge"><div class="dot"></div><span id="fcStatus">Menganalisis...</span></div>
+    </div>
+    <div id="fcContent"><div class="loading-state"><div class="spinner"></div><div>Menganalisis pola campaign...</div></div></div>
   </div>
 
 </main>
@@ -638,7 +632,6 @@ function renderHeatmap(){
   fillSel('hmMP',allMPs,'Semua Marketplace');
   if(catCol&&allCats.length)fillSel('hmCat',allCats,'Semua Cat');
 
-
   // FIX: only fill week dropdowns once (or when weeks change), not on every render
   if(!hmWeeksInit){
     ['hmWkFrom','hmWkTo'].forEach((id,idx)=>{
@@ -663,54 +656,6 @@ function renderHeatmap(){
   const displayWeeks= filteredWeeks.length ? filteredWeeks : allWeeks;
   const latestWk    = displayWeeks[displayWeeks.length-1];
 
-  const latestSlRows = slCol ? filtered.filter(r=>String(r[wkCol])===String(latestWk)) : [];
-  const avgSl = latestSlRows.length ? latestSlRows.reduce((sum,r)=>sum+toN(r[slCol]),0)/latestSlRows.length : 0;
-  const rankAvg={};
-  if(slCol){
-    filteredMPs.forEach(mp=>{
-      const slVals=displayWeeks.map(w=>{
-        const row=filtered.find(r=>r[mpCol]===mp&&String(r[wkCol])===String(w));
-        return row?toN(row[slCol]):0;
-      }).filter(v=>v>0);
-      rankAvg[mp]=slVals.length?slVals.reduce((a,b)=>a+b,0)/slVals.length:0;
-    });
-  }
-  const rankedMPs=Object.keys(rankAvg).sort((a,b)=>rankAvg[b]-rankAvg[a]);
-  const rankIndex={};
-  rankedMPs.forEach((mp,i)=>{rankIndex[mp]=i+1;});
-  const rankLabel=v=>{if(v===1)return'🥇 Rank 1';if(v===2)return'🥈 Rank 2';if(v===3)return'🥉 Rank 3';return v?`#${v}`:'-';};
-  const targetSL = 90;
-  const slGap = avgSl - targetSL;
-  const slTrend = slGap >= 0 ? `+${slGap.toFixed(1)}% above target` : `${slGap.toFixed(1)}% below target`;
-  const slNoteClass = slGap >= 0 ? 'success' : 'danger';
-
-  const prevWk = displayWeeks.length>1 ? displayWeeks[displayWeeks.length-2] : null;
-  const latestRows = filtered.filter(r=>String(r[wkCol])===String(latestWk));
-  const latestMap = {};
-  latestRows.forEach(r=>{
-    const key = r[mpCol] || 'Unknown';
-    if(!latestMap[key]) latestMap[key] = {mp:key,latest:0,prev:0};
-    latestMap[key].latest += getVal(r);
-  });
-  if(prevWk){
-    filtered.filter(r=>String(r[wkCol])===String(prevWk)).forEach(r=>{
-      const key = r[mpCol] || 'Unknown';
-      if(latestMap[key]) latestMap[key].prev += getVal(r);
-    });
-  }
-  const marketSummaries = Object.values(latestMap);
-  const bestMarket = marketSummaries.reduce((best,item)=>item.latest>best.latest?item:best,{mp:'—',latest:-Infinity,prev:0});
-  const worstMarket = marketSummaries.reduce((worst,item)=>item.latest<worst.latest?item:worst,{mp:'—',latest:Infinity,prev:0});
-  const belowTargetCount = slCol ? [...new Set(latestSlRows.filter(r=>toN(r[slCol])<targetSL).map(r=>r[mpCol]||'Unknown'))].length : 0;
-  const improvementCandidates = marketSummaries.map(item=>({
-    ...item,
-    delta: item.prev ? item.latest - item.prev : null
-  })).filter(item=>item.delta !== null && item.delta > 0);
-  const mostImproved = improvementCandidates.reduce((best,item)=>item.delta>best.delta?item:best,{mp:'—',latest:0,prev:0,delta:-Infinity});
-  const bestDeltaText = bestMarket.prev ? (bestMarket.latest - bestMarket.prev).toFixed(1) : null;
-  const worstDeltaText = worstMarket.prev ? (worstMarket.latest - worstMarket.prev).toFixed(1) : null;
-  const formatMetricValue = v => isQtyMetric ? (v>=1e6?(v/1e6).toFixed(1)+'jt':v>=1e3?(v/1e3).toFixed(1)+'rb':Math.round(v).toString()) : v.toFixed(1)+'%';
-
   // Build cell lookup from filtered data
   const cell={};
   filtered.forEach(r=>{
@@ -724,63 +669,41 @@ function renderHeatmap(){
   const maxV=isQtyMetric?Math.max(...Object.values(cell).map(c=>c.v),1):100;
 
   function cellColor(v){
-    if(!v||v===0)return{bg:'#f3f1f8',text:'#9c9aba'};
+    if(!v||v===0)return{bg:'#f8f6ff',text:'#ccc5e8'};
     if(isQtyMetric){
       const p=v/maxV;
-      if(p>=0.8)return{bg:'#1F8A70',text:'#effaf4'};
-      if(p>=0.5)return{bg:'#3F9F85',text:'#f4faf6'};
-      if(p>=0.2)return{bg:'#D3E7DA',text:'#1F3D33'};
-      return        {bg:'#EEF6F2',text:'#2A4A3E'};
+      if(p>=0.8)return{bg:'#1e3a8a',text:'#93c5fd'};
+      if(p>=0.5)return{bg:'#1d4ed8',text:'#bfdbfe'};
+      if(p>=0.2)return{bg:'#3b82f6',text:'#dbeafe'};
+      return        {bg:'#93c5fd',text:'#1e3a8a'};
     }
     if(isRateMetric){
-      if(v<=2) return{bg:'#1F8A70',text:'#effaf4'};
-      if(v<=4) return{bg:'#57A389',text:'#f5fbf7'};
-      if(v<=6) return{bg:'#D99A2B',text:'#2F2A13'};
-      if(v<=9) return{bg:'#C28528',text:'#2B230F'};
-      if(v<=12)return{bg:'#C44536',text:'#fff4f2'};
-      return       {bg:'#9E2A2F',text:'#fff3f4'};
+      if(v<=2) return{bg:'#064e3b',text:'#6ee7b7'};
+      if(v<=4) return{bg:'#065f46',text:'#34d399'};
+      if(v<=6) return{bg:'#78350f',text:'#fcd34d'};
+      if(v<=9) return{bg:'#92400e',text:'#fbbf24'};
+      if(v<=12)return{bg:'#7f1d1d',text:'#fca5a5'};
+      return       {bg:'#991b1b',text:'#f87171'};
     }
-    if(v>=97)return{bg:'#1F8A70',text:'#effaf4'};
-    if(v>=95)return{bg:'#2F967A',text:'#f3fbf7'};
-    if(v>=93)return{bg:'#48AB89',text:'#f5fbf8'};
-    if(v>=90)return{bg:'#D99A2B',text:'#2F2A13'};
-    if(v>=87)return{bg:'#C07A23',text:'#2D260F'};
-    if(v>=85)return{bg:'#C44536',text:'#fff4f2'};
-    return       {bg:'#9E2A2F',text:'#fff3f4'};
+    if(v>=97)return{bg:'#064e3b',text:'#6ee7b7'};
+    if(v>=95)return{bg:'#065f46',text:'#34d399'};
+    if(v>=93)return{bg:'#047857',text:'#6ee7b7'};
+    if(v>=90)return{bg:'#78350f',text:'#fcd34d'};
+    if(v>=87)return{bg:'#92400e',text:'#fbbf24'};
+    if(v>=85)return{bg:'#7f1d1d',text:'#fca5a5'};
+    return       {bg:'#991b1b',text:'#f87171'};
   }
   function fmtV(v){return isQtyMetric?fmtQ(v):v.toFixed(1)+'%';}
   function fmtQ(v){if(v>=1e6)return(v/1e6).toFixed(1)+'jt';if(v>=1e3)return(v/1e3).toFixed(1)+'rb';return Math.round(v).toString();}
 
   let html=`
   <style>
-  #page-heatmap{background:linear-gradient(180deg,#F8F7FC 0%,#F2F0F8 100%);}
-  .exec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:20px;}
-  .exec-card{background:#221C4A;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:26px;position:relative;overflow:hidden;box-shadow:0 18px 40px rgba(34,28,74,0.12);min-height:176px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;}
-  .exec-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;border-radius:0 0 8px 0;background:transparent;}
-  .exec-card.green::before{background:#00D68F;}
-  .exec-card.red::before{background:#FF6B6B;}
-  .exec-card.amber::before{background:#FFC107;}
-  .exec-card.purple::before{background:#8B5CF6;}
-  .exec-card-title{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#E7E3FF;margin-bottom:12px;}
-  .exec-card-value{font-size:34px;font-weight:800;line-height:1.05;color:#FFFFFF;margin-bottom:10px;}
-  .exec-card-sub{font-size:14px;font-weight:600;color:#D8D2FF;line-height:1.25;margin-bottom:10px;}
-  .exec-card-note{font-size:13px;font-weight:700;line-height:1.3;}
-  .exec-card-note.success{color:#98FFDE;}
-  .exec-card-note.danger{color:#FF9CA8;}
-  .exec-card-note.warn{color:#FFE08C;}
-  .exec-card-note.accent{color:#C8B0FF;}
-  .exec-card-bottom{font-size:11px;color:#A9A3C9;opacity:0.95;}
   .hm-wrap{overflow-x:auto;}
-  .hm-tbl{border-collapse:separate;border-spacing:0;font-size:12px;min-width:700px;}
-  .hm-th{padding:8px 12px;text-align:center;color:#6F6C8C;font-size:11px;font-weight:700;white-space:nowrap;background:#F8F7FC;border-bottom:2px solid #E5E1F0;}
-  .hm-th.rank-col{position:sticky;left:0;z-index:3;background:#F8F7FC;text-align:left;min-width:72px;border-right:2px solid #E5E1F0;}
-  .hm-th.marketplace-col{position:sticky;left:72px;z-index:2;text-align:left;min-width:170px;border-right:2px solid #E5E1F0;}
+  .hm-tbl{border-collapse:separate;border-spacing:0;font-size:11.5px;min-width:600px;}
+  .hm-th{padding:6px 10px;text-align:center;color:var(--text2);font-size:10px;font-weight:600;white-space:nowrap;background:var(--card);border-bottom:2px solid var(--border);}
+  .hm-th:first-child{text-align:left;min-width:130px;border-right:2px solid var(--border);position:sticky;left:0;background:var(--card);z-index:2;}
   .hm-th.latest{color:var(--blue);font-weight:700;}
-  .hm-rank{padding:12px 10px 12px 14px;font-weight:700;font-size:12px;background:#F8F7FC;color:#3C3B5F;position:sticky;left:0;z-index:2;border-right:2px solid #E5E1F0;}
-  .hm-rl{padding:12px 12px 12px 14px;font-weight:600;font-size:12px;border-right:2px solid #E5E1F0;border-bottom:1px solid #E5E1F0;background:#F8F7FC;position:sticky;left:72px;z-index:1;white-space:nowrap;color:#2F2D4B;}
-  .hm-rl .rl-sub{display:block;font-size:10px;color:#7C7A96;font-family:monospace;margin-top:4px;}
-  .hm-cell{padding:0;border-bottom:1px solid rgba(97,92,148,0.12);border-right:1px solid rgba(97,92,148,0.1);cursor:pointer;transition:transform 0.15s,filter 0.15s;min-width:86px;position:relative;}
-  .hm-cell:hover{filter:brightness(1.05);transform:translateY(-1px);}
+  .hm-rl{padding:10px 12px 10px 8px;font-weight:600;font-size:12px;border-right:2px solid var(--border);border-bottom:1px solid var(--border);background:#faf9ff;position:sticky;left:0;z-index:1;white-space:nowrap;}
   .hm-rl .rl-sub{display:block;font-size:9px;color:var(--text2);font-family:monospace;margin-top:2px;}
   .hm-cell{padding:0;border-bottom:1px solid rgba(0,0,0,0.1);border-right:1px solid rgba(0,0,0,0.08);cursor:pointer;transition:filter 0.12s;min-width:72px;position:relative;}
   .hm-cell:hover{filter:brightness(1.2);z-index:1;}
@@ -793,64 +716,17 @@ function renderHeatmap(){
   .hm-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a0a2e;}
   .tt-r{display:flex;justify-content:space-between;gap:14px;margin-bottom:2px;font-size:10px;}
   .tt-k{color:#8b82b0;}.tt-v{font-weight:600;}
-  .hm-tot-row .hm-rank{background:#F8F7FC;color:#3C3B5F;}
-  .hm-tot-row .hm-rl{color:#2F2D4B;border-top:2px solid #E5E1F0;font-weight:700;}
-  .hm-tot-row .hm-cell{border-top:2px solid rgba(97,92,148,0.18);} 
-  .hm-avg-cell{text-align:center;padding:8px 10px;border-left:4px solid #6D4AFF;border-bottom:1px solid rgba(97,92,148,0.12);background:#EEF2FF;font-weight:700;position:sticky;right:0;z-index:3;color:#1F2957;min-width:110px;}
-  .hm-current-week-header{background:#F3E8FF;border-left:3px solid #7C3AED;border-right:3px solid #7C3AED;color:#4A2B7A;}
-  .hm-current-week-cell-overlay{background:linear-gradient(rgba(243,232,255,0.28),rgba(243,232,255,0.28)), var(--cell-bg);} 
-  .hm-na{color:#7C7A96;font-weight:600;font-family:monospace}
-  .hm-avg-header{position:sticky;right:0;z-index:4;background:#EEF2FF;font-weight:800;border-left:4px solid #6D4AFF;color:#1F2957;padding:8px 10px;}
-  .legend-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:10px;color:#7C7A96;}
-  /* ALL MP summary row */
-  .hm-tot-row{background:#F8FAFC;font-weight:700;border-top:4px solid #6D4AFF;}
-  .hm-subtitle{font-size:12px;color:#7C7A96;margin-top:4px;line-height:1.4;}
-  #page-heatmap .filter-bar{padding:14px 18px;gap:14px;align-items:center;}
-  #page-heatmap .filter-item{margin-bottom:0;}
-  #page-heatmap .filter-bar-label{margin-right:12px;}
-  #page-heatmap .btn-reset{margin-left:auto;}
+  .hm-tot-row .hm-rl{color:var(--blue);border-top:2px solid var(--border);font-weight:700;}
+  .hm-tot-row .hm-cell{border-top:2px solid var(--border);}
+  .hm-avg-cell{text-align:center;padding:0;border-left:2px solid var(--border);border-bottom:1px solid var(--border);}
+  .legend-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;font-size:10px;color:var(--text2);}
   .leg-swatch{display:flex;gap:2px;align-items:center;}
   .leg-box{width:16px;height:12px;border-radius:2px;}
   </style>
   <div class="kpi-matrix-card">
     <div class="kpi-matrix-header">
-      <div>
-        <div class="kpi-matrix-title">🟥 ${metricLabel} Heatmap — Week × Marketplace</div>
-        <div class="hm-subtitle">Performance Distribution by Week</div>
-      </div>
+      <div class="kpi-matrix-title">🟥 ${metricLabel} Heatmap — Week × Marketplace</div>
       <span class="kpi-week-badge">Wk ${displayWeeks[0]} → Wk ${latestWk} · ${displayWeeks.length} weeks</span>
-    </div>
-    <div class="exec-cards">
-      <div class="exec-card orange">
-        <div class="exec-card-title">AVG SL — ALL MP</div>
-        <div class="exec-card-value">${fmtPct(avgSl)}</div>
-        <div class="exec-card-note ${slNoteClass}">${slTrend}</div>
-        <div class="exec-card-bottom">Target: ${targetSL}% · Wk ${latestWk}</div>
-      </div>
-      <div class="exec-card green">
-        <div class="exec-card-title">🏆 BEST MP — WK CURRENT</div>
-        <div class="exec-card-value">${bestMarket.mp}</div>
-        <div class="exec-card-sub">${bestMarket.latest!==-Infinity?formatMetricValue(bestMarket.latest):'—'} ${metricLabel}</div>
-        <div class="exec-card-note success">${bestDeltaText?`▲ +${Math.abs(parseFloat(bestDeltaText)).toFixed(1)}% vs Wk ${prevWk}`:'No prior week'}</div>
-      </div>
-      <div class="exec-card red">
-        <div class="exec-card-title">⚠ WORST MP — WK CURRENT</div>
-        <div class="exec-card-value">${worstMarket.mp}</div>
-        <div class="exec-card-sub">${worstMarket.latest!==Infinity?formatMetricValue(worstMarket.latest):'—'} ${metricLabel}</div>
-        <div class="exec-card-note danger">${worstDeltaText?`▼ ${Math.abs(parseFloat(worstDeltaText)).toFixed(1)}% vs Wk ${prevWk}`:'No prior week'}</div>
-      </div>
-      <div class="exec-card amber">
-        <div class="exec-card-title">Critical Marketplace</div>
-        <div class="exec-card-value">${belowTargetCount} Marketplace</div>
-        <div class="exec-card-note warn">Below Target</div>
-        <div class="exec-card-bottom">SL &lt; ${targetSL}% in latest week</div>
-      </div>
-      <div class="exec-card purple">
-        <div class="exec-card-title">Most Improved MP</div>
-        <div class="exec-card-value">${mostImproved.mp}</div>
-        <div class="exec-card-sub">${mostImproved.delta>0?`▲ +${mostImproved.delta.toFixed(1)}%`:'—'}</div>
-        <div class="exec-card-note accent">vs Wk ${prevWk || 'n/a'}</div>
-      </div>
     </div>
     <div class="legend-row">
       <span>Legend:</span>
@@ -865,27 +741,23 @@ function renderHeatmap(){
       &nbsp;&nbsp;
       <span>▲▼ = WoW delta · angka bawah = total qty</span>
     </div>
-    <div style="margin-top:6px;text-align:right;color:#6b6a85;font-size:12px">Ranking: ${slCol? 'Avg SL' : 'Avg '+metricLabel}</div>
     <div class="hm-wrap"><table class="hm-tbl"><thead><tr>
-      <th class="hm-th rank-col">Rank</th>
-      <th class="hm-th marketplace-col">Marketplace</th>`;
+      <th class="hm-th">Marketplace</th>`;
 
   displayWeeks.forEach(w=>{
     const isLast=String(w)===String(latestWk);
-    html+=`<th class="hm-th ${isLast?'latest hm-current-week-header':''}">${isLast?'★ ':''}Wk ${w}</th>`;
+    html+=`<th class="hm-th ${isLast?'latest':''}">${isLast?'★ ':''}Wk ${w}</th>`;
   });
-  html+=`<th class="hm-th hm-current-week-header hm-avg-header" style="border-left:4px solid #6D4AFF;color:#1F2957">Avg</th></tr></thead><tbody>`;
+  html+=`<th class="hm-th" style="border-left:2px solid var(--border);color:var(--blue)">Avg</th></tr></thead><tbody>`;
 
-  const orderedMPs = slCol ? [...rankedMPs.filter(m=>filteredMPs.includes(m)), ...filteredMPs.filter(m=>!rankedMPs.includes(m))] : filteredMPs;
-  orderedMPs.forEach(mp=>{
+  filteredMPs.forEach(mp=>{
     const vals=displayWeeks.map(w=>cell[`${mp}__${w}`]?.v||0);
     const qtys=displayWeeks.map(w=>cell[`${mp}__${w}`]?.qty||0);
     const nonZero=vals.filter(v=>v>0);
     const avg=nonZero.length?(nonZero.reduce((a,b)=>a+b,0)/nonZero.length):0;
     const totQty=qtys.reduce((a,b)=>a+b,0);
     const {bg:aBg,text:aTxt}=cellColor(avg);
-    const rank = rankIndex[mp]||'-';
-    html+=`<tr><td class="hm-rank">${rankLabel(rank)}</td><td class="hm-rl marketplace-col">${mp}<span class="rl-sub">avg ${isQtyMetric?fmtQ(avg):avg.toFixed(1)+'%'} · ${fmtQ(totQty)}</span></td>`;
+    html+=`<tr><td class="hm-rl">${mp}<span class="rl-sub">avg ${isQtyMetric?fmtQ(avg):avg.toFixed(1)+'%'} · ${fmtQ(totQty)}</span></td>`;
     vals.forEach((v,i)=>{
       const prev=i>0?vals[i-1]:null;
       const d=(prev!==null&&v>0&&prev>0)?(v-prev):null;
@@ -893,38 +765,28 @@ function renderHeatmap(){
       const dStr=d!==null?(d>=0?`▲ +${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`:`▼ ${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`):'';
       const dColor=d!==null?((!isRateMetric&&d>=0)||(isRateMetric&&d<=0)?'#6ee7b7':'#fca5a5'):'transparent';
       const isLast=String(displayWeeks[i])===String(latestWk);
-      const overlayStyle = isLast ? `background:linear-gradient(rgba(243,232,255,0.28),rgba(243,232,255,0.28)), ${bg}; border-left:3px solid #7C3AED; border-right:3px solid #7C3AED;` : `background:${bg};`;
-      const status = v>0 ? (isRateMetric ? (v<=4?'✅ Good':v<=9?'⚠ Warning':'🚨 Critical') : (v>=95?'✅ Good':v>=85?'⚠ Warning':'🚨 Critical')) : 'N/A';
-      const cellValue = v>0 ? fmtV(v) : '<span class="hm-na">N/A</span>';
-      const qtyValue = qtys[i]>0 ? fmtQ(qtys[i]) : '<span class="hm-na">N/A</span>';
-      const targetDisplay = isQtyMetric ? '-' : targetSL + '%';
-      const gapDisplay = (!isQtyMetric && v>0) ? ((v - targetSL)>=0?'+':'') + (v - targetSL).toFixed(1) + '%' : 'N/A';
-      const rankForCell = rankIndex[mp] || '-';
-      const noteNoData = v>0 ? '' : `<div class="tt-r"><span class="tt-k">Note</span><span class="tt-v">No data available</span></div>`;
-      html+=`<td class="hm-cell" style="${overlayStyle}">
+      const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
+      const status=isRateMetric?(v<=4?'✅ Good':v<=9?'⚠ Warning':'🚨 Critical'):(v>=95?'✅ Good':v>=85?'⚠ Warning':'🚨 Critical');
+      html+=`<td class="hm-cell" style="background:${bg};${outline}">
         <div class="hm-inner">
-          <div class="hm-v" style="color:${text}">${cellValue}</div>
+          <div class="hm-v" style="color:${text}">${v>0?fmtV(v):'—'}</div>
           <div class="hm-d" style="color:${dColor}">${dStr}</div>
-          <div class="hm-q" style="color:${text}">${qtyValue}</div>
+          <div class="hm-q" style="color:${text}">${qtys[i]>0?fmtQ(qtys[i]):'—'}</div>
         </div>
         <div class="hm-tip">
           <div style="font-weight:700;margin-bottom:6px;color:#a78bfa">${mp} · Wk ${displayWeeks[i]}</div>
-          <div class="tt-r"><span class="tt-k">${metricLabel}</span><span class="tt-v" style="color:${text}">${cellValue}</span></div>
-          <div class="tt-r"><span class="tt-k">Target</span><span class="tt-v">${targetDisplay}</span></div>
-          <div class="tt-r"><span class="tt-k">Gap</span><span class="tt-v">${gapDisplay}</span></div>
-          <div class="tt-r"><span class="tt-k">WoW</span><span class="tt-v" style="color:${dColor}">${dStr||'N/A'}</span></div>
-          <div class="tt-r"><span class="tt-k">Total Qty</span><span class="tt-v">${qtyValue==='N/A'?qtyValue:qtys[i].toLocaleString('id-ID')}</span></div>
-          <div class="tt-r"><span class="tt-k">Rank</span><span class="tt-v">${rankForCell}</span></div>
-          <div class="tt-r"><span class="tt-k">Status</span><span class="tt-v" style="color:${text}">${status}</span></div>
-          ${noteNoData}
+          <div class="tt-r"><span class="tt-k">${metricLabel}</span><span class="tt-v" style="color:${text}">${v>0?fmtV(v):'—'}</span></div>
+          <div class="tt-r"><span class="tt-k">WoW</span><span class="tt-v" style="color:${dColor}">${dStr||'—'}</span></div>
+          <div class="tt-r"><span class="tt-k">Total Qty</span><span class="tt-v">${qtys[i].toLocaleString('id-ID')}</span></div>
+          ${!isQtyMetric?`<div class="tt-r"><span class="tt-k">Status</span><span class="tt-v" style="color:${text}">${v>0?status:'—'}</span></div>`:''}
         </div>
       </td>`;
     });
-    html+=`<td class="hm-avg-cell"><div class="hm-inner"><div class="hm-v">${avg>0?fmtV(avg):'<span class="hm-na">N/A</span>'}</div></div></td></tr>`;
+    html+=`<td class="hm-avg-cell" style="background:${aBg}"><div class="hm-inner"><div class="hm-v" style="color:${aTxt}">${avg>0?fmtV(avg):'—'}</div></div></td></tr>`;
   });
 
   // TOTAL ROW — FIX: use filteredMPs for aggregate
-  html+=`<tr class="hm-tot-row"><td class="hm-rank">—</td><td class="hm-rl marketplace-col" style="color:var(--blue)">ALL MP<span class="rl-sub">weighted avg</span></td>`;
+  html+=`<tr class="hm-tot-row"><td class="hm-rl" style="color:var(--blue)">ALL MP<span class="rl-sub">weighted avg</span></td>`;
   const totVals=displayWeeks.map(w=>{
     const rowVals=filteredMPs.map(mp=>cell[`${mp}__${w}`]?.v||0).filter(v=>v>0);
     return rowVals.length?(rowVals.reduce((a,b)=>a+b,0)/rowVals.length):0;
@@ -940,8 +802,8 @@ function renderHeatmap(){
     const dStr=d!==null?(d>=0?`▲ +${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`:`▼ ${isQtyMetric?fmtQ(Math.abs(d)):Math.abs(d).toFixed(1)+'%'}`):'';
     const dColor=d!==null?((!isRateMetric&&d>=0)||(isRateMetric&&d<=0)?'#6ee7b7':'#fca5a5'):'transparent';
     const isLast=String(displayWeeks[i])===String(latestWk);
-    const overlayStyle = isLast ? `background:linear-gradient(rgba(243,232,255,0.28),rgba(243,232,255,0.28)), ${bg}; border-left:3px solid #7C3AED; border-right:3px solid #7C3AED;` : `background:${bg};`;
-    html+=`<td class="hm-cell" style="${overlayStyle}"><div class="hm-inner"><div class="hm-v" style="color:${text};font-size:13px">${v>0?fmtV(v):'<span class="hm-na">N/A</span>'}</div><div class="hm-d" style="color:${dColor}">${dStr}</div><div class="hm-q" style="color:${text}">${totQtys[i]>0?fmtQ(totQtys[i]):'<span class="hm-na">N/A</span>'}</div></div></td>`;
+    const outline=isLast?'box-shadow:inset 0 0 0 2px rgba(91,63,168,0.6);':'';
+    html+=`<td class="hm-cell" style="background:${bg};${outline}"><div class="hm-inner"><div class="hm-v" style="color:${text};font-size:13px">${v>0?fmtV(v):'—'}</div><div class="hm-d" style="color:${dColor}">${dStr}</div><div class="hm-q" style="color:${text}">${totQtys[i]>0?fmtQ(totQtys[i]):'—'}</div></div></td>`;
   });
   html+=`<td class="hm-avg-cell" style="background:${gBg}"><div class="hm-inner"><div class="hm-v" style="color:${gTxt};font-size:13px">${grandAvg>0?fmtV(grandAvg):'—'}</div></div></td></tr></tbody></table></div></div>`;
 
@@ -951,85 +813,65 @@ function renderHeatmap(){
   // ── SPARKLINES SECTION ──
   let sparkHtml = `
 <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-top:14px;">
-  <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📈 SL% Trend per Marketplace</div>
-  <div style="font-size:10.5px;color:var(--text2);margin-bottom:14px;">Trend ${displayWeeks.length} minggu terakhir per marketplace. Warna titik akhir = status terkini.</div>
+  <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📈 SL% Trend per Marketplace — Mini Sparklines</div>
+  <div style="font-size:10.5px;color:var(--text2);margin-bottom:14px;">Trend ${displayWeeks.length} minggu terakhir. Warna titik akhir = status terkini.</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">`;
 
   filteredMPs.forEach(mp => {
-    const slColSpark = findCol(D.mp, ['servicelevel','sl%']);
-    const qtyColSpark = findCol(D.mp, ['totalqty','qty']);
-    const wkColSpark  = findCol(D.mp, ['week','minggu','wk']);
-    const mpColSpark  = findCol(D.mp, ['marketplace','platform','channel','mp','toko']);
-
-    const vals = displayWeeks.map(w => {
-      const mpRows = D.mp.filter(r => r[mpColSpark]===mp && String(r[wkColSpark])===String(w));
-      const slVals = mpRows.map(r => toN(r[slColSpark])).filter(v => v > 0);
-      return slVals.length ? +(slVals.reduce((a,b)=>a+b,0)/slVals.length).toFixed(2) : 0;
+    const slColSp = findCol(D.mp,['servicelevel','sl%']);
+    const wkColSp = findCol(D.mp,['week','minggu','wk']);
+    const mpColSp = findCol(D.mp,['marketplace','platform','channel','mp','toko']);
+    const vals = displayWeeks.map(w=>{
+      const r=D.mp.filter(x=>x[mpColSp]===mp&&String(x[wkColSp])===String(w));
+      const sv=r.map(x=>toN(x[slColSp])).filter(v=>v>0);
+      return sv.length?+(sv.reduce((a,b)=>a+b,0)/sv.length).toFixed(2):0;
     });
-
-    const latest = vals[vals.length - 1];
-    const prev   = vals[vals.length - 2] || 0;
-    const delta  = latest && prev ? (latest - prev) : null;
-    const trendUp = delta !== null ? delta >= 0 : null;
-
-    const latestColor = latest >= 95 ? '#1D9E75' : latest >= 85 ? '#e6944a' : '#e05b5b';
-    const statusLabel = latest >= 95 ? '✅ Good' : latest >= 85 ? '⚠ Warning' : '🚨 Critical';
-    const deltaStr = delta !== null
-      ? `${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta).toFixed(1)}% WoW`
-      : '—';
-    const deltaColor = trendUp === null ? 'var(--text2)' : trendUp ? '#1D9E75' : '#e05b5b';
-
-    // Build SVG sparkline
-    const W = 120, H = 40;
-    const nonZero = vals.filter(v => v > 0);
-    const minV = nonZero.length ? Math.max(50, Math.min(...nonZero) - 5) : 50;
-    const maxV2 = nonZero.length ? Math.min(100, Math.max(...nonZero) + 5) : 100;
-    const range = maxV2 - minV || 1;
-
-    const points = vals.map((v, i) => {
-      const x = vals.length > 1 ? (i / (vals.length - 1)) * W : W / 2;
-      const y = v > 0 ? H - ((v - minV) / range) * (H - 6) : H;
+    const latest=vals[vals.length-1]||0;
+    const prev=vals[vals.length-2]||0;
+    const delta=latest&&prev?latest-prev:null;
+    const lColor=latest>=95?'#1D9E75':latest>=85?'#e6944a':'#e05b5b';
+    const status=latest>=95?'✅ Good':latest>=85?'⚠ Warning':'🚨 Critical';
+    const dStr=delta!==null?`${delta>=0?'▲':'▼'} ${Math.abs(delta).toFixed(1)}% WoW`:'—';
+    const dColor=delta===null?'var(--text2)':delta>=0?'#1D9E75':'#e05b5b';
+    const W=120,H=40;
+    const nz=vals.filter(v=>v>0);
+    const minV=nz.length?Math.max(50,Math.min(...nz)-5):50;
+    const maxV2=nz.length?Math.min(100,Math.max(...nz)+5):100;
+    const rng=maxV2-minV||1;
+    const pts=vals.map((v,i)=>{
+      const x=vals.length>1?(i/(vals.length-1))*W:W/2;
+      const y=v>0?H-((v-minV)/rng)*(H-6):H;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     }).join(' ');
-
-    const dots = vals.map((v, i) => {
-      if (v === 0) return '';
-      const x = vals.length > 1 ? (i / (vals.length - 1)) * W : W / 2;
-      const y = H - ((v - minV) / range) * (H - 6);
-      const isLast = i === vals.length - 1;
-      const dotColor = v >= 95 ? '#1D9E75' : v >= 85 ? '#e6944a' : '#e05b5b';
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${isLast ? 4 : 2.5}" fill="${dotColor}" ${isLast ? `stroke="#fff" stroke-width="1.5"` : ''} />`;
+    const dots=vals.map((v,i)=>{
+      if(!v)return'';
+      const x=vals.length>1?(i/(vals.length-1))*W:W/2;
+      const y=H-((v-minV)/rng)*(H-6);
+      const isLast=i===vals.length-1;
+      const dc=v>=95?'#1D9E75':v>=85?'#e6944a':'#e05b5b';
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${isLast?4:2.5}" fill="${dc}" ${isLast?'stroke="#fff" stroke-width="1.5"':''} />`;
     }).join('');
-
-    // Area polygon
-    const areaPoints = vals.length > 1
-      ? `${points} ${W},${H} 0,${H}`
-      : `${W/2},${H-((vals[0]-minV)/range)*(H-6)} ${W},${H} 0,${H}`;
-
-    sparkHtml += `
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;">
+    const areaPts=vals.length>1?`${pts} ${W},${H} 0,${H}`:`${W/2},${H-((vals[0]||50-minV)/rng)*(H-6)} ${W},${H} 0,${H}`;
+    const uid=mp.replace(/[^a-zA-Z0-9]/g,'_');
+    sparkHtml += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;">
       <div style="flex:1;min-width:0;">
         <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${mp}</div>
-        <div style="font-size:18px;font-weight:800;color:${latestColor};line-height:1;">${latest > 0 ? latest.toFixed(1) + '%' : '—'}</div>
-        <div style="font-size:10px;margin-top:3px;color:${deltaColor};font-weight:600;">${deltaStr}</div>
-        <div style="font-size:9px;margin-top:2px;color:${latestColor}">${statusLabel}</div>
+        <div style="font-size:18px;font-weight:800;color:${lColor};line-height:1;">${latest>0?latest.toFixed(1)+'%':'—'}</div>
+        <div style="font-size:10px;margin-top:3px;color:${dColor};font-weight:600;">${dStr}</div>
+        <div style="font-size:9px;margin-top:2px;color:${lColor}">${status}</div>
       </div>
       <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="flex-shrink:0;">
-        <defs>
-          <linearGradient id="sg_${mp.replace(/[^a-zA-Z0-9]/g,'_')}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${latestColor}" stop-opacity="0.3"/>
-            <stop offset="100%" stop-color="${latestColor}" stop-opacity="0.02"/>
-          </linearGradient>
-        </defs>
-        <polygon points="${areaPoints}" fill="url(#sg_${mp.replace(/[^a-zA-Z0-9]/g,'_')})" />
-        <polyline points="${points}" fill="none" stroke="${latestColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs><linearGradient id="sg_${uid}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${lColor}" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="${lColor}" stop-opacity="0.02"/>
+        </linearGradient></defs>
+        <polygon points="${areaPts}" fill="url(#sg_${uid})" />
+        <polyline points="${pts}" fill="none" stroke="${lColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         ${dots}
       </svg>
     </div>`;
   });
-
   sparkHtml += `</div></div>`;
-
   document.getElementById('hmContent').innerHTML += sparkHtml;
 }
 
@@ -1518,6 +1360,514 @@ function renderCOD(){
   ]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:32,right:20,left:10,bottom:10}},interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},datalabels:{},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('id-ID')}`}}},scales:{x:{display:true,title:{display:true,text:'Marketplace',color:'#6b5b8a',font:{size:11,weight:'700'}}},yQty:{type:'linear',position:'left',beginAtZero:true,stacked:true,title:{display:true,text:'Qty Return/Cancel',color:'#e05b5b',font:{size:9,weight:'600'}},ticks:{color:'#e05b5b',callback:v=>fmtLabel(v)},grid:{color:'#e2daf2'}},yOrd:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:9,weight:'600'}},ticks:{color:'#5b3fa8',callback:v=>fmtLabel(v)},grid:{drawOnChartArea:false}},yOrd2:{type:'linear',position:'right',beginAtZero:true,offset:true,title:{display:true,text:'Total Order',color:'#e879a0',font:{size:9,weight:'600'}},ticks:{color:'#e879a0',callback:v=>v.toLocaleString('id-ID')},grid:{drawOnChartArea:false}}}}});
 }
 
+
+// ─── FORECAST & CAMPAIGN (3-EVENT FOCUS) ─────────────────────────────────────
+function renderForecast(){
+  const rows=D.daily;
+  if(!rows.length){document.getElementById('fcContent').innerHTML='<div class="error-state">Data Daily Trend belum tersedia.</div>';return;}
+  const dateCol=findCol(rows,['date','tanggal']);
+  const qtyCol =findCol(rows,['totalqty','qty']);
+  const ordCol =findCol(rows,['totalorder','order']);
+  if(!dateCol||!qtyCol){document.getElementById('fcContent').innerHTML='<div class="error-state">Kolom tanggal/qty tidak ditemukan.</div>';return;}
+
+  // ── 1. AGREGAT PER HARI ───────────────────────────────────────────────────
+  const dayMap={};
+  rows.forEach(r=>{
+    const d=r[dateCol];if(!d)return;
+    if(!dayMap[d])dayMap[d]={date:d,qty:0,ord:0};
+    dayMap[d].qty+=toN(r[qtyCol]);
+    dayMap[d].ord+=toN(r[ordCol]);
+  });
+  const days=Object.values(dayMap).sort((a,b)=>a.date.localeCompare(b.date));
+  if(days.length<8){document.getElementById('fcContent').innerHTML='<div class="error-state">Minimal 8 hari data diperlukan.</div>';return;}
+
+  // ── 2. AUTO DETECT FORECAST MONTH ────────────────────────────────────────
+  const lastDate=days[days.length-1].date;
+  const lastDt=new Date(lastDate);
+  let fcYear=lastDt.getFullYear();
+  let fcMonth=lastDt.getMonth()+2;
+  if(fcMonth>12){fcMonth=1;fcYear++;}
+  const fcMonthDays=new Date(fcYear,fcMonth,0).getDate();
+  const fcMonthName=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][fcMonth];
+  const fcMonthStr=String(fcMonth).padStart(2,'0');
+
+  // ── 3. SPIKE DETECTION ────────────────────────────────────────────────────
+  const SPIKE_THR=1.4;
+  const spikes=[];
+  for(let i=7;i<days.length;i++){
+    const avg7=days.slice(i-7,i).reduce((s,d)=>s+d.qty,0)/7;
+    if(avg7>0&&days[i].qty>=avg7*SPIKE_THR){
+      spikes.push({...days[i],avg7,ratio:days[i].qty/avg7,idx:i});
+    }
+  }
+
+  // ── 4. CLUSTER → CAMPAIGN EVENTS ─────────────────────────────────────────
+  const campaigns=[];
+  let si=0;
+  while(si<spikes.length){
+    const cluster=[spikes[si]];
+    let sj=si+1;
+    while(sj<spikes.length){
+      const gap=(new Date(spikes[sj].date)-new Date(cluster[cluster.length-1].date))/86400000;
+      if(gap<=3){cluster.push(spikes[sj]);sj++;}else break;
+    }
+    const peak=cluster.reduce((a,b)=>b.qty>a.qty?b:a);
+    campaigns.push({
+      start:cluster[0].date,end:cluster[cluster.length-1].date,
+      peakDate:peak.date,peakQty:peak.qty,
+      dur:Math.round((new Date(cluster[cluster.length-1].date)-new Date(cluster[0].date))/86400000)+1,
+      ratio:peak.ratio,
+      totalQty:cluster.reduce((s,d)=>s+d.qty,0)
+    });
+    si=sj;
+  }
+
+  // ── 5. STATISTIK HISTORI ──────────────────────────────────────────────────
+  const avgDur=campaigns.length?Math.round(campaigns.reduce((s,c)=>s+c.dur,0)/campaigns.length):2;
+  const avgRatio=campaigns.length?+(campaigns.reduce((s,c)=>s+c.ratio,0)/campaigns.length).toFixed(2):1.5;
+  const maxRatio=campaigns.length?Math.max(...campaigns.map(c=>c.ratio)):2;
+
+  // Hitung boost khusus untuk campaign tanggal kembar vs payday
+  // Campaign tanggal kembar biasanya spike lebih tinggi dari payday
+  const campRatios=campaigns.filter(c=>{
+    const dt=new Date(c.peakDate);
+    const mo=dt.getMonth()+1,dd=dt.getDate();
+    return Math.abs(dd-mo)<=2; // tanggal kembar (mis 7 Jul = 7.7)
+  });
+  const paydayRatios=campaigns.filter(c=>{
+    const dt=new Date(c.peakDate);
+    const dd=dt.getDate();
+    return dd<=5||dd>=24;
+  });
+  const campBoostBase=campRatios.length?+(campRatios.reduce((s,c)=>s+c.ratio,0)/campRatios.length).toFixed(2):avgRatio*1.2;
+  const paydayBoostBase=paydayRatios.length?+(paydayRatios.reduce((s,c)=>s+c.ratio,0)/paydayRatios.length).toFixed(2):avgRatio*0.85;
+
+  // ── 6. BASELINE BERSIH ────────────────────────────────────────────────────
+  const last30=days.slice(-30);
+  const last30Clean=last30.filter(d=>{
+    const idx=days.indexOf(d);
+    if(idx<7)return true;
+    const avg7=days.slice(idx-7,idx).reduce((s,x)=>s+x.qty,0)/7;
+    return d.qty<avg7*SPIKE_THR;
+  });
+  const baselineQty=last30Clean.length?Math.round(last30Clean.reduce((s,d)=>s+d.qty,0)/last30Clean.length):Math.round(last30.reduce((s,d)=>s+d.qty,0)/last30.length);
+  const baselineOrd=Math.round(last30.reduce((s,d)=>s+d.ord,0)/last30.length);
+
+  // ── 7. DOW SEASONALITY ────────────────────────────────────────────────────
+  const dowSums=[0,0,0,0,0,0,0],dowCounts=[0,0,0,0,0,0,0];
+  last30Clean.forEach(d=>{
+    const dow=new Date(d.date).getDay();
+    dowSums[dow]+=d.qty;dowCounts[dow]++;
+  });
+  const dowAvg=dowSums.map((s,i)=>dowCounts[i]?s/dowCounts[i]:baselineQty);
+  const dowGlobal=dowAvg.reduce((a,b)=>a+b,0)/7;
+  const dowMult=dowAvg.map(v=>dowGlobal>0?+(v/dowGlobal).toFixed(3):1);
+
+  // ── 8. DEFINISI 3 EVENT UNTUK BULAN FORECAST ─────────────────────────────
+  // Payday Awal: tgl 1 (H+1=2, H+2=3)
+  // Campaign tanggal kembar: dd=fcMonth (mis Juli=7 → tgl 7), H-1 s/d H+2
+  // Payday Akhir: tgl 25 (H-1=24, H+1=26, H+2=27)
+  const ddCamp=fcMonth; // 7.7 = tgl 7, 8.8 = tgl 8, dst
+  const ddPayAwal=1;
+  const ddPayAkhir=25;
+
+  // Boost decay: H-1=75%, H+1=60%, H+2=40% dari boost hari H
+  const boostDecay={'-1':0.75,'0':1.0,'+1':0.60,'+2':0.40};
+
+  const threeEvents=[
+    {
+      key:'payday_awal',
+      name:'Payday Awal Bulan',
+      type:'payday',
+      color:'#e6944a',
+      colorLight:'#fff7ed',
+      mainDD:ddPayAwal,
+      offsets:[0,1,2], // H+0, H+1, H+2
+      boostBase:paydayBoostBase,
+      desc:`${fcMonth}/${fcMonthStr}/tgl 1–3`
+    },
+    {
+      key:'campaign',
+      name:`${fcMonth}.${fcMonth} Campaign`,
+      type:'campaign',
+      color:'#e879a0',
+      colorLight:'#fdf4ff',
+      mainDD:ddCamp,
+      offsets:[-1,0,1,2], // H-1, H+0, H+1, H+2
+      boostBase:campBoostBase,
+      desc:`${fcMonth}.${fcMonth} · tgl ${ddCamp-1}–${ddCamp+2}`
+    },
+    {
+      key:'payday_akhir',
+      name:'Payday Akhir Bulan',
+      type:'payday',
+      color:'#5b3fa8',
+      colorLight:'#f0eef8',
+      mainDD:ddPayAkhir,
+      offsets:[-1,0,1,2], // H-1, H+0, H+1, H+2
+      boostBase:paydayBoostBase,
+      desc:`tgl ${ddPayAkhir-1}–${ddPayAkhir+2}`
+    }
+  ];
+
+  // ── 9. GENERATE FORECAST PER EVENT ───────────────────────────────────────
+  // Untuk setiap event, generate forecast per hari (H-1 s/d H+2)
+  function getEventDays(ev){
+    return ev.offsets.map(offset=>{
+      const dd=ev.mainDD+offset;
+      if(dd<1||dd>fcMonthDays)return null;
+      const ds=`${fcYear}-${fcMonthStr}-${String(dd).padStart(2,'0')}`;
+      const dt=new Date(ds);
+      const dow=dt.getDay();
+      const dowBoost=dowMult[dow]||1;
+      const decayKey=offset===0?'0':offset<0?'-1':offset===1?'+1':'+2';
+      const decay=boostDecay[decayKey]||0.4;
+      const boost=+(ev.boostBase*decay*dowBoost).toFixed(3);
+      const forecastQty=Math.round(baselineQty*boost);
+      const forecastOrd=Math.round(baselineOrd*boost);
+      const actual=dayMap[ds];
+      const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+      return{
+        date:ds,dd,offset,
+        offsetLabel:offset===0?'H-0':offset<0?`H${offset}`:`H+${offset}`,
+        dayName:dayNames[dow],
+        isWeekend:dow===0||dow===6,
+        forecastQty,forecastOrd,
+        actualQty:actual?actual.qty:null,
+        actualOrd:actual?actual.ord:null,
+        boost,
+        isMain:offset===0
+      };
+    }).filter(Boolean);
+  }
+
+  const eventDays=threeEvents.map(ev=>({...ev,days:getEventDays(ev)}));
+
+  // ── 10. FULL MONTH FORECAST (untuk bar chart) ─────────────────────────────
+  // Build map of campaign dates
+  const campDateMap={};
+  eventDays.forEach(ev=>{
+    ev.days.forEach(d=>{
+      if(!campDateMap[d.date]||d.isMain){
+        campDateMap[d.date]={boost:d.boost,name:ev.name,type:ev.type,color:ev.color,isMain:d.isMain,offsetLabel:d.offsetLabel};
+      }
+    });
+  });
+
+  const fullMonthFc=[];
+  for(let d=1;d<=fcMonthDays;d++){
+    const ds=`${fcYear}-${fcMonthStr}-${String(d).padStart(2,'0')}`;
+    const dt=new Date(ds);
+    const dow=dt.getDay();
+    const dowBoost=dowMult[dow]||1;
+    const campInfo=campDateMap[ds];
+    const boost=campInfo?campInfo.boost:+(dowBoost).toFixed(3);
+    const actual=dayMap[ds];
+    fullMonthFc.push({
+      date:ds,day:d,
+      forecastQty:Math.round(baselineQty*boost),
+      actualQty:actual?actual.qty:null,
+      isCampaign:!!campInfo,
+      isMain:campInfo?.isMain||false,
+      color:campInfo?.color||null,
+      type:campInfo?.type||'normal',
+      boost
+    });
+  }
+
+  const totalFcQty=fullMonthFc.reduce((s,d)=>s+d.forecastQty,0);
+  const peakFc=fullMonthFc.reduce((a,b)=>b.forecastQty>a.forecastQty?b:a);
+  const daysActual=fullMonthFc.filter(d=>d.actualQty!==null).length;
+
+  // Accuracy jika ada aktual
+  const accRows=fullMonthFc.filter(d=>d.actualQty!==null&&d.forecastQty>0);
+  const mape=accRows.length?+(accRows.reduce((s,d)=>s+Math.abs(d.actualQty-d.forecastQty)/d.forecastQty,0)/accRows.length*100).toFixed(1):null;
+
+  // ── 11. BUILD HTML ─────────────────────────────────────────────────────────
+  let html=`
+  <!-- HEADER BADGES -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+    <span style="background:#f0eef8;color:#5b3fa8;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #ddd6f8;">
+      🗓️ ${fcMonthName} ${fcYear}
+    </span>
+    <span style="background:#f0fff8;color:#1D9E75;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #a7f3d0;">
+      📊 Data s/d: ${lastDate}
+    </span>
+    ${mape!==null?`<span style="background:#fff7ed;color:#c2410c;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #fed7aa;">🎯 Akurasi: ${(100-mape).toFixed(1)}% (MAPE ${mape}%)</span>`:''}
+    <span style="background:#fdf4ff;color:#7c3aed;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #e9d5ff;">⚙️ Auto-detect · update tiap bulan</span>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #5b3fa8;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📊 Baseline Harian</div>
+      <div style="font-size:20px;font-weight:800;color:#5b3fa8;">${fmtN(baselineQty)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Avg 30h bersih · excl spike</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #1D9E75;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🔮 Forecast ${fcMonthName}</div>
+      <div style="font-size:20px;font-weight:800;color:#1D9E75;">${fmtN(totalFcQty)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${fcMonthDays} hari · ${daysActual>0?daysActual+' aktual':'-'}</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e879a0;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🎯 Peak Forecast</div>
+      <div style="font-size:20px;font-weight:800;color:#e879a0;">${fmtN(peakFc.forecastQty)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${peakFc.date}</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e6944a;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🚀 Avg Spike Histori</div>
+      <div style="font-size:20px;font-weight:800;color:#e6944a;">${avgRatio}×</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Campaign: ${campBoostBase.toFixed(1)}× · Payday: ${paydayBoostBase.toFixed(1)}×</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e6944a;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">⏱ Avg Durasi Spike</div>
+      <div style="font-size:20px;font-weight:800;color:#e6944a;">${avgDur} hari</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Dari ${campaigns.length} event histori</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e05b5b;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📦 Buffer Stok</div>
+      <div style="font-size:20px;font-weight:800;color:#e05b5b;">${fmtN(Math.round(baselineQty*(campBoostBase-1)*3+baselineQty*(paydayBoostBase-1)*3*2))}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Extra qty untuk 3 event</div>
+    </div>
+  </div>
+
+  <!-- 3 EVENT CARDS -->
+  <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">3 Campaign Event — ${fcMonthName} ${fcYear}</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">`;
+
+  eventDays.forEach(ev=>{
+    const totalEvQty=ev.days.reduce((s,d)=>s+d.forecastQty,0);
+    const totalEvOrd=ev.days.reduce((s,d)=>s+d.forecastOrd,0);
+    const mainDay=ev.days.find(d=>d.isMain)||ev.days[0];
+    html+=`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;border-top:3px solid ${ev.color};">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:10px;height:10px;border-radius:50%;background:${ev.color};flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">${ev.name}</div>
+          <div style="font-size:10px;color:var(--text2);">${ev.desc} · ${ev.days.length} hari</div>
+        </div>
+      </div>`;
+
+    ev.days.forEach(d=>{
+      const isMain=d.isMain;
+      const diff=d.actualQty!==null?d.actualQty-d.forecastQty:null;
+      const diffStr=diff!==null?(diff>=0?`▲ +${fmtN(diff)}`:`▼ ${fmtN(Math.abs(diff))}`):null;
+      html+=`
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <span style="font-size:10px;font-weight:700;color:${isMain?ev.color:'var(--text2)'};">${d.offsetLabel}</span>
+          <span style="font-size:10px;color:var(--text2);margin-left:4px;">${d.date.slice(5)} ${d.dayName}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:700;color:${isMain?ev.color:'var(--text)'};">${fmtN(d.forecastQty)} qty</div>
+          <div style="font-size:10px;color:var(--text2);">${fmtN(d.forecastOrd)} order</div>
+          ${d.actualQty!==null?`<div style="font-size:9px;color:${diff>=0?'var(--green)':'var(--red)'};">${diffStr}</div>`:''}
+        </div>
+      </div>`;
+    });
+
+    html+=`
+      <div style="margin-top:10px;padding-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span style="font-size:10px;color:var(--text2);">Total ${ev.days.length} hari</span>
+          <span style="font-size:13px;font-weight:800;color:${ev.color};">${fmtN(totalEvQty)} qty</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:2px;">
+          <span style="font-size:10px;color:var(--text2);">Est. order</span>
+          <span style="font-size:11px;font-weight:700;color:var(--text2);">${fmtN(totalEvOrd)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:2px;">
+          <span style="font-size:10px;color:var(--text2);">Boost H-0</span>
+          <span style="font-size:11px;font-weight:700;color:${ev.color};">${mainDay.boost.toFixed(2)}×</span>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  html+=`</div>
+
+  <!-- BAR CHART: SEMUA HARI (highlight campaign) -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;margin-bottom:16px;">
+    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Forecast Qty — ${fcMonthName} ${fcYear} (31 hari)</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Bar warna = hari event · Bar abu = normal · Garis putus = baseline</div>
+    <div class="chart-legend" style="margin-bottom:10px;">
+      <div class="legend-item"><div class="legend-dot" style="background:#e879a0"></div>Campaign H-0</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e879a066"></div>Campaign H±1/2</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Payday H-0</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e6944a66"></div>Payday H±1/2</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1D9E75;border-radius:50%"></div>Aktual</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa855"></div>Normal</div>
+    </div>
+    <div style="position:relative;height:280px;"><canvas id="fcChart"></canvas></div>
+  </div>
+
+  <!-- DETAIL TABLE: HANYA HARI EVENT -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;margin-bottom:16px;">
+    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📋 Detail Forecast — Hari Campaign & Payday</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Hanya H-1 sampai H+2 per event · Aktual otomatis tampil jika data sudah ada</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="background:#f8f6ff;">
+          <th style="padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Tanggal</th>
+          <th style="padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Event</th>
+          <th style="padding:7px 10px;text-align:center;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Hari</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;">Forecast Qty</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;">Forecast Order</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;">Aktual Qty</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;">Aktual Order</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Δ Qty</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Boost</th>
+        </tr></thead>
+        <tbody>`;
+
+  eventDays.forEach(ev=>{
+    ev.days.forEach((d,i)=>{
+      const isMain=d.isMain;
+      const diff=d.actualQty!==null?d.actualQty-d.forecastQty:null;
+      const diffStr=diff!==null?(diff>=0?`▲ +${fmtN(diff)}`:`▼ ${fmtN(Math.abs(diff))}`):' — ';
+      const diffColor=diff!==null?(diff>=0?'var(--green)':'var(--red)'):'var(--text2)';
+      const acc=diff!==null&&d.forecastQty>0?` (${(100-Math.abs(diff)/d.forecastQty*100).toFixed(0)}%)`:' ';
+      let rowBg='#fff';
+      if(isMain)rowBg=ev.colorLight||'#fff3e0';
+      else if(i===0)rowBg='#fafaf0';
+      html+=`<tr style="background:${rowBg};border-bottom:1px solid var(--border);">
+        <td style="padding:7px 10px;font-weight:${isMain?'700':'600'};color:${isMain?ev.color:'var(--text)'};">${isMain?'🎯 ':''}${d.date}</td>
+        <td style="padding:7px 10px;"><span style="background:${ev.colorLight};color:${ev.color};font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;border:1px solid ${ev.color}33;">${ev.name}</span></td>
+        <td style="padding:7px 10px;text-align:center;font-weight:700;color:${isMain?ev.color:'var(--text2)'};">${d.offsetLabel}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:${isMain?'800':'600'};color:var(--blue);font-family:monospace;">${fmtN(d.forecastQty)}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:${isMain?'700':'600'};color:var(--blue);font-family:monospace;">${fmtN(d.forecastOrd)}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:700;color:var(--green);font-family:monospace;">${d.actualQty!==null?fmtN(d.actualQty):'—'}</td>
+        <td style="padding:7px 10px;text-align:right;color:var(--green);font-family:monospace;">${d.actualOrd!==null?fmtN(d.actualOrd):'—'}</td>
+        <td style="padding:7px 10px;text-align:right;color:${diffColor};font-weight:600;font-size:10px;">${diffStr}${d.actualQty!==null?`<br><span style="color:var(--text2);font-size:9px">${acc}</span>`:''}</td>
+        <td style="padding:7px 10px;text-align:right;color:${d.boost>1.3?ev.color:'var(--text2)'};">${d.boost.toFixed(2)}×</td>
+      </tr>`;
+      // Separator between events
+      if(i===ev.days.length-1){
+        html+=`<tr style="height:6px;background:var(--bg);"><td colspan="9"></td></tr>`;
+      }
+    });
+  });
+
+  html+=`</tbody></table></div></div>
+
+  <!-- REKOMENDASI STOK -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;">
+    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:12px;">💡 Rekomendasi Persiapan Stok — ${fcMonthName} ${fcYear}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">`;
+
+  eventDays.forEach(ev=>{
+    const mainDay=ev.days.find(d=>d.isMain)||ev.days[0];
+    const totalQty=ev.days.reduce((s,d)=>s+d.forecastQty,0);
+    const bufferExtra=Math.round(totalQty*0.15); // 15% buffer safety stock
+    html+=`
+      <div style="padding:12px;background:${ev.colorLight};border-radius:8px;border-left:3px solid ${ev.color};">
+        <div style="font-size:11px;font-weight:700;color:${ev.color};margin-bottom:8px;">${ev.name}</div>
+        <div style="font-size:10px;color:var(--text2);line-height:1.9;">
+          • Peak H-0: <strong style="color:${ev.color}">${fmtN(mainDay.forecastQty)}</strong> qty<br>
+          • Total ${ev.days.length} hari: <strong>${fmtN(totalQty)}</strong> qty<br>
+          • Buffer +15%: <strong>${fmtN(bufferExtra)}</strong> extra<br>
+          • Mulai siapkan: <strong>H-3 sebelum ${ev.days[0].date.slice(5)}</strong>
+        </div>
+      </div>`;
+  });
+
+  html+=`</div></div>`;
+
+  document.getElementById('fcContent').innerHTML=html;
+  document.getElementById('fcStatus').textContent=
+    `${fcMonthName} ${fcYear} · 3 event · Forecast total: ${fmtN(totalFcQty)} qty`+
+    (mape!==null?` · Akurasi: ${(100-mape).toFixed(1)}%`:'');
+
+  // ── 12. DRAW BAR CHART ────────────────────────────────────────────────────
+  killChart('fcChart');
+  const fcLabels=fullMonthFc.map(d=>String(d.day));
+  const fcForecastData=fullMonthFc.map(d=>d.forecastQty);
+  const fcActualData=fullMonthFc.map(d=>d.actualQty);
+  const fcBarBg=fullMonthFc.map(d=>{
+    if(!d.isCampaign)return'#5b3fa833';
+    const info=campDateMap[d.date];
+    if(!info)return'#5b3fa833';
+    if(info.isMain)return info.color+'dd';
+    return info.color+'66';
+  });
+  const fcBarBorder=fullMonthFc.map(d=>{
+    if(!d.isCampaign)return'#5b3fa855';
+    const info=campDateMap[d.date];
+    return info?info.color+'aa':'#5b3fa855';
+  });
+
+  charts['fcChart']=new Chart(document.getElementById('fcChart'),{
+    data:{
+      labels:fcLabels,
+      datasets:[
+        {type:'bar',label:'Forecast Qty',data:fcForecastData,
+          backgroundColor:fcBarBg,borderColor:fcBarBorder,
+          borderWidth:1.5,borderRadius:3,yAxisID:'yQty',order:3,
+          datalabels:{
+            display:ctx=>fullMonthFc[ctx.dataIndex].isMain,
+            anchor:'end',align:'end',
+            color:ctx=>{const d=fullMonthFc[ctx.dataIndex];return campDateMap[d.date]?.color||'#5b3fa8';},
+            font:{weight:'700',size:9},
+            formatter:(v,ctx)=>{
+              const d=fullMonthFc[ctx.dataIndex];
+              const info=campDateMap[d.date];
+              if(!info)return fmtLabel(v);
+              const nm=info.name.split(' ').slice(0,2).join(' ');
+              return nm+'\n'+fmtLabel(v);
+            }
+          }
+        },
+        {type:'line',label:'Aktual Qty',data:fcActualData,
+          borderColor:'#1D9E75',backgroundColor:'#1D9E7520',
+          borderWidth:2.5,
+          pointRadius:ctx=>fcActualData[ctx.dataIndex]!==null?4:0,
+          pointBackgroundColor:'#1D9E75',pointBorderColor:'#fff',pointBorderWidth:2,
+          tension:0.2,fill:false,yAxisID:'yQty',order:1,
+          datalabels:{display:false}
+        },
+        {type:'line',label:'Baseline',data:fullMonthFc.map(()=>baselineQty),
+          borderColor:'#e6944a',borderWidth:1.5,borderDash:[4,4],
+          pointRadius:0,fill:false,yAxisID:'yQty',order:4,
+          datalabels:{display:false}
+        }
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:10},padding:10}},
+        tooltip:{callbacks:{
+          title:ctx=>{
+            const d=fullMonthFc[ctx[0].dataIndex];
+            const info=campDateMap[d.date];
+            return d.date+(info?' · '+info.name+(info.isMain?' (H-0)':''):'');
+          },
+          label:c=>{
+            if(c.dataset.label==='Baseline')return` Baseline: ${fmtN(c.parsed.y)}/hari`;
+            if(c.parsed.y===null||c.parsed.y===undefined)return'';
+            return` ${c.dataset.label}: ${fmtN(Math.round(c.parsed.y))}`;
+          }
+        }},
+        datalabels:{}
+      },
+      scales:{
+        x:{display:true,
+          title:{display:true,text:`Tanggal ${fcMonthName} ${fcYear}`,color:'#6b5b8a',font:{size:11,weight:'700'}},
+          ticks:{font:{size:9}}
+        },
+        yQty:{type:'linear',position:'left',beginAtZero:true,
+          title:{display:true,text:'Total Qty',color:'#5b3fa8',font:{size:11,weight:'700'}},
+          ticks:{color:'#5b3fa8',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'jt':v>=1e3?(v/1e3).toFixed(0)+'rb':v},
+          grid:{color:'#e2daf2'}
+        }
+      }
+    }
+  });
+}
+
+
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 function showPage(p,el){
   document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
@@ -1533,6 +1883,7 @@ function showPage(p,el){
   else if(p==='daily')renderDaily();
   else if(p==='monthly')renderMonthly();
   else if(p==='cod')renderCOD();
+  else if(p==='forecast')renderForecast();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
@@ -1547,7 +1898,7 @@ async function init(){
     renderKPI();
   }catch(e){
     console.error(e);
-    ['kpiContent','mpContent','prodContent','catContent','hmContent','dailyContent','moveContent','monthlyContent','codContent'].forEach(id=>{
+    ['kpiContent','mpContent','prodContent','catContent','hmContent','dailyContent','moveContent','monthlyContent','codContent','fcContent'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.innerHTML=`<div class="error-state">⚠️ Gagal memuat data. Cek koneksi & refresh.<br><small>${e.message||''}</small></div>`;
     });
