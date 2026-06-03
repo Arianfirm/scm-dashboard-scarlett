@@ -1443,7 +1443,7 @@ function renderForecast(){
   const paydayBoostBase=paydayRatios.length?+(paydayRatios.reduce((s,c)=>s+c.ratio,0)/paydayRatios.length).toFixed(2):avgRatio*0.85;
 
   // ── 6. BASELINE BERSIH ────────────────────────────────────────────────────
-  const last30=days.slice(-30);
+  const last30=days.slice(-90);
   const last30Clean=last30.filter(d=>{
     const idx=days.indexOf(d);
     if(idx<7)return true;
@@ -1591,7 +1591,7 @@ function renderForecast(){
       🗓️ ${fcMonthName} ${fcYear}
     </span>
     <span style="background:#f0fff8;color:#1D9E75;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #a7f3d0;">
-      📊 Data s/d: ${lastDate}
+      📊 Baseline: 90 hari · Data s/d: ${lastDate}
     </span>
     ${mape!==null?`<span style="background:#fff7ed;color:#c2410c;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #fed7aa;">🎯 Akurasi: ${(100-mape).toFixed(1)}% (MAPE ${mape}%)</span>`:''}
     <span style="background:#fdf4ff;color:#7c3aed;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #e9d5ff;">⚙️ Auto-detect · update tiap bulan</span>
@@ -1602,7 +1602,7 @@ function renderForecast(){
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #5b3fa8;">
       <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📊 Baseline Harian</div>
       <div style="font-size:20px;font-weight:800;color:#5b3fa8;">${fmtN(baselineQty)}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Avg 30h bersih · excl spike</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Avg 90h bersih · excl spike</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #1D9E75;">
       <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🔮 Forecast ${fcMonthName}</div>
