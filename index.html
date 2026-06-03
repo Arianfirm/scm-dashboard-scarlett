@@ -947,6 +947,90 @@ function renderHeatmap(){
 
   document.getElementById('hmContent').innerHTML=html;
   document.getElementById('hmStatus').textContent=`${filteredMPs.length} marketplace · ${displayWeeks.length} weeks · ${metricLabel}`;
+
+  // ── SPARKLINES SECTION ──
+  let sparkHtml = `
+<div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-top:14px;">
+  <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📈 SL% Trend per Marketplace</div>
+  <div style="font-size:10.5px;color:var(--text2);margin-bottom:14px;">Trend ${displayWeeks.length} minggu terakhir per marketplace. Warna titik akhir = status terkini.</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">`;
+
+  filteredMPs.forEach(mp => {
+    const slColSpark = findCol(D.mp, ['servicelevel','sl%']);
+    const qtyColSpark = findCol(D.mp, ['totalqty','qty']);
+    const wkColSpark  = findCol(D.mp, ['week','minggu','wk']);
+    const mpColSpark  = findCol(D.mp, ['marketplace','platform','channel','mp','toko']);
+
+    const vals = displayWeeks.map(w => {
+      const mpRows = D.mp.filter(r => r[mpColSpark]===mp && String(r[wkColSpark])===String(w));
+      const slVals = mpRows.map(r => toN(r[slColSpark])).filter(v => v > 0);
+      return slVals.length ? +(slVals.reduce((a,b)=>a+b,0)/slVals.length).toFixed(2) : 0;
+    });
+
+    const latest = vals[vals.length - 1];
+    const prev   = vals[vals.length - 2] || 0;
+    const delta  = latest && prev ? (latest - prev) : null;
+    const trendUp = delta !== null ? delta >= 0 : null;
+
+    const latestColor = latest >= 95 ? '#1D9E75' : latest >= 85 ? '#e6944a' : '#e05b5b';
+    const statusLabel = latest >= 95 ? '✅ Good' : latest >= 85 ? '⚠ Warning' : '🚨 Critical';
+    const deltaStr = delta !== null
+      ? `${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta).toFixed(1)}% WoW`
+      : '—';
+    const deltaColor = trendUp === null ? 'var(--text2)' : trendUp ? '#1D9E75' : '#e05b5b';
+
+    // Build SVG sparkline
+    const W = 120, H = 40;
+    const nonZero = vals.filter(v => v > 0);
+    const minV = nonZero.length ? Math.max(50, Math.min(...nonZero) - 5) : 50;
+    const maxV2 = nonZero.length ? Math.min(100, Math.max(...nonZero) + 5) : 100;
+    const range = maxV2 - minV || 1;
+
+    const points = vals.map((v, i) => {
+      const x = vals.length > 1 ? (i / (vals.length - 1)) * W : W / 2;
+      const y = v > 0 ? H - ((v - minV) / range) * (H - 6) : H;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+
+    const dots = vals.map((v, i) => {
+      if (v === 0) return '';
+      const x = vals.length > 1 ? (i / (vals.length - 1)) * W : W / 2;
+      const y = H - ((v - minV) / range) * (H - 6);
+      const isLast = i === vals.length - 1;
+      const dotColor = v >= 95 ? '#1D9E75' : v >= 85 ? '#e6944a' : '#e05b5b';
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${isLast ? 4 : 2.5}" fill="${dotColor}" ${isLast ? `stroke="#fff" stroke-width="1.5"` : ''} />`;
+    }).join('');
+
+    // Area polygon
+    const areaPoints = vals.length > 1
+      ? `${points} ${W},${H} 0,${H}`
+      : `${W/2},${H-((vals[0]-minV)/range)*(H-6)} ${W},${H} 0,${H}`;
+
+    sparkHtml += `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${mp}</div>
+        <div style="font-size:18px;font-weight:800;color:${latestColor};line-height:1;">${latest > 0 ? latest.toFixed(1) + '%' : '—'}</div>
+        <div style="font-size:10px;margin-top:3px;color:${deltaColor};font-weight:600;">${deltaStr}</div>
+        <div style="font-size:9px;margin-top:2px;color:${latestColor}">${statusLabel}</div>
+      </div>
+      <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="flex-shrink:0;">
+        <defs>
+          <linearGradient id="sg_${mp.replace(/[^a-zA-Z0-9]/g,'_')}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${latestColor}" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="${latestColor}" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+        <polygon points="${areaPoints}" fill="url(#sg_${mp.replace(/[^a-zA-Z0-9]/g,'_')})" />
+        <polyline points="${points}" fill="none" stroke="${latestColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        ${dots}
+      </svg>
+    </div>`;
+  });
+
+  sparkHtml += `</div></div>`;
+
+  document.getElementById('hmContent').innerHTML += sparkHtml;
 }
 
 // ─── MONTHLY OVERVIEW ────────────────────────────────────────────────────────
