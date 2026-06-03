@@ -1443,40 +1443,15 @@ function renderForecast(){
   const paydayBoostBase=paydayRatios.length?+(paydayRatios.reduce((s,c)=>s+c.ratio,0)/paydayRatios.length).toFixed(2):avgRatio*0.85;
 
   // ── 6. BASELINE BERSIH ────────────────────────────────────────────────────
-  const last30=days.slice(-90);
+  const last30=days.slice(-30);
   const last30Clean=last30.filter(d=>{
     const idx=days.indexOf(d);
     if(idx<7)return true;
     const avg7=days.slice(idx-7,idx).reduce((s,x)=>s+x.qty,0)/7;
     return d.qty<avg7*SPIKE_THR;
   });
-  // Baseline bersih dari 90 hari
-  const baselineQtyRaw=last30Clean.length?Math.round(last30Clean.reduce((s,d)=>s+d.qty,0)/last30Clean.length):Math.round(last30.reduce((s,d)=>s+d.qty,0)/last30.length);
-  const baselineOrdRaw=Math.round(last30.reduce((s,d)=>s+d.ord,0)/last30.length);
-
-  // Trend adjustment: hitung growth rate dari data bersih
-  // Bagi 90 hari bersih jadi 3 periode (masing-masing 30 hari), hitung slope
-  const cleanDays=last30.filter(d=>{
-    const idx=days.indexOf(d);
-    if(idx<7)return true;
-    const avg7=days.slice(idx-7,idx).reduce((s,x)=>s+x.qty,0)/7;
-    return d.qty<avg7*SPIKE_THR;
-  });
-  const p1=cleanDays.slice(0,Math.floor(cleanDays.length/3));
-  const p2=cleanDays.slice(Math.floor(cleanDays.length/3),Math.floor(cleanDays.length*2/3));
-  const p3=cleanDays.slice(Math.floor(cleanDays.length*2/3));
-  const avg1=p1.length?p1.reduce((s,d)=>s+d.qty,0)/p1.length:baselineQtyRaw;
-  const avg2=p2.length?p2.reduce((s,d)=>s+d.qty,0)/p2.length:baselineQtyRaw;
-  const avg3=p3.length?p3.reduce((s,d)=>s+d.qty,0)/p3.length:baselineQtyRaw;
-
-  // Growth rate per periode (dari p1→p3), cap antara -20% sampai +30%
-  const growthTotal=avg1>0?(avg3-avg1)/avg1:0;
-  const growthCapped=Math.max(-0.20,Math.min(0.30,growthTotal));
-  // Proyeksikan 1 periode ke depan (forecast month)
-  const trendMultiplier=+(1+(growthCapped/2)).toFixed(3);
-
-  const baselineQty=Math.round(baselineQtyRaw*trendMultiplier);
-  const baselineOrd=Math.round(baselineOrdRaw*trendMultiplier);
+  const baselineQty=last30Clean.length?Math.round(last30Clean.reduce((s,d)=>s+d.qty,0)/last30Clean.length):Math.round(last30.reduce((s,d)=>s+d.qty,0)/last30.length);
+  const baselineOrd=Math.round(last30.reduce((s,d)=>s+d.ord,0)/last30.length);
 
   // ── 7. DOW SEASONALITY ────────────────────────────────────────────────────
   const dowSums=[0,0,0,0,0,0,0],dowCounts=[0,0,0,0,0,0,0];
@@ -1616,7 +1591,7 @@ function renderForecast(){
       🗓️ ${fcMonthName} ${fcYear}
     </span>
     <span style="background:#f0fff8;color:#1D9E75;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #a7f3d0;">
-      📊 Baseline: 90 hari · Data s/d: ${lastDate}
+      📊 Data s/d: ${lastDate}
     </span>
     ${mape!==null?`<span style="background:#fff7ed;color:#c2410c;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #fed7aa;">🎯 Akurasi: ${(100-mape).toFixed(1)}% (MAPE ${mape}%)</span>`:''}
     <span style="background:#fdf4ff;color:#7c3aed;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #e9d5ff;">⚙️ Auto-detect · update tiap bulan</span>
@@ -1627,7 +1602,7 @@ function renderForecast(){
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #5b3fa8;">
       <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📊 Baseline Harian</div>
       <div style="font-size:20px;font-weight:800;color:#5b3fa8;">${fmtN(baselineQty)}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Avg 90h · trend adj ${trendMultiplier.toFixed(2)}×</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Avg 30h bersih · excl spike</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #1D9E75;">
       <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🔮 Forecast ${fcMonthName}</div>
@@ -1932,4 +1907,4 @@ async function init(){
 init();
 </script>
 </body>
-</html>const last30=days.slice(-90);  // ← harusnya sudah -90
+</html>
