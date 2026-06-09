@@ -1477,8 +1477,12 @@ function renderForecast(){
     const dd=dt.getDate();
     return dd<=5||dd>=24;
   });
-  const campBoostBase=campRatios.length?+(campRatios.reduce((s,c)=>s+c.ratio,0)/campRatios.length).toFixed(2):avgRatio*1.2;
-  const paydayBoostBase=paydayRatios.length?+(paydayRatios.reduce((s,c)=>s+c.ratio,0)/paydayRatios.length).toFixed(2):avgRatio*0.85;
+  // Blend histori (40%) + aktual Juni (60%) — makin banyak bulan aktual,
+  // otomatis makin akurat karena histori campaigns bertambah
+  const campBoostHist=campRatios.length?+(campRatios.reduce((s,c)=>s+c.ratio,0)/campRatios.length).toFixed(2):avgRatio;
+  const campBoostBase=+(campBoostHist*0.4 + 2.85*0.6).toFixed(2); // 2.85 = aktual 6.6 Juni
+  const paydayBoostHist=paydayRatios.length?+(paydayRatios.reduce((s,c)=>s+c.ratio,0)/paydayRatios.length).toFixed(2):1.0;
+  const paydayBoostBase=+(paydayBoostHist*0.3 + 0.94*0.7).toFixed(2); // 0.94 = aktual payday Juni
 
   // ── 6. BASELINE BERSIH ────────────────────────────────────────────────────
   const last30=days.slice(-30);
@@ -1509,8 +1513,11 @@ function renderForecast(){
   const ddPayAwal=1;
   const ddPayAkhir=25;
 
-  // Boost decay: H-1=75%, H+1=60%, H+2=40% dari boost hari H
-  const boostDecay={'-1':0.75,'0':1.0,'+1':0.60,'+2':0.40};
+  // Decay berdasarkan aktual Juni 2026:
+  // Campaign: H-1=0.46, H+1=0.32, H+2=0.20 dari H-0
+  // Payday: flat sekitar baseline (H-0 aktual ~0.94x, bukan spike)
+  const boostDecayCamp={'-1':0.46,'0':1.0,'+1':0.32,'+2':0.20};
+  const boostDecayPay= {'-1':0.90,'0':1.0,'+1':1.00,'+2':0.90};
 
   const threeEvents=[
     {
@@ -1559,7 +1566,9 @@ function renderForecast(){
       const dow=dt.getDay();
       const dowBoost=dowMult[dow]||1;
       const decayKey=offset===0?'0':offset<0?'-1':offset===1?'+1':'+2';
-      const decay=boostDecay[decayKey]||0.4;
+      // Pakai decay berbeda untuk campaign vs payday
+      const decayTable=ev.type==='campaign'?boostDecayCamp:boostDecayPay;
+      const decay=decayTable[decayKey]||0.4;
       const boost=+(ev.boostBase*decay*dowBoost).toFixed(3);
       const forecastQty=Math.round(baselineQty*boost);
       const forecastOrd=Math.round(baselineOrd*boost);
