@@ -1394,8 +1394,8 @@ function renderForecast(){
   let fcYear=lastDt.getFullYear();
   let fcMonth=lastDt.getMonth()+2;
   if(fcMonth>12){fcMonth=1;fcYear++;}
-  const fcMonthDays=new Date(fcYear,fcMonth,0).getDate();
-  const fcMonthName=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][fcMonth];
+  let fcMonthDays=new Date(fcYear,fcMonth,0).getDate();
+  let fcMonthName=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][fcMonth];
   let fcMonthStr=String(fcMonth).padStart(2,'0');
 
   // Populate dropdown sekali saja
