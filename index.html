@@ -357,6 +357,13 @@ td.sl-bad{color:var(--red);font-weight:700;}
       <div><div class="page-title">🔮 Forecast & Campaign</div><div class="page-sub">Prediksi demand Juni & deteksi pola campaign dari histori harian</div></div>
       <div class="live-badge"><div class="dot"></div><span id="fcStatus">Menganalisis...</span></div>
     </div>
+    <div class="filter-bar">
+      <span class="filter-bar-label">🗓️ Bulan Forecast:</span>
+      <select id="fcMonthSel" class="filter-select" onchange="renderForecast()" style="min-width:160px;">
+        <option value="auto">Auto (bulan berikutnya)</option>
+      </select>
+      <span style="font-size:10px;color:var(--text2);">Pilih bulan histori untuk validasi akurasi</span>
+    </div>
     <div id="fcContent"><div class="loading-state"><div class="spinner"></div><div>Menganalisis pola campaign...</div></div></div>
   </div>
 
@@ -1389,7 +1396,38 @@ function renderForecast(){
   if(fcMonth>12){fcMonth=1;fcYear++;}
   const fcMonthDays=new Date(fcYear,fcMonth,0).getDate();
   const fcMonthName=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][fcMonth];
-  const fcMonthStr=String(fcMonth).padStart(2,'0');
+  let fcMonthStr=String(fcMonth).padStart(2,'0');
+
+  // Populate dropdown sekali saja
+  const fcSel=document.getElementById('fcMonthSel');
+  if(fcSel&&fcSel.options.length<=1){
+    const moNames=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const existingMonths=[...new Set(days.map(d=>d.date.slice(0,7)))].sort();
+    existingMonths.forEach(m=>{
+      const[y,mo]=m.split('-').map(Number);
+      const o=document.createElement('option');
+      o.value=m;o.textContent=`${moNames[mo]} ${y} (histori)`;
+      fcSel.appendChild(o);
+    });
+    const now=new Date();
+    for(let mo=now.getMonth()+1;mo<=12;mo++){
+      const y=now.getFullYear();
+      const key=`${y}-${String(mo).padStart(2,'0')}`;
+      if(existingMonths.includes(key))continue;
+      const o=document.createElement('option');
+      o.value=key;o.textContent=`${moNames[mo]} ${y}`;
+      fcSel.appendChild(o);
+    }
+  }
+  // Override semua variabel bulan jika user pilih manual
+  if(fcSel&&fcSel.value&&fcSel.value!=='auto'){
+    const[y,m]=fcSel.value.split('-').map(Number);
+    fcYear=y;
+    fcMonth=m;
+    fcMonthDays=new Date(y,m,0).getDate();
+    fcMonthName=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][m];
+    fcMonthStr=String(m).padStart(2,'0');
+  }
 
   // ── 3. SPIKE DETECTION ────────────────────────────────────────────────────
   const SPIKE_THR=1.4;
