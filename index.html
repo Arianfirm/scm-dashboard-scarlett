@@ -508,10 +508,10 @@ function renderMarketplace(){
   html+='</div><div class="chart-row">';
   html+=`<div class="chart-card"><div class="chart-title">🛒 Total per Marketplace</div><div class="chart-wrap"><canvas id="mpBar"></canvas></div></div>`;
   html+=`<div class="chart-card"><div class="chart-title">📅 Trend Mingguan</div><div class="chart-wrap"><canvas id="mpLine"></canvas></div></div></div>`;
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Marketplace × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto"><table><thead><tr><th>Marketplace</th>`;
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Marketplace × Week</div><div class="table-meta">${filtered.length} baris</div></div><div style="overflow-x:auto;"><table style="border-collapse:separate;border-spacing:0;"><thead><tr><th style="position:sticky;left:0;z-index:2;background:var(--card);width:200px;min-width:180px;max-width:220px;white-space:nowrap;">Marketplace</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  sm.forEach(mp=>{const tot=filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0);html+=`<tr><td style="font-weight:600">${mp}</td>`;sw.forEach(w=>{const v=filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0);html+=`<td class="num">${v>0?fmt(v,mpMetric):'—'}</td>`;});html+=`<td class="tot">${fmt(tot,mpMetric)}</td></tr>`;});
+  sm.forEach(mp=>{const tot=filtered.filter(r=>r[mpCol]===mp).reduce((s,r)=>s+toN(r[mpMetric]),0);html+=`<tr><td style="font-weight:600;position:sticky;left:0;z-index:1;background:var(--card);width:200px;min-width:180px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${mp}">${mp}</td>`;sw.forEach(w=>{const v=filtered.filter(r=>r[mpCol]===mp&&String(r[wkCol])===String(w)).reduce((s,r)=>s+toN(r[mpMetric]),0);html+=`<td class="num">${v>0?fmt(v,mpMetric):'—'}</td>`;});html+=`<td class="tot">${fmt(tot,mpMetric)}</td></tr>`;});
   html+='</tbody></table></div></div>';
   document.getElementById('mpContent').innerHTML=html;
   document.getElementById('mpStatus').textContent=`${sm.length} marketplace · ${sw.length} weeks`;
