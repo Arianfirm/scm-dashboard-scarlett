@@ -523,14 +523,29 @@ function renderMarketplace(){
 function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderMarketplace();}
 
 // ─── PRODUCT ─────────────────────────────────────────────────────────────────
+const PROD_METRICS=[
+  {key:'__net__',        label:'Total Order (Net) ⭐'},
+  {key:'Total Order',    label:'Total Order'},
+  {key:'Total Qty',      label:'Total Qty'},
+  {key:'Qty Delivered',  label:'Qty Delivered'},
+  {key:'Qty Dispatched', label:'Qty Dispatch'},
+  {key:'Qty Return',     label:'Qty Return'},
+  {key:'Qty Cancelled',  label:'Qty Cancelled'},
+  {key:'Return Rate %',  label:'Return Rate %'},
+  {key:'Cancel Rate %',  label:'Cancel Rate %'},
+];
 function renderProduct(){
   const rows=D.prod;if(!rows.length){document.getElementById('prodContent').innerHTML='<div class="error-state">Data Product belum tersedia.</div>';return;}
-  const wkCol=findCol(rows,['week','minggu','wk']);
+  const wkCol =findCol(rows,['week','minggu','wk']);
   const skuCol=findCol(rows,['sku','product','produk','name','nama','item','barang','kode']);
-  const mpCol=findCol(rows,['marketplace','platform','channel','mp','toko']);
+  const mpCol =findCol(rows,['marketplace','platform','channel','mp','toko']);
   const catCol=findCol(rows,['category','kategori','cat']);
-  const metrics=allCols(rows).filter(c=>c!==wkCol&&c!==skuCol&&c!==mpCol&&c!==catCol&&rows.some(r=>toN(r[c])!==0));
-  if(!prodMetric||!metrics.includes(prodMetric))prodMetric=metrics[0];
+  const delCol=findCol(rows,['qty delivered','delivered qty','delivered']);
+  const disCol=findCol(rows,['qty dispatched','qty dispatch','dispatched qty','dispatched']);
+  const validKeys=PROD_METRICS.map(m=>m.key);
+  if(!prodMetric||!validKeys.includes(prodMetric))prodMetric='__net__';
+  const curDef=PROD_METRICS.find(m=>m.key===prodMetric)||PROD_METRICS[0];
+  function getVal(r){return prodMetric==='__net__'?toN(r[delCol])+toN(r[disCol]):toN(r[prodMetric]);}
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
   const allMPs=mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
   const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
@@ -542,12 +557,12 @@ function renderProduct(){
   if(fCat!=='all'&&catCol)filtered=filtered.filter(r=>r[catCol]===fCat);
   const sw=[...new Set(filtered.map(r=>r[wkCol]))].sort((a,b)=>toN(a)-toN(b));
   const skuMap={};
-  filtered.forEach(r=>{const k=r[skuCol]||'(unknown)';if(!skuMap[k])skuMap[k]={sku:k,weeks:{},total:0};const v=toN(r[prodMetric]),wk=String(r[wkCol]);skuMap[k].weeks[wk]=(skuMap[k].weeks[wk]||0)+v;skuMap[k].total+=v;});
+  filtered.forEach(r=>{const k=r[skuCol]||'(unknown)';if(!skuMap[k])skuMap[k]={sku:k,weeks:{},total:0};const v=getVal(r),wk=String(r[wkCol]);skuMap[k].weeks[wk]=(skuMap[k].weeks[wk]||0)+v;skuMap[k].total+=v;});
   const skus=Object.values(skuMap).sort((a,b)=>b.total-a.total);
   let html=`<div class="metric-tabs" id="prodTabs">`;
-  metrics.forEach(m=>html+=`<div class="metric-tab ${m===prodMetric?'active':''}" onclick="prodSwitch('${m}',this)">${m}</div>`);
+  PROD_METRICS.forEach(m=>html+=`<div class="metric-tab ${m.key===prodMetric?'active':''}" onclick="prodSwitch('${m.key}',this)">${m.label}</div>`);
   html+='</div>';
-  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 10 SKU — ${prodMetric}</div><div class="chart-wrap"><canvas id="prodBar"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 20 SKU — ${curDef.label}</div><div class="chart-wrap"><canvas id="prodBar"></canvas></div></div>`;
   html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
@@ -556,8 +571,8 @@ function renderProduct(){
   document.getElementById('prodContent').innerHTML=html;
   document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
   killChart('prodBar');
-  const top10=skus.slice(0,10);
-  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top10.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top10.map(s=>s.total),backgroundColor:top10.map(()=>'#8a44ffbb'),borderColor:'#8a44ff',borderWidth:1.5,borderRadius:5,datalabels:{anchor:'end',align:'end',color:'#3f136a',font:{weight:'700',size:11},formatter:v=>fmtN(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{}},scales:{x:{beginAtZero:true,title:{display:true,text:prodMetric,color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>fmtN(v)}},y:{title:{display:true,text:'SKU / Product',color:'#6b5b8a',font:{size:11,weight:'700'}}}}}});
+  const top20=skus.slice(0,20);
+  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top20.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top20.map(s=>s.total),backgroundColor:top20.map(()=>'#8a44ffbb'),borderColor:'#8a44ff',borderWidth:1.5,borderRadius:5,datalabels:{anchor:'end',align:'end',color:'#3f136a',font:{weight:'700',size:11},formatter:v=>fmtN(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{}},scales:{x:{beginAtZero:true,title:{display:true,text:curDef.label,color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>fmtN(v)}},y:{title:{display:true,text:'SKU / Product',color:'#6b5b8a',font:{size:11,weight:'700'}}}}}});
 }
 function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
 
