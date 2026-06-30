@@ -570,7 +570,7 @@ function renderProduct(){
   let html=`<div class="metric-tabs" id="prodTabs">`;
   PROD_METRICS.forEach(m=>html+=`<div class="metric-tab ${m.key===prodMetric?'active':''}" onclick="prodSwitch('${m.key}',this)">${m.label}</div>`);
   html+='</div>';
-  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 20 SKU — ${curDef.label}</div><div class="chart-wrap" style="height:520px;"><canvas id="prodBar"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 20 SKU — ${curDef.label}</div><div class="chart-wrap" style="height:600px;"><canvas id="prodBar"></canvas></div></div>`;
   html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
@@ -580,7 +580,52 @@ function renderProduct(){
   document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
   killChart('prodBar');
   const top20=skus.slice(0,20);
-  charts['prodBar']=new Chart(document.getElementById('prodBar'),{type:'bar',data:{labels:top20.map(s=>s.sku.length>22?s.sku.slice(0,22)+'…':s.sku),datasets:[{data:top20.map(s=>s.total),backgroundColor:top20.map(()=>'#8a44ffbb'),borderColor:'#8a44ff',borderWidth:1.5,borderRadius:5,datalabels:{anchor:'end',align:'end',color:'#3f136a',font:{weight:'700',size:11},formatter:v=>fmtN(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{}},scales:{x:{beginAtZero:true,title:{display:true,text:curDef.label,color:'#6b5b8a',font:{size:11,weight:'700'}},ticks:{callback:v=>fmtN(v)}},y:{title:{display:true,text:'SKU / Product',color:'#6b5b8a',font:{size:11,weight:'700'}}}}}});
+  // Truncate label at 38 chars so Y-axis stays readable; tooltip shows full name
+  const truncLabel=s=>s.sku.length>38?s.sku.slice(0,38)+'…':s.sku;
+  charts['prodBar']=new Chart(document.getElementById('prodBar'),{
+    type:'bar',
+    data:{
+      labels:top20.map(truncLabel),
+      datasets:[{
+        data:top20.map(s=>s.total),
+        backgroundColor:top20.map(()=>'#8a44ffbb'),
+        borderColor:'#8a44ff',
+        borderWidth:1.5,
+        borderRadius:5,
+        datalabels:{anchor:'end',align:'end',color:'#3f136a',font:{weight:'700',size:11},formatter:v=>fmtN(v),display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      indexAxis:'y',
+      layout:{padding:{right:60}},
+      plugins:{
+        legend:{display:false},
+        datalabels:{},
+        tooltip:{
+          callbacks:{
+            title:ctx=>top20[ctx[0].dataIndex].sku
+          }
+        }
+      },
+      scales:{
+        x:{
+          beginAtZero:true,
+          title:{display:true,text:curDef.label,color:'#6b5b8a',font:{size:11,weight:'700'}},
+          ticks:{callback:v=>fmtN(v)}
+        },
+        y:{
+          ticks:{
+            font:{size:11},
+            crossAlign:'far',
+            padding:10
+          },
+          afterFit(axis){axis.width=220;}
+        }
+      }
+    }
+  });
 }
 function prodSwitch(m,el){prodMetric=m;document.querySelectorAll('#prodTabs .metric-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderProduct();}
 
