@@ -580,8 +580,20 @@ function renderProduct(){
   document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
   killChart('prodBar');
   const top20=skus.slice(0,20);
-  // Truncate label at 38 chars so Y-axis stays readable; tooltip shows full name
-  const truncLabel=s=>s.sku.length>38?s.sku.slice(0,38)+'…':s.sku;
+  // Smart label: strip "SCARLETT-" prefix, title-case segments, lowercase size tokens
+  // Tooltip (unchanged) always shows raw full SKU name
+  const _ABBR=new Set(['EDP','EDT','EAU','BB','CC','SPF','UV','ODP']);
+  function smartSkuLabel(raw){
+    const s=raw.replace(/^SCARLETT-/i,'');
+    return s.split('-').map(seg=>seg.trim()).filter(Boolean)
+      .map(seg=>seg.split(/\s+/).map(w=>{
+        if(!w) return '';
+        if(/^\d/.test(w)) return w.toLowerCase();          // e.g. 48X30ML → 48x30ml
+        if(_ABBR.has(w.toUpperCase())) return w.toUpperCase(); // EDP → EDP
+        return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase(); // title-case
+      }).join(' ')).join(' ');
+  }
+  const truncLabel=s=>{const lbl=smartSkuLabel(s.sku);return lbl.length>35?lbl.slice(0,35)+'…':lbl;};
   charts['prodBar']=new Chart(document.getElementById('prodBar'),{
     type:'bar',
     data:{
