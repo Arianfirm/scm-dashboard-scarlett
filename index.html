@@ -136,6 +136,14 @@ td.sl-bad{color:var(--red);font-weight:700;}
 .trend-btn[data-period="360"].active{background:#e6944a;border-color:#e6944a;}
 .trend-btn:hover:not(.active){border-color:currentColor;color:currentColor;}
 .chart-wrap.xtall{height:380px;}
+.prod-tbl{border-collapse:collapse;width:100%;min-width:600px;}
+.prod-tbl th{padding:11px 18px;font-size:11.5px;color:var(--text2);font-weight:700;border-bottom:2px solid var(--border);white-space:nowrap;background:var(--card);}
+.prod-tbl td{padding:10px 18px;border-bottom:1px solid var(--border);white-space:nowrap;font-size:12px;}
+.prod-tbl th:first-child{min-width:240px;}
+.prod-tbl th.wk-col{text-align:right;min-width:80px;color:var(--blue);}
+.prod-tbl th.tot-col{text-align:right;font-weight:700;color:var(--blue);}
+.prod-tbl tr:hover td{background:#f8f6ff;}
+.prod-tbl tr:last-child td{border-bottom:none;}
 </style>
 </head>
 <body>
@@ -524,9 +532,8 @@ function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-ta
 
 // ─── PRODUCT ─────────────────────────────────────────────────────────────────
 const PROD_METRICS=[
-  {key:'__net__',        label:'Total Order (Net) ⭐'},
-  {key:'Total Order',    label:'Total Order'},
-  {key:'Total Qty',      label:'Total Qty'},
+  {key:'__net__',        label:'Total Qty (Net) ⭐'},
+  {key:'Total Order',    label:'Total Order (SO)'},
   {key:'Qty Delivered',  label:'Qty Delivered'},
   {key:'Qty Dispatched', label:'Qty Dispatch'},
   {key:'Qty Return',     label:'Qty Return'},
@@ -571,10 +578,10 @@ function renderProduct(){
   PROD_METRICS.forEach(m=>html+=`<div class="metric-tab ${m.key===prodMetric?'active':''}" onclick="prodSwitch('${m.key}',this)">${m.label}</div>`);
   html+='</div>';
   html+=`<div class="chart-card"><div class="chart-title">🏆 Top 20 SKU — ${curDef.label}</div><div class="chart-wrap" style="height:600px;"><canvas id="prodBar"></canvas></div></div>`;
-  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
-  sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
-  html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
-  skus.forEach(s=>{html+=`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmtN(v):'—'}</td>`;});html+=`<td class="tot">${fmtN(s.total)}</td></tr>`;});
+  html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table class="prod-tbl"><thead><tr><th>SKU / Produk</th>`;
+  sw.forEach(w=>html+=`<th class="wk-col">Wk ${w}</th>`);
+  html+=`<th class="tot-col">Total</th></tr></thead><tbody>`;
+  skus.forEach(s=>{html+=`<tr><td style="max-width:360px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmtN(v):'—'}</td>`;});html+=`<td class="tot">${fmtN(s.total)}</td></tr>`;});
   html+='</tbody></table></div></div>';
   document.getElementById('prodContent').innerHTML=html;
   document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
