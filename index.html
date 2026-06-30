@@ -136,12 +136,13 @@ td.sl-bad{color:var(--red);font-weight:700;}
 .trend-btn[data-period="360"].active{background:#e6944a;border-color:#e6944a;}
 .trend-btn:hover:not(.active){border-color:currentColor;color:currentColor;}
 .chart-wrap.xtall{height:380px;}
-.prod-tbl{border-collapse:collapse;width:100%;min-width:600px;}
-.prod-tbl th{padding:11px 18px;font-size:11.5px;color:var(--text2);font-weight:700;border-bottom:2px solid var(--border);white-space:nowrap;background:var(--card);}
-.prod-tbl td{padding:10px 18px;border-bottom:1px solid var(--border);white-space:nowrap;font-size:12px;}
-.prod-tbl th:first-child{min-width:240px;}
-.prod-tbl th.wk-col{text-align:right;min-width:80px;color:var(--blue);}
-.prod-tbl th.tot-col{text-align:right;font-weight:700;color:var(--blue);}
+.prod-tbl{border-collapse:collapse;width:100%;min-width:700px;}
+.prod-tbl th{padding:13px 20px;font-size:12px;color:var(--text2);font-weight:700;border-bottom:2px solid var(--border);white-space:nowrap;background:var(--card);line-height:1.4;}
+.prod-tbl td{padding:12px 20px;border-bottom:1px solid var(--border);white-space:nowrap;font-size:12px;line-height:1.5;}
+.prod-tbl th:first-child{min-width:260px;max-width:420px;}
+.prod-tbl td:first-child{min-width:260px;max-width:420px;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+.prod-tbl th.wk-col{text-align:right;min-width:88px;padding-left:24px;color:var(--blue);}
+.prod-tbl th.tot-col{text-align:right;min-width:88px;padding-left:24px;font-weight:700;color:var(--blue);}
 .prod-tbl tr:hover td{background:#f8f6ff;}
 .prod-tbl tr:last-child td{border-bottom:none;}
 </style>
@@ -532,14 +533,14 @@ function mpSwitch(m,el){mpMetric=m;document.querySelectorAll('#mpTabs .metric-ta
 
 // ─── PRODUCT ─────────────────────────────────────────────────────────────────
 const PROD_METRICS=[
-  {key:'__net__',        label:'Total Qty (Net) ⭐'},
-  {key:'Total Order',    label:'Total Order (SO)'},
-  {key:'Qty Delivered',  label:'Qty Delivered'},
-  {key:'Qty Dispatched', label:'Qty Dispatch'},
-  {key:'Qty Return',     label:'Qty Return'},
-  {key:'Qty Cancelled',  label:'Qty Cancelled'},
-  {key:'Return Rate %',  label:'Return Rate %'},
-  {key:'Cancel Rate %',  label:'Cancel Rate %'},
+  {key:'__net__',       label:'Total Qty (Net) ⭐'},
+  {key:'Total Order',   label:'Total Order (SO)'},
+  {key:'Qty Delivered', label:'Qty Delivered'},
+  {key:'Qty Dispatch',  label:'Qty Dispatch'},
+  {key:'Qty Return',    label:'Qty Return'},
+  {key:'Qty Cancelled', label:'Qty Cancelled'},
+  {key:'Return Rate %', label:'Return Rate %'},
+  {key:'Cancel Rate %', label:'Cancel Rate %'},
 ];
 function renderProduct(){
   const rows=D.prod;if(!rows.length){document.getElementById('prodContent').innerHTML='<div class="error-state">Data Product belum tersedia.</div>';return;}
@@ -547,12 +548,13 @@ function renderProduct(){
   const skuCol=findCol(rows,['sku','product','produk','name','nama','item','barang','kode']);
   const mpCol =findCol(rows,['marketplace','platform','channel','mp','toko']);
   const catCol=findCol(rows,['category','kategori','cat']);
-  // D.prod (Product_Weekly) has: Total Qty, Qty Return, Qty Cancelled — no Delivered/Dispatched cols
-  // Net = Total Qty - Qty Return - Qty Cancelled
+  // Product_Weekly cols: Week, Marketplace, SKU, Category, Total Order, Total Qty,
+  //   Qty Dispatch, Qty Delivered, Qty Return, Qty Cancelled, Return Rate %, Cancel Rate %
+  // __net__ = Total Qty - Qty Return - Qty Cancelled  (computed in frontend)
   const totQtyCol=findCol(rows,['total qty','totalqty']);
   const retCol   =findCol(rows,['qty return','qtyreturn','return qty']);
   const canCol   =findCol(rows,['qty cancelled','qtycancelled','cancelled qty']);
-  console.log('[Product] Available cols:',Object.keys(rows[0]||{}).join(', '));
+  console.log('[Product] cols:',Object.keys(rows[0]||{}).join(', '));
   console.log('[Product] totQtyCol=',totQtyCol,'retCol=',retCol,'canCol=',canCol);
   const validKeys=PROD_METRICS.map(m=>m.key);
   if(!prodMetric||!validKeys.includes(prodMetric))prodMetric='__net__';
@@ -581,7 +583,7 @@ function renderProduct(){
   html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table class="prod-tbl"><thead><tr><th>SKU / Produk</th>`;
   sw.forEach(w=>html+=`<th class="wk-col">Wk ${w}</th>`);
   html+=`<th class="tot-col">Total</th></tr></thead><tbody>`;
-  skus.forEach(s=>{html+=`<tr><td style="max-width:360px;overflow:hidden;text-overflow:ellipsis;font-weight:600" title="${s.sku}">${s.sku}</td>`;sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmtN(v):'—'}</td>`;});html+=`<td class="tot">${fmtN(s.total)}</td></tr>`;});
+  skus.forEach(s=>{html+=`<tr><td title="${s.sku}">${s.sku}</td>`;sw.forEach(w=>{const v=s.weeks[String(w)]||0;html+=`<td class="num">${v>0?fmtN(v):'—'}</td>`;});html+=`<td class="tot">${fmtN(s.total)}</td></tr>`;});
   html+='</tbody></table></div></div>';
   document.getElementById('prodContent').innerHTML=html;
   document.getElementById('prodStatus').textContent=`${skus.length} SKU · ${sw.length} weeks`;
