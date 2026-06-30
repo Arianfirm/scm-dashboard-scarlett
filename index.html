@@ -540,12 +540,20 @@ function renderProduct(){
   const skuCol=findCol(rows,['sku','product','produk','name','nama','item','barang','kode']);
   const mpCol =findCol(rows,['marketplace','platform','channel','mp','toko']);
   const catCol=findCol(rows,['category','kategori','cat']);
-  const delCol=findCol(rows,['qty delivered','delivered qty','delivered']);
-  const disCol=findCol(rows,['qty dispatched','qty dispatch','dispatched qty','dispatched']);
+  // D.prod (Product_Weekly) has: Total Qty, Qty Return, Qty Cancelled — no Delivered/Dispatched cols
+  // Net = Total Qty - Qty Return - Qty Cancelled
+  const totQtyCol=findCol(rows,['total qty','totalqty']);
+  const retCol   =findCol(rows,['qty return','qtyreturn','return qty']);
+  const canCol   =findCol(rows,['qty cancelled','qtycancelled','cancelled qty']);
+  console.log('[Product] Available cols:',Object.keys(rows[0]||{}).join(', '));
+  console.log('[Product] totQtyCol=',totQtyCol,'retCol=',retCol,'canCol=',canCol);
   const validKeys=PROD_METRICS.map(m=>m.key);
   if(!prodMetric||!validKeys.includes(prodMetric))prodMetric='__net__';
   const curDef=PROD_METRICS.find(m=>m.key===prodMetric)||PROD_METRICS[0];
-  function getVal(r){return prodMetric==='__net__'?toN(r[delCol])+toN(r[disCol]):toN(r[prodMetric]);}
+  function getVal(r){
+    if(prodMetric==='__net__') return Math.max(0,toN(r[totQtyCol])-toN(r[retCol])-toN(r[canCol]));
+    return toN(r[prodMetric]);
+  }
   const allWeeks=[...new Set(rows.map(r=>r[wkCol]).filter(Boolean))].sort((a,b)=>toN(a)-toN(b));
   const allMPs=mpCol?[...new Set(rows.map(r=>r[mpCol]).filter(Boolean))].sort():[];
   const allCats=catCol?[...new Set(rows.map(r=>r[catCol]).filter(Boolean))].sort():[];
@@ -562,7 +570,7 @@ function renderProduct(){
   let html=`<div class="metric-tabs" id="prodTabs">`;
   PROD_METRICS.forEach(m=>html+=`<div class="metric-tab ${m.key===prodMetric?'active':''}" onclick="prodSwitch('${m.key}',this)">${m.label}</div>`);
   html+='</div>';
-  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 20 SKU — ${curDef.label}</div><div class="chart-wrap"><canvas id="prodBar"></canvas></div></div>`;
+  html+=`<div class="chart-card"><div class="chart-title">🏆 Top 20 SKU — ${curDef.label}</div><div class="chart-wrap" style="height:520px;"><canvas id="prodBar"></canvas></div></div>`;
   html+=`<div class="table-card"><div class="table-header"><div class="table-title">📋 Product Detail</div><div class="table-meta">${skus.length} SKU</div></div><div style="overflow-x:auto"><table><thead><tr><th>SKU / Produk</th>`;
   sw.forEach(w=>html+=`<th style="text-align:right;color:var(--blue)">Wk ${w}</th>`);
   html+=`<th style="text-align:right;font-weight:700;color:var(--blue)">Total</th></tr></thead><tbody>`;
