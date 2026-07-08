@@ -1460,7 +1460,10 @@ function renderCOD(){
 }
 
 
-// ─── FORECAST V2 (DATA-DRIVEN: BASELINE × TREND × DOW, NO CAMPAIGN ASSUMPTION) ─
+// ─── FORECAST V1.5 (HYBRID: BASELINE × TREND × DOW × EVENT MULTIPLIER) ───────
+// Event Multiplier (Payday, Double Date) DIHITUNG OTOMATIS dari histori
+// aktual yang ada — TIDAK ADA angka hardcode (bukan 2.85, bukan 0.94, dst).
+// Lihat komentar "V1.5 EVENT MULTIPLIER" di bawah untuk detail metodenya.
 function renderForecast(){
   const rows=D.daily;
   if(!rows.length){document.getElementById('fcContent').innerHTML='<div class="error-state">Data Daily Trend belum tersedia.</div>';return;}
@@ -1521,15 +1524,12 @@ function renderForecast(){
     fcMonthStr=String(m).padStart(2,'0');
   }
 
-  // V2 Forecast:
-  // Baseline × Trend × DayOfWeek
+  // V1.5 Forecast:
+  // Baseline × Trend × DayOfWeek × Event Multiplier
   //
-  // Event belum digunakan sebagai multiplier
-  // karena histori hanya mulai Januari 2026.
-  //
-  // Setelah histori minimal 12 bulan,
-  // event multiplier akan dihitung otomatis
-  // berdasarkan histori nyata.
+  // Event Multiplier dihitung otomatis dari histori aktual (bukan hardcode).
+  // Jika event tsb belum pernah terjadi sama sekali, Multiplier = 1.00
+  // (forecast otomatis kembali menjadi Baseline × Trend × DOW).
 
   // ── 3. MODEL PER METRIK (qty & order) ────────────────────────────────────
   // STEP 1: Baseline = rolling average 30 hari terakhir
@@ -1563,21 +1563,66 @@ function renderForecast(){
   const qtyModel=buildMetricModel('qty');
   const ordModel=buildMetricModel('ord');
 
-  // ── EVENT DETECTION (INFORMASI SAJA — TIDAK MENGUBAH FORECAST) ──────────
-  // Payday & Double Date dideteksi murni dari kalender (tanggal), BUKAN dari
-  // statistik histori — karena histori baru mulai Jan 2026 dan belum cukup
-  // untuk menghitung multiplier event yang valid secara statistik.
-  // Badge ini hanya informasi bagi Capacity Planner; angka forecast di bawah
-  // TIDAK berubah karena badge ini.
-  function detectEventBadges(dt){
-    const day=dt.getDate(), month=dt.getMonth()+1;
+  // ── V1.5 EVENT MULTIPLIER (AUTO DARI HISTORI, TIDAK ADA HARDCODE) ────────
+  // Payday & Double Date dideteksi dari kalender (tanggal), tapi BESAR
+  // multiplier-nya SELALU dihitung dari histori aktual, dengan cara:
+  //
+  //   Multiplier(hari-X) = ActualQty(hari-X) / (BaselineSaatItu × DOW)
+  //
+  // "BaselineSaatItu" = rolling average 30 hari SEBELUM hari-X (point-in-time,
+  // bukan baseline hari ini), supaya tidak lookahead. Jika hari-X spesifik
+  // (mis. 7.7) belum pernah terjadi di histori, pakai rata-rata multiplier
+  // dari semua kejadian tipe event yang sama yang SUDAH terjadi (mis. rata2
+  // 1.1 s/d 6.6). Hanya histori SEBELUM bulan forecast yang dipakai, supaya
+  // tidak "mengintip" data aktual bulan yang sedang diforecast/divalidasi.
+  const eventCutoffDate=`${fcYear}-${fcMonthStr}-01`;
+  function buildEventRatios(key,model){
+    const doubleRatios=[],paydayRatios=[];
+    days.forEach((row,idx)=>{
+      if(row.date>=eventCutoffDate)return; // jangan pakai data bulan yang sedang diforecast
+      const dt=new Date(row.date);
+      const day=dt.getDate(),month=dt.getMonth()+1;
+      const isDD=day===month, isPD=day<=5||day>=24;
+      if(!isDD&&!isPD)return;
+      const prior=days.slice(Math.max(0,idx-30),idx); // 30 hari SEBELUM hari event ini
+      if(prior.length<14)return; // histori sebelum event terlalu tipis, jangan dipakai
+      const baselineAtEvent=prior.reduce((s,x)=>s+x[key],0)/prior.length;
+      if(baselineAtEvent<=0)return;
+      const predicted=baselineAtEvent*model.dowMult[dt.getDay()];
+      if(predicted<=0)return;
+      const ratio=row[key]/predicted;
+      if(isDD)doubleRatios.push(ratio);
+      if(isPD)paydayRatios.push(ratio);
+    });
+    const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:null;
+    return{doubleDate:avg(doubleRatios),payday:avg(paydayRatios)};
+  }
+  const qtyEventRatios=buildEventRatios('qty',qtyModel);
+  const ordEventRatios=buildEventRatios('ord',ordModel);
+
+  // Jika lebih dari 1 event jatuh di tanggal yang sama, pakai yang PALING
+  // BESAR (bukan dijumlah), lalu batasi supaya forecast tidak liar:
+  // minimum 1.00×, maksimum 1.60×. Jika tidak ada event & tidak ada histori
+  // event sama sekali → 1.00× (forecast = Baseline × Trend × DOW saja).
+  function eventMultiplierFor(dt,eventRatios){
+    const day=dt.getDate(),month=dt.getMonth()+1;
+    const isDD=day===month, isPD=day<=5||day>=24;
+    const candidates=[];
+    if(isDD&&eventRatios.doubleDate!=null)candidates.push(eventRatios.doubleDate);
+    if(isPD&&eventRatios.payday!=null)candidates.push(eventRatios.payday);
+    if(!candidates.length)return 1.0;
+    return +Math.min(1.60,Math.max(1.00,Math.max(...candidates))).toFixed(3);
+  }
+  function detectEventBadges(dt,eventMult){
+    const day=dt.getDate(),month=dt.getMonth()+1;
     const badges=[];
     if(day===month)badges.push(`⚠ Double Date ${month}.${month}`);
     if(day<=5||day>=24)badges.push('⚠ Payday');
+    if(badges.length&&eventMult>1)badges[badges.length-1]+=` · ${eventMult.toFixed(2)}×`;
     return badges;
   }
 
-  // ── 4. FORECAST QTY & ORDER = Baseline × Trend Factor × DOW Multiplier ───
+  // ── 4. FORECAST QTY & ORDER = Baseline × Trend Factor × DOW × Event Mult ─
   const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
   const fullMonthFc=[];
   for(let d=1;d<=fcMonthDays;d++){
@@ -1586,17 +1631,19 @@ function renderForecast(){
     const dow=dt.getDay();
     const dowMultQty=qtyModel.dowMult[dow];
     const dowMultOrd=ordModel.dowMult[dow];
-    const forecastQty=Math.round(qtyModel.baseline*qtyModel.trendFactor*dowMultQty);
-    const forecastOrd=Math.round(ordModel.baseline*ordModel.trendFactor*dowMultOrd);
+    const eventMultQty=eventMultiplierFor(dt,qtyEventRatios);
+    const eventMultOrd=eventMultiplierFor(dt,ordEventRatios);
+    const forecastQty=Math.round(qtyModel.baseline*qtyModel.trendFactor*dowMultQty*eventMultQty);
+    const forecastOrd=Math.round(ordModel.baseline*ordModel.trendFactor*dowMultOrd*eventMultOrd);
     const actual=dayMap[ds];
     fullMonthFc.push({
       date:ds,day:d,dow,
-      baselineQty:qtyModel.baseline,trendFactorQty:qtyModel.trendFactor,dowMultQty,
-      baselineOrd:ordModel.baseline,trendFactorOrd:ordModel.trendFactor,dowMultOrd,
+      baselineQty:qtyModel.baseline,trendFactorQty:qtyModel.trendFactor,dowMultQty,eventMultQty,
+      baselineOrd:ordModel.baseline,trendFactorOrd:ordModel.trendFactor,dowMultOrd,eventMultOrd,
       forecastQty,forecastOrd,
       actualQty:actual?actual.qty:null,
       actualOrd:actual?actual.ord:null,
-      eventBadges:detectEventBadges(dt)
+      eventBadges:detectEventBadges(dt,eventMultQty)
     });
   }
 
@@ -1659,7 +1706,7 @@ function renderForecast(){
   <!-- BAR CHART -->
   <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;margin-bottom:16px;">
     <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Forecast Qty — ${fcMonthName} ${fcYear} (${fcMonthDays} hari)</div>
-    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Forecast = Baseline × Trend Factor × Day-of-Week Multiplier · Garis putus = baseline</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Forecast = Baseline × Trend Factor × Day-of-Week Multiplier × Event Multiplier · Garis putus = baseline</div>
     <div class="chart-legend" style="margin-bottom:10px;">
       <div class="legend-item"><div class="legend-dot" style="background:#5b3fa855"></div>Forecast</div>
       <div class="legend-item"><div class="legend-dot" style="background:#1D9E75;border-radius:50%"></div>Aktual</div>
@@ -1671,7 +1718,7 @@ function renderForecast(){
   <!-- DETAIL TABLE: SEMUA HARI ─────────────────────────────────────────────-->
   <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;">
     <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📋 Detail Forecast Harian — ${fcMonthName} ${fcYear}</div>
-    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Semua hari dalam bulan · Baseline/Trend/DOW menjelaskan cara Forecast Qty terbentuk · Badge ⚠ Payday/Double Date hanya informasi, TIDAK mengubah angka forecast · Aktual otomatis tampil jika data sudah ada</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Semua hari dalam bulan · Baseline/Trend/DOW/Event menjelaskan cara Forecast Qty terbentuk · Event× dihitung otomatis dari histori aktual (bukan hardcode) · Aktual otomatis tampil jika data sudah ada</div>
     <div style="overflow-x:auto;max-height:420px;">
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <thead><tr style="background:#f8f6ff;">
@@ -1680,6 +1727,7 @@ function renderForecast(){
           <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Baseline</th>
           <th style="padding:7px 10px;text-align:center;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Trend Factor</th>
           <th style="padding:7px 10px;text-align:center;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">DOW Mult</th>
+          <th style="padding:7px 10px;text-align:center;border-bottom:2px solid var(--border);color:#c2410c;font-weight:600;position:sticky;top:0;background:#f8f6ff;">Event Mult</th>
           <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Forecast Qty</th>
           <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Forecast Order</th>
           <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Aktual Qty</th>
@@ -1699,6 +1747,7 @@ function renderForecast(){
       <td style="padding:6px 10px;text-align:right;color:var(--text2);font-family:monospace;">${fmtN(d.baselineQty)}</td>
       <td style="padding:6px 10px;text-align:center;color:var(--text2);">${d.trendFactorQty}×</td>
       <td style="padding:6px 10px;text-align:center;color:var(--text2);">${d.dowMultQty}×</td>
+      <td style="padding:6px 10px;text-align:center;font-weight:${d.eventMultQty>1?'700':'400'};color:${d.eventMultQty>1?'#c2410c':'var(--text2)'};">${d.eventMultQty.toFixed(2)}×</td>
       <td style="padding:6px 10px;text-align:right;font-weight:600;color:var(--blue);font-family:monospace;">${fmtN(d.forecastQty)}</td>
       <td style="padding:6px 10px;text-align:right;color:var(--blue);font-family:monospace;">${fmtN(d.forecastOrd)}</td>
       <td style="padding:6px 10px;text-align:right;font-weight:700;color:var(--green);font-family:monospace;">${d.actualQty!==null?fmtN(d.actualQty):'—'}</td>
@@ -1756,7 +1805,7 @@ function renderForecast(){
             if(c.parsed.y===null||c.parsed.y===undefined)return'';
             if(c.dataset.label==='Forecast Qty'){
               const d=fullMonthFc[c.dataIndex];
-              const eventPart=d.eventBadges.length?` (${d.eventBadges.join(' ')} — info saja, tidak mengubah angka)`:'';
+              const eventPart=d.eventMultQty>1?` × Event ${d.eventMultQty.toFixed(2)}× (${d.eventBadges.join(' ')})`:'';
               return[
                 ` Forecast Qty: ${fmtN(Math.round(c.parsed.y))}`,
                 ` = Baseline ${fmtN(d.baselineQty)} × Trend ${d.trendFactorQty}× × DOW ${d.dowMultQty}×${eventPart}`
