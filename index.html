@@ -1636,6 +1636,22 @@ function renderForecast(){
     const forecastQty=Math.round(qtyModel.baseline*qtyModel.trendFactor*dowMultQty*eventMultQty);
     const forecastOrd=Math.round(ordModel.baseline*ordModel.trendFactor*dowMultOrd*eventMultOrd);
     const actual=dayMap[ds];
+
+    // ── TEMPORARY DEBUG (hapus setelah audit browser selesai) ─────────────
+    // Membuktikan apakah Event Multiplier BENAR-BENAR dipakai saat runtime
+    // di browser, bukan cuma di simulasi Node.js.
+    if(['2026-06-06','2026-07-07','2026-07-25','2026-07-15'].includes(ds)){
+      const forecastQtyBeforeEvent=Math.round(qtyModel.baseline*qtyModel.trendFactor*dowMultQty);
+      console.log(`[FORECAST DEBUG] ${ds}`,{
+        Baseline:qtyModel.baseline,
+        Trend:qtyModel.trendFactor,
+        DOW:dowMultQty,
+        Event:eventMultQty,
+        'Before Event':forecastQtyBeforeEvent,
+        'After Event':forecastQty
+      });
+    }
+
     fullMonthFc.push({
       date:ds,day:d,dow,
       baselineQty:qtyModel.baseline,trendFactorQty:qtyModel.trendFactor,dowMultQty,eventMultQty,
