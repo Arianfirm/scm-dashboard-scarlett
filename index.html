@@ -1460,7 +1460,7 @@ function renderCOD(){
 }
 
 
-// ─── FORECAST & CAMPAIGN (3-EVENT FOCUS) ─────────────────────────────────────
+// ─── FORECAST V2 (DATA-DRIVEN: BASELINE × TREND × DOW, NO CAMPAIGN ASSUMPTION) ─
 function renderForecast(){
   const rows=D.daily;
   if(!rows.length){document.getElementById('fcContent').innerHTML='<div class="error-state">Data Daily Trend belum tersedia.</div>';return;}
@@ -1521,196 +1521,87 @@ function renderForecast(){
     fcMonthStr=String(m).padStart(2,'0');
   }
 
-  // ── 3. SPIKE DETECTION ────────────────────────────────────────────────────
-  const SPIKE_THR=1.4;
-  const spikes=[];
-  for(let i=7;i<days.length;i++){
-    const avg7=days.slice(i-7,i).reduce((s,d)=>s+d.qty,0)/7;
-    if(avg7>0&&days[i].qty>=avg7*SPIKE_THR){
-      spikes.push({...days[i],avg7,ratio:days[i].qty/avg7,idx:i});
-    }
-  }
+  // ── 3. MODEL PER METRIK (qty & order) ────────────────────────────────────
+  // STEP 1: Baseline = rolling average 30 hari terakhir
+  // STEP 2: Recent Trend = rolling average 7 hari terakhir
+  // STEP 3: Trend Factor = Rolling7 / Rolling30, clamp [0.85, 1.20]
+  // STEP 4: Day-of-Week Multiplier dari histori 30 hari
+  function buildMetricModel(key){
+    const last30=days.slice(-30);
+    const last7 =days.slice(-7);
+    const rolling30=last30.length?last30.reduce((s,d)=>s+d[key],0)/last30.length:0;
+    const rolling7 =last7.length?last7.reduce((s,d)=>s+d[key],0)/last7.length:0;
+    let trendFactor=rolling30>0?rolling7/rolling30:1;
+    trendFactor=Math.min(1.20,Math.max(0.85,trendFactor));
 
-  // ── 4. CLUSTER → CAMPAIGN EVENTS ─────────────────────────────────────────
-  const campaigns=[];
-  let si=0;
-  while(si<spikes.length){
-    const cluster=[spikes[si]];
-    let sj=si+1;
-    while(sj<spikes.length){
-      const gap=(new Date(spikes[sj].date)-new Date(cluster[cluster.length-1].date))/86400000;
-      if(gap<=3){cluster.push(spikes[sj]);sj++;}else break;
-    }
-    const peak=cluster.reduce((a,b)=>b.qty>a.qty?b:a);
-    campaigns.push({
-      start:cluster[0].date,end:cluster[cluster.length-1].date,
-      peakDate:peak.date,peakQty:peak.qty,
-      dur:Math.round((new Date(cluster[cluster.length-1].date)-new Date(cluster[0].date))/86400000)+1,
-      ratio:peak.ratio,
-      totalQty:cluster.reduce((s,d)=>s+d.qty,0)
+    const dowSums=[0,0,0,0,0,0,0],dowCounts=[0,0,0,0,0,0,0];
+    last30.forEach(d=>{
+      const dow=new Date(d.date).getDay();
+      dowSums[dow]+=d[key];dowCounts[dow]++;
     });
-    si=sj;
+    const dowAvg=dowSums.map((s,i)=>dowCounts[i]?s/dowCounts[i]:rolling30);
+    const dowGlobal=dowAvg.reduce((a,b)=>a+b,0)/7;
+    const dowMult=dowAvg.map(v=>dowGlobal>0?v/dowGlobal:1);
+
+    // Coefficient of Variation dari histori 30 hari — dasar Forecast Confidence.
+    // Makin volatile histori (stdev besar relatif ke rata-rata), makin rendah confidence.
+    const variance=last30.length?last30.reduce((s,d)=>s+Math.pow(d[key]-rolling30,2),0)/last30.length:0;
+    const cv=rolling30>0?Math.sqrt(variance)/rolling30:0;
+
+    return{
+      baseline:Math.round(rolling30),
+      recent7:Math.round(rolling7),
+      trendFactor:+trendFactor.toFixed(3),
+      dowMult:dowMult.map(v=>+v.toFixed(3)),
+      cv
+    };
   }
 
-  // ── 5. STATISTIK HISTORI ──────────────────────────────────────────────────
-  const avgDur=campaigns.length?Math.round(campaigns.reduce((s,c)=>s+c.dur,0)/campaigns.length):2;
-  const avgRatio=campaigns.length?+(campaigns.reduce((s,c)=>s+c.ratio,0)/campaigns.length).toFixed(2):1.5;
-  const maxRatio=campaigns.length?Math.max(...campaigns.map(c=>c.ratio)):2;
+  const qtyModel=buildMetricModel('qty');
+  const ordModel=buildMetricModel('ord');
 
-  // Hitung boost khusus untuk campaign tanggal kembar vs payday
-  // Campaign tanggal kembar biasanya spike lebih tinggi dari payday
-  const campRatios=campaigns.filter(c=>{
-    const dt=new Date(c.peakDate);
-    const mo=dt.getMonth()+1,dd=dt.getDate();
-    return Math.abs(dd-mo)<=2; // tanggal kembar (mis 7 Jul = 7.7)
-  });
-  const paydayRatios=campaigns.filter(c=>{
-    const dt=new Date(c.peakDate);
-    const dd=dt.getDate();
-    return dd<=5||dd>=24;
-  });
-  // Blend histori (40%) + aktual Juni (60%) — makin banyak bulan aktual,
-  // otomatis makin akurat karena histori campaigns bertambah
-  const campBoostHist=campRatios.length?+(campRatios.reduce((s,c)=>s+c.ratio,0)/campRatios.length).toFixed(2):avgRatio;
-  const campBoostBase=+(campBoostHist*0.4 + 2.85*0.6).toFixed(2); // 2.85 = aktual 6.6 Juni
-  const paydayBoostHist=paydayRatios.length?+(paydayRatios.reduce((s,c)=>s+c.ratio,0)/paydayRatios.length).toFixed(2):1.0;
-  const paydayBoostBase=+(paydayBoostHist*0.3 + 0.94*0.7).toFixed(2); // 0.94 = aktual payday Juni
+  // ── FORECAST CONFIDENCE ──────────────────────────────────────────────────
+  // Confidence% = 100 - CV×100, diambil dari kestabilan histori qty 30 hari.
+  const confidencePct=+Math.max(0,Math.min(100,100-qtyModel.cv*100)).toFixed(1);
+  const confidenceLabel=confidencePct>=95?'High Confidence':confidencePct>=85?'Medium Confidence':'Low Confidence';
+  const confidenceColor=confidencePct>=95?'#1D9E75':confidencePct>=85?'#e6944a':'#e05b5b';
 
-  // ── 6. BASELINE BERSIH ────────────────────────────────────────────────────
-  const last30=days.slice(-30);
-  const last30Clean=last30.filter(d=>{
-    const idx=days.indexOf(d);
-    if(idx<7)return true;
-    const avg7=days.slice(idx-7,idx).reduce((s,x)=>s+x.qty,0)/7;
-    return d.qty<avg7*SPIKE_THR;
-  });
-  const baselineQty=last30Clean.length?Math.round(last30Clean.reduce((s,d)=>s+d.qty,0)/last30Clean.length):Math.round(last30.reduce((s,d)=>s+d.qty,0)/last30.length);
-  const baselineOrd=Math.round(last30.reduce((s,d)=>s+d.ord,0)/last30.length);
-
-  // ── 7. DOW SEASONALITY ────────────────────────────────────────────────────
-  const dowSums=[0,0,0,0,0,0,0],dowCounts=[0,0,0,0,0,0,0];
-  last30Clean.forEach(d=>{
-    const dow=new Date(d.date).getDay();
-    dowSums[dow]+=d.qty;dowCounts[dow]++;
-  });
-  const dowAvg=dowSums.map((s,i)=>dowCounts[i]?s/dowCounts[i]:baselineQty);
-  const dowGlobal=dowAvg.reduce((a,b)=>a+b,0)/7;
-  const dowMult=dowAvg.map(v=>dowGlobal>0?+(v/dowGlobal).toFixed(3):1);
-
-  // ── 8. DEFINISI 3 EVENT UNTUK BULAN FORECAST ─────────────────────────────
-  // Payday Awal: tgl 1 (H+1=2, H+2=3)
-  // Campaign tanggal kembar: dd=fcMonth (mis Juli=7 → tgl 7), H-1 s/d H+2
-  // Payday Akhir: tgl 25 (H-1=24, H+1=26, H+2=27)
-  const ddCamp=fcMonth; // 7.7 = tgl 7, 8.8 = tgl 8, dst
-  const ddPayAwal=1;
-  const ddPayAkhir=25;
-
-  // Decay berdasarkan aktual Juni 2026:
-  // Campaign: H-1=0.46, H+1=0.32, H+2=0.20 dari H-0
-  // Payday: flat sekitar baseline (H-0 aktual ~0.94x, bukan spike)
-  const boostDecayCamp={'-1':0.46,'0':1.0,'+1':0.32,'+2':0.20};
-  const boostDecayPay= {'-1':0.90,'0':1.0,'+1':1.00,'+2':0.90};
-
-  const threeEvents=[
-    {
-      key:'payday_awal',
-      name:'Payday Awal Bulan',
-      type:'payday',
-      color:'#e6944a',
-      colorLight:'#fff7ed',
-      mainDD:ddPayAwal,
-      offsets:[0,1,2], // H+0, H+1, H+2
-      boostBase:paydayBoostBase,
-      desc:`${fcMonth}/${fcMonthStr}/tgl 1–3`
-    },
-    {
-      key:'campaign',
-      name:`${fcMonth}.${fcMonth} Campaign`,
-      type:'campaign',
-      color:'#e879a0',
-      colorLight:'#fdf4ff',
-      mainDD:ddCamp,
-      offsets:[-1,0,1,2], // H-1, H+0, H+1, H+2
-      boostBase:campBoostBase,
-      desc:`${fcMonth}.${fcMonth} · tgl ${ddCamp-1}–${ddCamp+2}`
-    },
-    {
-      key:'payday_akhir',
-      name:'Payday Akhir Bulan',
-      type:'payday',
-      color:'#5b3fa8',
-      colorLight:'#f0eef8',
-      mainDD:ddPayAkhir,
-      offsets:[-1,0,1,2], // H-1, H+0, H+1, H+2
-      boostBase:paydayBoostBase,
-      desc:`tgl ${ddPayAkhir-1}–${ddPayAkhir+2}`
-    }
-  ];
-
-  // ── 9. GENERATE FORECAST PER EVENT ───────────────────────────────────────
-  // Untuk setiap event, generate forecast per hari (H-1 s/d H+2)
-  function getEventDays(ev){
-    return ev.offsets.map(offset=>{
-      const dd=ev.mainDD+offset;
-      if(dd<1||dd>fcMonthDays)return null;
-      const ds=`${fcYear}-${fcMonthStr}-${String(dd).padStart(2,'0')}`;
-      const dt=new Date(ds);
-      const dow=dt.getDay();
-      const dowBoost=dowMult[dow]||1;
-      const decayKey=offset===0?'0':offset<0?'-1':offset===1?'+1':'+2';
-      // Pakai decay berbeda untuk campaign vs payday
-      const decayTable=ev.type==='campaign'?boostDecayCamp:boostDecayPay;
-      const decay=decayTable[decayKey]||0.4;
-      const boost=+(ev.boostBase*decay*dowBoost).toFixed(3);
-      const forecastQty=Math.round(baselineQty*boost);
-      const forecastOrd=Math.round(baselineOrd*boost);
-      const actual=dayMap[ds];
-      const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-      return{
-        date:ds,dd,offset,
-        offsetLabel:offset===0?'H-0':offset<0?`H${offset}`:`H+${offset}`,
-        dayName:dayNames[dow],
-        isWeekend:dow===0||dow===6,
-        forecastQty,forecastOrd,
-        actualQty:actual?actual.qty:null,
-        actualOrd:actual?actual.ord:null,
-        boost,
-        isMain:offset===0
-      };
-    }).filter(Boolean);
-  }
-
-  const eventDays=threeEvents.map(ev=>({...ev,days:getEventDays(ev)}));
-
-  // ── 10. FULL MONTH FORECAST (untuk bar chart) ─────────────────────────────
-  // Build map of campaign dates
-  const campDateMap={};
-  eventDays.forEach(ev=>{
-    ev.days.forEach(d=>{
-      if(!campDateMap[d.date]||d.isMain){
-        campDateMap[d.date]={boost:d.boost,name:ev.name,type:ev.type,color:ev.color,isMain:d.isMain,offsetLabel:d.offsetLabel};
+  // ── CAMPAIGN CALENDAR HOOK (extension point — TIDAK dipakai hari ini) ────
+  // Jika suatu saat tabel resmi Campaign Calendar (Date, Event, Multiplier)
+  // tersedia di D.campaignCalendar, fungsi ini otomatis memakainya tanpa
+  // perlu mengubah formula forecast. Selama data itu tidak ada (kondisi saat
+  // ini), fungsi ini SELALU mengembalikan 1.0 — no-op murni.
+  function getCampaignMultiplier(dateStr){
+    if(Array.isArray(D.campaignCalendar)&&D.campaignCalendar.length){
+      const hit=D.campaignCalendar.find(c=>(c.date||c.Date)===dateStr);
+      if(hit){
+        const m=toN(hit.multiplier??hit.Multiplier);
+        if(m>0)return m;
       }
-    });
-  });
+    }
+    return 1.0;
+  }
 
+  // ── 4. FORECAST QTY & ORDER = Baseline × TrendFactor × DOW Mult × Campaign ─
+  const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
   const fullMonthFc=[];
   for(let d=1;d<=fcMonthDays;d++){
     const ds=`${fcYear}-${fcMonthStr}-${String(d).padStart(2,'0')}`;
-    const dt=new Date(ds);
-    const dow=dt.getDay();
-    const dowBoost=dowMult[dow]||1;
-    const campInfo=campDateMap[ds];
-    const boost=campInfo?campInfo.boost:+(dowBoost).toFixed(3);
+    const dow=new Date(ds).getDay();
+    const campMult=getCampaignMultiplier(ds);
+    const dowMultQty=qtyModel.dowMult[dow];
+    const dowMultOrd=ordModel.dowMult[dow];
+    const forecastQty=Math.round(qtyModel.baseline*qtyModel.trendFactor*dowMultQty*campMult);
+    const forecastOrd=Math.round(ordModel.baseline*ordModel.trendFactor*dowMultOrd*campMult);
     const actual=dayMap[ds];
     fullMonthFc.push({
-      date:ds,day:d,
-      forecastQty:Math.round(baselineQty*boost),
+      date:ds,day:d,dow,
+      baselineQty:qtyModel.baseline,trendFactorQty:qtyModel.trendFactor,dowMultQty,
+      baselineOrd:ordModel.baseline,trendFactorOrd:ordModel.trendFactor,dowMultOrd,
+      campMult,
+      forecastQty,forecastOrd,
       actualQty:actual?actual.qty:null,
-      isCampaign:!!campInfo,
-      isMain:campInfo?.isMain||false,
-      color:campInfo?.color||null,
-      type:campInfo?.type||'normal',
-      boost
+      actualOrd:actual?actual.ord:null
     });
   }
 
@@ -1718,11 +1609,11 @@ function renderForecast(){
   const peakFc=fullMonthFc.reduce((a,b)=>b.forecastQty>a.forecastQty?b:a);
   const daysActual=fullMonthFc.filter(d=>d.actualQty!==null).length;
 
-  // Accuracy jika ada aktual
+  // Accuracy (MAPE) jika ada aktual
   const accRows=fullMonthFc.filter(d=>d.actualQty!==null&&d.forecastQty>0);
   const mape=accRows.length?+(accRows.reduce((s,d)=>s+Math.abs(d.actualQty-d.forecastQty)/d.forecastQty,0)/accRows.length*100).toFixed(1):null;
 
-  // ── 11. BUILD HTML ─────────────────────────────────────────────────────────
+  // ── 5. BUILD HTML ─────────────────────────────────────────────────────────
   let html=`
   <!-- HEADER BADGES -->
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
@@ -1733,229 +1624,121 @@ function renderForecast(){
       📊 Data s/d: ${lastDate}
     </span>
     ${mape!==null?`<span style="background:#fff7ed;color:#c2410c;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #fed7aa;">🎯 Akurasi: ${(100-mape).toFixed(1)}% (MAPE ${mape}%)</span>`:''}
-    <span style="background:#fdf4ff;color:#7c3aed;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #e9d5ff;">⚙️ Auto-detect · update tiap bulan</span>
+    <span style="background:#fdf4ff;color:#7c3aed;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #e9d5ff;">⚙️ Trend Factor Qty: ${qtyModel.trendFactor}× · Rolling 7/30 hari</span>
+    <span style="background:${confidenceColor}1a;color:${confidenceColor};font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid ${confidenceColor}55;">🧭 Confidence: ${confidencePct}% (${confidenceLabel})</span>
   </div>
 
   <!-- SUMMARY CARDS -->
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px;">
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #5b3fa8;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📊 Baseline Harian</div>
-      <div style="font-size:20px;font-weight:800;color:#5b3fa8;">${fmtN(baselineQty)}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Avg 30h bersih · excl spike</div>
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📊 Baseline Qty (30h)</div>
+      <div style="font-size:20px;font-weight:800;color:#5b3fa8;">${fmtN(qtyModel.baseline)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Rolling average 30 hari terakhir</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e6944a;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📈 Recent Trend (7h)</div>
+      <div style="font-size:20px;font-weight:800;color:#e6944a;">${fmtN(qtyModel.recent7)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Rolling average 7 hari terakhir</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #1D9E75;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🔮 Forecast ${fcMonthName}</div>
-      <div style="font-size:20px;font-weight:800;color:#1D9E75;">${fmtN(totalFcQty)}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${fcMonthDays} hari · ${daysActual>0?daysActual+' aktual':'-'}</div>
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">⚙️ Trend Factor</div>
+      <div style="font-size:20px;font-weight:800;color:#1D9E75;">${qtyModel.trendFactor}×</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Rolling7 / Rolling30 · clamp 0.85–1.20</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e879a0;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🔮 Forecast ${fcMonthName}</div>
+      <div style="font-size:20px;font-weight:800;color:#e879a0;">${fmtN(totalFcQty)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${fcMonthDays} hari · ${daysActual>0?daysActual+' aktual':'-'}</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #5b3fa8;">
       <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🎯 Peak Forecast</div>
-      <div style="font-size:20px;font-weight:800;color:#e879a0;">${fmtN(peakFc.forecastQty)}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${peakFc.date}</div>
+      <div style="font-size:20px;font-weight:800;color:#5b3fa8;">${fmtN(peakFc.forecastQty)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${peakFc.date} (${dayNames[peakFc.dow]})</div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e6944a;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🚀 Avg Spike Histori</div>
-      <div style="font-size:20px;font-weight:800;color:#e6944a;">${avgRatio}×</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Campaign: ${campBoostBase.toFixed(1)}× · Payday: ${paydayBoostBase.toFixed(1)}×</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #c2410c;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🎯 Akurasi (MAPE)</div>
+      <div style="font-size:20px;font-weight:800;color:#c2410c;">${mape!==null?(100-mape).toFixed(1)+'%':'—'}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${mape!==null?`MAPE ${mape}% dari ${daysActual} hari aktual`:'Belum ada data aktual'}</div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e6944a;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">⏱ Avg Durasi Spike</div>
-      <div style="font-size:20px;font-weight:800;color:#e6944a;">${avgDur} hari</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Dari ${campaigns.length} event histori</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e05b5b;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📦 Buffer Stok</div>
-      <div style="font-size:20px;font-weight:800;color:#e05b5b;">${fmtN(Math.round(baselineQty*(campBoostBase-1)*3+baselineQty*(paydayBoostBase-1)*3*2))}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Extra qty untuk 3 event</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid ${confidenceColor};">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🧭 Forecast Confidence</div>
+      <div style="font-size:20px;font-weight:800;color:${confidenceColor};">${confidencePct}%</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${confidenceLabel} · dari kestabilan histori 30h (CV)</div>
     </div>
   </div>
 
-  <!-- 3 EVENT CARDS -->
-  <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">3 Campaign Event — ${fcMonthName} ${fcYear}</div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">`;
-
-  eventDays.forEach(ev=>{
-    const totalEvQty=ev.days.reduce((s,d)=>s+d.forecastQty,0);
-    const totalEvOrd=ev.days.reduce((s,d)=>s+d.forecastOrd,0);
-    const mainDay=ev.days.find(d=>d.isMain)||ev.days[0];
-    html+=`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;border-top:3px solid ${ev.color};">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
-        <div style="width:10px;height:10px;border-radius:50%;background:${ev.color};flex-shrink:0;"></div>
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--text);">${ev.name}</div>
-          <div style="font-size:10px;color:var(--text2);">${ev.desc} · ${ev.days.length} hari</div>
-        </div>
-      </div>`;
-
-    ev.days.forEach(d=>{
-      const isMain=d.isMain;
-      const diff=d.actualQty!==null?d.actualQty-d.forecastQty:null;
-      const diffStr=diff!==null?(diff>=0?`▲ +${fmtN(diff)}`:`▼ ${fmtN(Math.abs(diff))}`):null;
-      html+=`
-      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);">
-        <div>
-          <span style="font-size:10px;font-weight:700;color:${isMain?ev.color:'var(--text2)'};">${d.offsetLabel}</span>
-          <span style="font-size:10px;color:var(--text2);margin-left:4px;">${d.date.slice(5)} ${d.dayName}</span>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:12px;font-weight:700;color:${isMain?ev.color:'var(--text)'};">${fmtN(d.forecastQty)} qty</div>
-          <div style="font-size:10px;color:var(--text2);">${fmtN(d.forecastOrd)} order</div>
-          ${d.actualQty!==null?`<div style="font-size:9px;color:${diff>=0?'var(--green)':'var(--red)'};">${diffStr}</div>`:''}
-        </div>
-      </div>`;
-    });
-
-    html+=`
-      <div style="margin-top:10px;padding-top:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;">
-          <span style="font-size:10px;color:var(--text2);">Total ${ev.days.length} hari</span>
-          <span style="font-size:13px;font-weight:800;color:${ev.color};">${fmtN(totalEvQty)} qty</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:2px;">
-          <span style="font-size:10px;color:var(--text2);">Est. order</span>
-          <span style="font-size:11px;font-weight:700;color:var(--text2);">${fmtN(totalEvOrd)}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:2px;">
-          <span style="font-size:10px;color:var(--text2);">Boost H-0</span>
-          <span style="font-size:11px;font-weight:700;color:${ev.color};">${mainDay.boost.toFixed(2)}×</span>
-        </div>
-      </div>
-    </div>`;
-  });
-
-  html+=`</div>
-
-  <!-- BAR CHART: SEMUA HARI (highlight campaign) -->
+  <!-- BAR CHART -->
   <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;margin-bottom:16px;">
-    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Forecast Qty — ${fcMonthName} ${fcYear} (31 hari)</div>
-    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Bar warna = hari event · Bar abu = normal · Garis putus = baseline</div>
+    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📊 Forecast Qty — ${fcMonthName} ${fcYear} (${fcMonthDays} hari)</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Forecast = Baseline × Trend Factor × Day-of-Week Multiplier · Garis putus = baseline</div>
     <div class="chart-legend" style="margin-bottom:10px;">
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a0"></div>Campaign H-0</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e879a066"></div>Campaign H±1/2</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Payday H-0</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e6944a66"></div>Payday H±1/2</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa855"></div>Forecast</div>
       <div class="legend-item"><div class="legend-dot" style="background:#1D9E75;border-radius:50%"></div>Aktual</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#5b3fa855"></div>Normal</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e6944a"></div>Baseline</div>
     </div>
     <div style="position:relative;height:280px;"><canvas id="fcChart"></canvas></div>
   </div>
 
-  <!-- DETAIL TABLE: HANYA HARI EVENT -->
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;margin-bottom:16px;">
-    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📋 Detail Forecast — Hari Campaign & Payday</div>
-    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Hanya H-1 sampai H+2 per event · Aktual otomatis tampil jika data sudah ada</div>
-    <div style="overflow-x:auto;">
+  <!-- DETAIL TABLE: SEMUA HARI ─────────────────────────────────────────────-->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;">
+    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📋 Detail Forecast Harian — ${fcMonthName} ${fcYear}</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Semua hari dalam bulan · Baseline/Trend/DOW menjelaskan cara Forecast Qty terbentuk · Aktual otomatis tampil jika data sudah ada</div>
+    <div style="overflow-x:auto;max-height:420px;">
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <thead><tr style="background:#f8f6ff;">
-          <th style="padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Tanggal</th>
-          <th style="padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Event</th>
-          <th style="padding:7px 10px;text-align:center;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Hari</th>
-          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;">Forecast Qty</th>
-          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;">Forecast Order</th>
-          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;">Aktual Qty</th>
-          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;">Aktual Order</th>
-          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Δ Qty</th>
-          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;">Boost</th>
+          <th style="padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Tanggal</th>
+          <th style="padding:7px 10px;text-align:center;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Hari</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Baseline</th>
+          <th style="padding:7px 10px;text-align:center;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Trend Factor</th>
+          <th style="padding:7px 10px;text-align:center;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">DOW Mult</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Forecast Qty</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--blue);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Forecast Order</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Aktual Qty</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--green);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Aktual Order</th>
+          <th style="padding:7px 10px;text-align:right;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;position:sticky;top:0;background:#f8f6ff;">Δ Qty</th>
         </tr></thead>
         <tbody>`;
 
-  eventDays.forEach(ev=>{
-    ev.days.forEach((d,i)=>{
-      const isMain=d.isMain;
-      const diff=d.actualQty!==null?d.actualQty-d.forecastQty:null;
-      const diffStr=diff!==null?(diff>=0?`▲ +${fmtN(diff)}`:`▼ ${fmtN(Math.abs(diff))}`):' — ';
-      const diffColor=diff!==null?(diff>=0?'var(--green)':'var(--red)'):'var(--text2)';
-      const acc=diff!==null&&d.forecastQty>0?` (${(100-Math.abs(diff)/d.forecastQty*100).toFixed(0)}%)`:' ';
-      let rowBg='#fff';
-      if(isMain)rowBg=ev.colorLight||'#fff3e0';
-      else if(i===0)rowBg='#fafaf0';
-      html+=`<tr style="background:${rowBg};border-bottom:1px solid var(--border);">
-        <td style="padding:7px 10px;font-weight:${isMain?'700':'600'};color:${isMain?ev.color:'var(--text)'};">${isMain?'🎯 ':''}${d.date}</td>
-        <td style="padding:7px 10px;"><span style="background:${ev.colorLight};color:${ev.color};font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;border:1px solid ${ev.color}33;">${ev.name}</span></td>
-        <td style="padding:7px 10px;text-align:center;font-weight:700;color:${isMain?ev.color:'var(--text2)'};">${d.offsetLabel}</td>
-        <td style="padding:7px 10px;text-align:right;font-weight:${isMain?'800':'600'};color:var(--blue);font-family:monospace;">${fmtN(d.forecastQty)}</td>
-        <td style="padding:7px 10px;text-align:right;font-weight:${isMain?'700':'600'};color:var(--blue);font-family:monospace;">${fmtN(d.forecastOrd)}</td>
-        <td style="padding:7px 10px;text-align:right;font-weight:700;color:var(--green);font-family:monospace;">${d.actualQty!==null?fmtN(d.actualQty):'—'}</td>
-        <td style="padding:7px 10px;text-align:right;color:var(--green);font-family:monospace;">${d.actualOrd!==null?fmtN(d.actualOrd):'—'}</td>
-        <td style="padding:7px 10px;text-align:right;color:${diffColor};font-weight:600;font-size:10px;">${diffStr}${d.actualQty!==null?`<br><span style="color:var(--text2);font-size:9px">${acc}</span>`:''}</td>
-        <td style="padding:7px 10px;text-align:right;color:${d.boost>1.3?ev.color:'var(--text2)'};">${d.boost.toFixed(2)}×</td>
-      </tr>`;
-      // Separator between events
-      if(i===ev.days.length-1){
-        html+=`<tr style="height:6px;background:var(--bg);"><td colspan="9"></td></tr>`;
-      }
-    });
+  fullMonthFc.forEach(d=>{
+    const diff=d.actualQty!==null?d.actualQty-d.forecastQty:null;
+    const diffStr=diff!==null?(diff>=0?`▲ +${fmtN(diff)}`:`▼ ${fmtN(Math.abs(diff))}`):'—';
+    const diffColor=diff!==null?(diff>=0?'var(--green)':'var(--red)'):'var(--text2)';
+    const isWeekend=d.dow===0||d.dow===6;
+    html+=`<tr style="background:${isWeekend?'#faf9fd':'#fff'};border-bottom:1px solid var(--border);">
+      <td style="padding:6px 10px;font-weight:600;color:var(--text);">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;color:var(--text2);">${dayNames[d.dow]}</td>
+      <td style="padding:6px 10px;text-align:right;color:var(--text2);font-family:monospace;">${fmtN(d.baselineQty)}</td>
+      <td style="padding:6px 10px;text-align:center;color:var(--text2);">${d.trendFactorQty}×</td>
+      <td style="padding:6px 10px;text-align:center;color:var(--text2);">${d.dowMultQty}×</td>
+      <td style="padding:6px 10px;text-align:right;font-weight:600;color:var(--blue);font-family:monospace;">${fmtN(d.forecastQty)}</td>
+      <td style="padding:6px 10px;text-align:right;color:var(--blue);font-family:monospace;">${fmtN(d.forecastOrd)}</td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;color:var(--green);font-family:monospace;">${d.actualQty!==null?fmtN(d.actualQty):'—'}</td>
+      <td style="padding:6px 10px;text-align:right;color:var(--green);font-family:monospace;">${d.actualOrd!==null?fmtN(d.actualOrd):'—'}</td>
+      <td style="padding:6px 10px;text-align:right;color:${diffColor};font-weight:600;font-size:10px;">${diffStr}</td>
+    </tr>`;
   });
 
-  html+=`</tbody></table></div></div>
-
-  <!-- REKOMENDASI STOK -->
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;">
-    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:12px;">💡 Rekomendasi Persiapan Stok — ${fcMonthName} ${fcYear}</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">`;
-
-  eventDays.forEach(ev=>{
-    const mainDay=ev.days.find(d=>d.isMain)||ev.days[0];
-    const totalQty=ev.days.reduce((s,d)=>s+d.forecastQty,0);
-    const bufferExtra=Math.round(totalQty*0.15); // 15% buffer safety stock
-    html+=`
-      <div style="padding:12px;background:${ev.colorLight};border-radius:8px;border-left:3px solid ${ev.color};">
-        <div style="font-size:11px;font-weight:700;color:${ev.color};margin-bottom:8px;">${ev.name}</div>
-        <div style="font-size:10px;color:var(--text2);line-height:1.9;">
-          • Peak H-0: <strong style="color:${ev.color}">${fmtN(mainDay.forecastQty)}</strong> qty<br>
-          • Total ${ev.days.length} hari: <strong>${fmtN(totalQty)}</strong> qty<br>
-          • Buffer +15%: <strong>${fmtN(bufferExtra)}</strong> extra<br>
-          • Mulai siapkan: <strong>H-3 sebelum ${ev.days[0].date.slice(5)}</strong>
-        </div>
-      </div>`;
-  });
-
-  html+=`</div></div>`;
+  html+=`</tbody></table></div></div>`;
 
   document.getElementById('fcContent').innerHTML=html;
   document.getElementById('fcStatus').textContent=
-    `${fcMonthName} ${fcYear} · 3 event · Forecast total: ${fmtN(totalFcQty)} qty`+
+    `${fcMonthName} ${fcYear} · Trend factor ${qtyModel.trendFactor}× · Confidence ${confidencePct}% (${confidenceLabel}) · Forecast total: ${fmtN(totalFcQty)} qty`+
     (mape!==null?` · Akurasi: ${(100-mape).toFixed(1)}%`:'');
 
-  // ── 12. DRAW BAR CHART ────────────────────────────────────────────────────
+  // ── 6. DRAW BAR CHART ────────────────────────────────────────────────────
   killChart('fcChart');
   const fcLabels=fullMonthFc.map(d=>String(d.day));
   const fcForecastData=fullMonthFc.map(d=>d.forecastQty);
   const fcActualData=fullMonthFc.map(d=>d.actualQty);
-  const fcBarBg=fullMonthFc.map(d=>{
-    if(!d.isCampaign)return'#5b3fa833';
-    const info=campDateMap[d.date];
-    if(!info)return'#5b3fa833';
-    if(info.isMain)return info.color+'dd';
-    return info.color+'66';
-  });
-  const fcBarBorder=fullMonthFc.map(d=>{
-    if(!d.isCampaign)return'#5b3fa855';
-    const info=campDateMap[d.date];
-    return info?info.color+'aa':'#5b3fa855';
-  });
 
   charts['fcChart']=new Chart(document.getElementById('fcChart'),{
     data:{
       labels:fcLabels,
       datasets:[
         {type:'bar',label:'Forecast Qty',data:fcForecastData,
-          backgroundColor:fcBarBg,borderColor:fcBarBorder,
+          backgroundColor:'#5b3fa855',borderColor:'#5b3fa8aa',
           borderWidth:1.5,borderRadius:3,yAxisID:'yQty',order:3,
-          datalabels:{
-            display:ctx=>fullMonthFc[ctx.dataIndex].isMain,
-            anchor:'end',align:'end',
-            color:ctx=>{const d=fullMonthFc[ctx.dataIndex];return campDateMap[d.date]?.color||'#5b3fa8';},
-            font:{weight:'700',size:9},
-            formatter:(v,ctx)=>{
-              const d=fullMonthFc[ctx.dataIndex];
-              const info=campDateMap[d.date];
-              if(!info)return fmtLabel(v);
-              const nm=info.name.split(' ').slice(0,2).join(' ');
-              return nm+'\n'+fmtLabel(v);
-            }
-          }
+          datalabels:{display:false}
         },
         {type:'line',label:'Aktual Qty',data:fcActualData,
           borderColor:'#1D9E75',backgroundColor:'#1D9E7520',
@@ -1965,7 +1748,7 @@ function renderForecast(){
           tension:0.2,fill:false,yAxisID:'yQty',order:1,
           datalabels:{display:false}
         },
-        {type:'line',label:'Baseline',data:fullMonthFc.map(()=>baselineQty),
+        {type:'line',label:'Baseline',data:fullMonthFc.map(()=>qtyModel.baseline),
           borderColor:'#e6944a',borderWidth:1.5,borderDash:[4,4],
           pointRadius:0,fill:false,yAxisID:'yQty',order:4,
           datalabels:{display:false}
@@ -1978,14 +1761,18 @@ function renderForecast(){
       plugins:{
         legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:10},padding:10}},
         tooltip:{callbacks:{
-          title:ctx=>{
-            const d=fullMonthFc[ctx[0].dataIndex];
-            const info=campDateMap[d.date];
-            return d.date+(info?' · '+info.name+(info.isMain?' (H-0)':''):'');
-          },
+          title:ctx=>fullMonthFc[ctx[0].dataIndex].date,
           label:c=>{
             if(c.dataset.label==='Baseline')return` Baseline: ${fmtN(c.parsed.y)}/hari`;
             if(c.parsed.y===null||c.parsed.y===undefined)return'';
+            if(c.dataset.label==='Forecast Qty'){
+              const d=fullMonthFc[c.dataIndex];
+              const campPart=d.campMult!==1?` × Campaign ${d.campMult}×`:'';
+              return[
+                ` Forecast Qty: ${fmtN(Math.round(c.parsed.y))}`,
+                ` = Baseline ${fmtN(d.baselineQty)} × Trend ${d.trendFactorQty}× × DOW ${d.dowMultQty}×${campPart}`
+              ];
+            }
             return` ${c.dataset.label}: ${fmtN(Math.round(c.parsed.y))}`;
           }
         }},
