@@ -1521,6 +1521,16 @@ function renderForecast(){
     fcMonthStr=String(m).padStart(2,'0');
   }
 
+  // V2 Forecast:
+  // Baseline × Trend × DayOfWeek
+  //
+  // Event belum digunakan sebagai multiplier
+  // karena histori hanya mulai Januari 2026.
+  //
+  // Setelah histori minimal 12 bulan,
+  // event multiplier akan dihitung otomatis
+  // berdasarkan histori nyata.
+
   // ── 3. MODEL PER METRIK (qty & order) ────────────────────────────────────
   // STEP 1: Baseline = rolling average 30 hari terakhir
   // STEP 2: Recent Trend = rolling average 7 hari terakhir
@@ -1543,70 +1553,55 @@ function renderForecast(){
     const dowGlobal=dowAvg.reduce((a,b)=>a+b,0)/7;
     const dowMult=dowAvg.map(v=>dowGlobal>0?v/dowGlobal:1);
 
-    // Coefficient of Variation dari histori 30 hari — dasar Forecast Confidence.
-    // Makin volatile histori (stdev besar relatif ke rata-rata), makin rendah confidence.
-    const variance=last30.length?last30.reduce((s,d)=>s+Math.pow(d[key]-rolling30,2),0)/last30.length:0;
-    const cv=rolling30>0?Math.sqrt(variance)/rolling30:0;
-
     return{
       baseline:Math.round(rolling30),
-      recent7:Math.round(rolling7),
       trendFactor:+trendFactor.toFixed(3),
-      dowMult:dowMult.map(v=>+v.toFixed(3)),
-      cv
+      dowMult:dowMult.map(v=>+v.toFixed(3))
     };
   }
 
   const qtyModel=buildMetricModel('qty');
   const ordModel=buildMetricModel('ord');
 
-  // ── FORECAST CONFIDENCE ──────────────────────────────────────────────────
-  // Confidence% = 100 - CV×100, diambil dari kestabilan histori qty 30 hari.
-  const confidencePct=+Math.max(0,Math.min(100,100-qtyModel.cv*100)).toFixed(1);
-  const confidenceLabel=confidencePct>=95?'High Confidence':confidencePct>=85?'Medium Confidence':'Low Confidence';
-  const confidenceColor=confidencePct>=95?'#1D9E75':confidencePct>=85?'#e6944a':'#e05b5b';
-
-  // ── CAMPAIGN CALENDAR HOOK (extension point — TIDAK dipakai hari ini) ────
-  // Jika suatu saat tabel resmi Campaign Calendar (Date, Event, Multiplier)
-  // tersedia di D.campaignCalendar, fungsi ini otomatis memakainya tanpa
-  // perlu mengubah formula forecast. Selama data itu tidak ada (kondisi saat
-  // ini), fungsi ini SELALU mengembalikan 1.0 — no-op murni.
-  function getCampaignMultiplier(dateStr){
-    if(Array.isArray(D.campaignCalendar)&&D.campaignCalendar.length){
-      const hit=D.campaignCalendar.find(c=>(c.date||c.Date)===dateStr);
-      if(hit){
-        const m=toN(hit.multiplier??hit.Multiplier);
-        if(m>0)return m;
-      }
-    }
-    return 1.0;
+  // ── EVENT DETECTION (INFORMASI SAJA — TIDAK MENGUBAH FORECAST) ──────────
+  // Payday & Double Date dideteksi murni dari kalender (tanggal), BUKAN dari
+  // statistik histori — karena histori baru mulai Jan 2026 dan belum cukup
+  // untuk menghitung multiplier event yang valid secara statistik.
+  // Badge ini hanya informasi bagi Capacity Planner; angka forecast di bawah
+  // TIDAK berubah karena badge ini.
+  function detectEventBadges(dt){
+    const day=dt.getDate(), month=dt.getMonth()+1;
+    const badges=[];
+    if(day===month)badges.push(`⚠ Double Date ${month}.${month}`);
+    if(day<=5||day>=24)badges.push('⚠ Payday');
+    return badges;
   }
 
-  // ── 4. FORECAST QTY & ORDER = Baseline × TrendFactor × DOW Mult × Campaign ─
+  // ── 4. FORECAST QTY & ORDER = Baseline × Trend Factor × DOW Multiplier ───
   const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
   const fullMonthFc=[];
   for(let d=1;d<=fcMonthDays;d++){
     const ds=`${fcYear}-${fcMonthStr}-${String(d).padStart(2,'0')}`;
-    const dow=new Date(ds).getDay();
-    const campMult=getCampaignMultiplier(ds);
+    const dt=new Date(ds);
+    const dow=dt.getDay();
     const dowMultQty=qtyModel.dowMult[dow];
     const dowMultOrd=ordModel.dowMult[dow];
-    const forecastQty=Math.round(qtyModel.baseline*qtyModel.trendFactor*dowMultQty*campMult);
-    const forecastOrd=Math.round(ordModel.baseline*ordModel.trendFactor*dowMultOrd*campMult);
+    const forecastQty=Math.round(qtyModel.baseline*qtyModel.trendFactor*dowMultQty);
+    const forecastOrd=Math.round(ordModel.baseline*ordModel.trendFactor*dowMultOrd);
     const actual=dayMap[ds];
     fullMonthFc.push({
       date:ds,day:d,dow,
       baselineQty:qtyModel.baseline,trendFactorQty:qtyModel.trendFactor,dowMultQty,
       baselineOrd:ordModel.baseline,trendFactorOrd:ordModel.trendFactor,dowMultOrd,
-      campMult,
       forecastQty,forecastOrd,
       actualQty:actual?actual.qty:null,
-      actualOrd:actual?actual.ord:null
+      actualOrd:actual?actual.ord:null,
+      eventBadges:detectEventBadges(dt)
     });
   }
 
   const totalFcQty=fullMonthFc.reduce((s,d)=>s+d.forecastQty,0);
-  const peakFc=fullMonthFc.reduce((a,b)=>b.forecastQty>a.forecastQty?b:a);
+  const totalFcOrd=fullMonthFc.reduce((s,d)=>s+d.forecastOrd,0);
   const daysActual=fullMonthFc.filter(d=>d.actualQty!==null).length;
 
   // Accuracy (MAPE) jika ada aktual
@@ -1625,45 +1620,39 @@ function renderForecast(){
     </span>
     ${mape!==null?`<span style="background:#fff7ed;color:#c2410c;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #fed7aa;">🎯 Akurasi: ${(100-mape).toFixed(1)}% (MAPE ${mape}%)</span>`:''}
     <span style="background:#fdf4ff;color:#7c3aed;font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid #e9d5ff;">⚙️ Trend Factor Qty: ${qtyModel.trendFactor}× · Rolling 7/30 hari</span>
-    <span style="background:${confidenceColor}1a;color:${confidenceColor};font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;border:1px solid ${confidenceColor}55;">🧭 Confidence: ${confidencePct}% (${confidenceLabel})</span>
   </div>
 
-  <!-- SUMMARY CARDS -->
+  <!-- SUMMARY CARDS (6 kartu: Baseline, Trend Factor, DOW Multiplier, Forecast Qty, Forecast Order, MAPE/Accuracy) -->
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px;">
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #5b3fa8;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📊 Baseline Qty (30h)</div>
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📊 Baseline Qty</div>
       <div style="font-size:20px;font-weight:800;color:#5b3fa8;">${fmtN(qtyModel.baseline)}</div>
       <div style="font-size:10px;color:var(--text2);margin-top:2px;">Rolling average 30 hari terakhir</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e6944a;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📈 Recent Trend (7h)</div>
-      <div style="font-size:20px;font-weight:800;color:#e6944a;">${fmtN(qtyModel.recent7)}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Rolling average 7 hari terakhir</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #1D9E75;">
       <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">⚙️ Trend Factor</div>
       <div style="font-size:20px;font-weight:800;color:#1D9E75;">${qtyModel.trendFactor}×</div>
       <div style="font-size:10px;color:var(--text2);margin-top:2px;">Rolling7 / Rolling30 · clamp 0.85–1.20</div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e879a0;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🔮 Forecast ${fcMonthName}</div>
-      <div style="font-size:20px;font-weight:800;color:#e879a0;">${fmtN(totalFcQty)}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${fcMonthDays} hari · ${daysActual>0?daysActual+' aktual':'-'}</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e6944a;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">📅 DOW Multiplier</div>
+      <div style="font-size:11px;font-weight:700;color:#e6944a;line-height:1.7;">${dayNames.map((n,i)=>`${n} ${qtyModel.dowMult[i]}×`).join(' · ')}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Dari histori 30 hari terakhir</div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #5b3fa8;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🎯 Peak Forecast</div>
-      <div style="font-size:20px;font-weight:800;color:#5b3fa8;">${fmtN(peakFc.forecastQty)}</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${peakFc.date} (${dayNames[peakFc.dow]})</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #e879a0;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🔮 Forecast Qty</div>
+      <div style="font-size:20px;font-weight:800;color:#e879a0;">${fmtN(totalFcQty)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Total ${fcMonthName} · ${fcMonthDays} hari · ${daysActual>0?daysActual+' aktual':'-'}</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #7c3aed;">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🔮 Forecast Order</div>
+      <div style="font-size:20px;font-weight:800;color:#7c3aed;">${fmtN(totalFcOrd)}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Total ${fcMonthName} · ${fcMonthDays} hari</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid #c2410c;">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🎯 Akurasi (MAPE)</div>
+      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🎯 MAPE / Accuracy</div>
       <div style="font-size:20px;font-weight:800;color:#c2410c;">${mape!==null?(100-mape).toFixed(1)+'%':'—'}</div>
       <div style="font-size:10px;color:var(--text2);margin-top:2px;">${mape!==null?`MAPE ${mape}% dari ${daysActual} hari aktual`:'Belum ada data aktual'}</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;border-top:3px solid ${confidenceColor};">
-      <div style="font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🧭 Forecast Confidence</div>
-      <div style="font-size:20px;font-weight:800;color:${confidenceColor};">${confidencePct}%</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:2px;">${confidenceLabel} · dari kestabilan histori 30h (CV)</div>
     </div>
   </div>
 
@@ -1682,7 +1671,7 @@ function renderForecast(){
   <!-- DETAIL TABLE: SEMUA HARI ─────────────────────────────────────────────-->
   <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;">
     <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;">📋 Detail Forecast Harian — ${fcMonthName} ${fcYear}</div>
-    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Semua hari dalam bulan · Baseline/Trend/DOW menjelaskan cara Forecast Qty terbentuk · Aktual otomatis tampil jika data sudah ada</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:12px;">Semua hari dalam bulan · Baseline/Trend/DOW menjelaskan cara Forecast Qty terbentuk · Badge ⚠ Payday/Double Date hanya informasi, TIDAK mengubah angka forecast · Aktual otomatis tampil jika data sudah ada</div>
     <div style="overflow-x:auto;max-height:420px;">
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <thead><tr style="background:#f8f6ff;">
@@ -1705,7 +1694,7 @@ function renderForecast(){
     const diffColor=diff!==null?(diff>=0?'var(--green)':'var(--red)'):'var(--text2)';
     const isWeekend=d.dow===0||d.dow===6;
     html+=`<tr style="background:${isWeekend?'#faf9fd':'#fff'};border-bottom:1px solid var(--border);">
-      <td style="padding:6px 10px;font-weight:600;color:var(--text);">${d.date}</td>
+      <td style="padding:6px 10px;font-weight:600;color:var(--text);">${d.date}${d.eventBadges.length?`<br><span style="font-size:9px;font-weight:700;color:#c2410c;">${d.eventBadges.join(' ')}</span>`:''}</td>
       <td style="padding:6px 10px;text-align:center;color:var(--text2);">${dayNames[d.dow]}</td>
       <td style="padding:6px 10px;text-align:right;color:var(--text2);font-family:monospace;">${fmtN(d.baselineQty)}</td>
       <td style="padding:6px 10px;text-align:center;color:var(--text2);">${d.trendFactorQty}×</td>
@@ -1722,7 +1711,7 @@ function renderForecast(){
 
   document.getElementById('fcContent').innerHTML=html;
   document.getElementById('fcStatus').textContent=
-    `${fcMonthName} ${fcYear} · Trend factor ${qtyModel.trendFactor}× · Confidence ${confidencePct}% (${confidenceLabel}) · Forecast total: ${fmtN(totalFcQty)} qty`+
+    `${fcMonthName} ${fcYear} · Trend factor ${qtyModel.trendFactor}× · Forecast total: ${fmtN(totalFcQty)} qty`+
     (mape!==null?` · Akurasi: ${(100-mape).toFixed(1)}%`:'');
 
   // ── 6. DRAW BAR CHART ────────────────────────────────────────────────────
@@ -1767,10 +1756,10 @@ function renderForecast(){
             if(c.parsed.y===null||c.parsed.y===undefined)return'';
             if(c.dataset.label==='Forecast Qty'){
               const d=fullMonthFc[c.dataIndex];
-              const campPart=d.campMult!==1?` × Campaign ${d.campMult}×`:'';
+              const eventPart=d.eventBadges.length?` (${d.eventBadges.join(' ')} — info saja, tidak mengubah angka)`:'';
               return[
                 ` Forecast Qty: ${fmtN(Math.round(c.parsed.y))}`,
-                ` = Baseline ${fmtN(d.baselineQty)} × Trend ${d.trendFactorQty}× × DOW ${d.dowMultQty}×${campPart}`
+                ` = Baseline ${fmtN(d.baselineQty)} × Trend ${d.trendFactorQty}× × DOW ${d.dowMultQty}×${eventPart}`
               ];
             }
             return` ${c.dataset.label}: ${fmtN(Math.round(c.parsed.y))}`;
